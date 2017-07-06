@@ -19,13 +19,13 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.message.Message;
 
-public class DataServlet extends HttpServlet {
+public class RecordServlet extends HttpServlet {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static Logger logger = Logger.getLogger(DataServlet.class.getName());
+	private static Logger logger = Logger.getLogger(RecordServlet.class.getName());
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)

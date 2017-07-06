@@ -26,7 +26,8 @@ public class WebServer {
 		// servlet handlers
 		ServletContextHandler servletContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		servletContext.setContextPath("/");
-		servletContext.addServlet(new ServletHolder(new DataServlet()), "/data");
+		servletContext.addServlet(new ServletHolder(new RecordServlet()), "/record");
+		servletContext.addServlet(new ServletHolder(new RecordListServlet()), "/record/list");
 
 		// add handlers to HandlerList
 		HandlerList handlers = new HandlerList();

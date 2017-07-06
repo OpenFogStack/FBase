@@ -10,9 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import control.Mastermind;
 import crypto.CryptoProvider;
-import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseRestException;
+import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
@@ -41,18 +42,16 @@ public class DataServlet extends HttpServlet {
 				throw new FBaseRestException(FBaseRestException.DATAIDENTIFIER_MISSING, 400);
 			}
 			
-			// TODO Temporary, replace with Database lookup
-			KeygroupConfig config = new KeygroupConfig(dataIdentifier.getKeygroup(), "secret", EncryptionAlgorithm.AES);
+			KeygroupConfig config = null;
+			DataRecord record = null;
 			
-			DataRecord record = new DataRecord();
-			record.setDataIdentifier(dataIdentifier);
-			record.setValueWithoutKey("Example value");
-			// End Temporary
-			
-			if (record == null || config == null) {
+			try {
+				config = Mastermind.connector.getKeygroupConfig(dataIdentifier.getKeygroup());
+				record = Mastermind.connector.getDataRecord(dataIdentifier);
+			} catch (FBaseStorageConnectorException e) {
 				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 			}
-			
+
 			m.setTextualResponse("Success");
 			m.setContent(CryptoProvider.encrypt(record.toJSON(), 
 						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));

@@ -3,6 +3,7 @@ package de.hasenburg.fbase.rest;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -11,12 +12,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import control.Mastermind;
 import crypto.CryptoProvider;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
-import model.data.DataIdentifier;
 import model.data.KeygroupID;
 import model.message.Message;
 
@@ -44,29 +46,30 @@ public class RecordListServlet extends HttpServlet {
 			}
 			
 			KeygroupConfig config = null;
-			String IDString = null;
+			String IDJson = null;
 			
 			try {
 				config = Mastermind.connector.getKeygroupConfig(keygroupID);
-				Set<DataIdentifier> IDs = Mastermind.connector.listDataRecords(keygroupID);
-				IDString = "[";
-				for (DataIdentifier di : IDs) {
-					IDString += "\"" + di.toString() + "\", "; // TODO no , at the end
-				}
-				IDString += "]";
+				
+				// create a set of dataidentifier strings
+				Set<String> IDs = Mastermind.connector.listDataRecords(keygroupID)
+						.stream().map(id -> id.toString()).collect(Collectors.toSet());
+				
+				ObjectMapper mapper = new ObjectMapper();
+				IDJson = mapper.writeValueAsString(IDs); // if this fails, error 500 will be thrown
 			} catch (FBaseStorageConnectorException e) {
 				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 			}
 
 			m.setTextualResponse("Success");
-			m.setContent(CryptoProvider.encrypt(IDString,
+			m.setContent(CryptoProvider.encrypt(IDJson,
 						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
-			m.setContent(IDString);
+			m.setContent(IDJson);
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
 		} catch (Exception e) {
-			resp.sendError(500);
+			resp.sendError(500, "Plesase consult server log");
 			e.printStackTrace();
 		}
 		

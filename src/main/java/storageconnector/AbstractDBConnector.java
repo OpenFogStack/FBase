@@ -63,25 +63,25 @@ public abstract class AbstractDBConnector {
 	/**
 	 * retrieve a data item for the storage system
 	 * 
-	 * @param key
+	 * @param dataIdentifier
 	 *            identifier for the data item
 	 * @return the respective data item if a mapping was found or null
 	 * @throws FBaseStorageConnectorException
 	 *             when the operation failed
 	 */
-	public abstract DataRecord getDataRecord(DataIdentifier key) throws FBaseStorageConnectorException;
+	public abstract DataRecord getDataRecord(DataIdentifier dataIdentifier) throws FBaseStorageConnectorException;
 
 	/**
 	 * delete a data item in the storage system
 	 * 
-	 * @param key
+	 * @param dataIdentifier
 	 *            identifier for the data item
 	 * @return true if the item no longer exists after the method call, false
 	 *         otherwise
 	 * @throws FBaseStorageConnectorException
 	 *             when the operation failed
 	 */
-	public abstract boolean deleteDataRecord(DataIdentifier key)
+	public abstract boolean deleteDataRecord(DataIdentifier dataIdentifier)
 			throws FBaseStorageConnectorException;
 
 	/**
@@ -97,27 +97,27 @@ public abstract class AbstractDBConnector {
 	 * @throws FBaseStorageConnectorException
 	 *             when the operation failed
 	 */
-	public abstract Set<DataIdentifier> listDataRecords(KeygroupID keygroup)
+	public abstract Set<DataIdentifier> listDataRecords(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
 
 	/**
 	 * creates the storage representation for a new keygroup in the storage
 	 * system. 
 	 * 
-	 * @param id
+	 * @param keygroupID
 	 *            identifier of the keygroup
 	 * 
 	 * @return true if the keygroup exists after the method call, false
 	 *         otherwise
 	 * @throws FBaseStorageConnectorException if an error occured or the keygroup already existed.
 	 */
-	public abstract boolean createKeygroup(KeygroupID id)
+	public abstract boolean createKeygroup(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
 
 	/**
 	 * deletes all data of a keygroup in the storage system
 	 * 
-	 * @param id
+	 * @param keygroupID
 	 *            identifier of the keygroup
 	 * 
 	 * @return true if the keygroup no longer exists after the method call,
@@ -125,20 +125,20 @@ public abstract class AbstractDBConnector {
 	 * @throws FBaseStorageConnectorException
 	 *             when the operation failed
 	 */
-	public abstract boolean deleteKeygroup(KeygroupID id)
+	public abstract boolean deleteKeygroup(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
 
 	/**
 	 * stores configuration details of a keygroup
 	 * 
-	 * @param id
+	 * @param keygroupID
 	 *            identifier of the keygroup
 	 * @param config
 	 *            configuration data
 	 * @throws FBaseStorageConnectorException
 	 *             when the operation fails
 	 */
-	public abstract void putKeygroupConfig(KeygroupID id, KeygroupConfig config)
+	public abstract void putKeygroupConfig(KeygroupID keygroupID, KeygroupConfig config)
 			throws FBaseStorageConnectorException;
 
 	/**

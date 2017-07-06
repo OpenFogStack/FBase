@@ -21,6 +21,11 @@ import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.message.Message;
 
+/**
+ * 
+ * @author jonathanhasenburg
+ *
+ */
 public class RecordServlet extends HttpServlet {
 
 	/**

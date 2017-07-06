@@ -22,6 +22,11 @@ import model.config.KeygroupConfig;
 import model.data.KeygroupID;
 import model.message.Message;
 
+/**
+ * 
+ * @author jonathanhasenburg
+ *
+ */
 public class RecordListServlet extends HttpServlet {
 
 	/**

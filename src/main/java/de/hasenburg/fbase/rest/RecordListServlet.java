@@ -34,7 +34,7 @@ public class RecordListServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {		
 		
-		logger.debug("Received get request with query string " + req.getQueryString());
+		logger.debug("Received list request with query string " + req.getQueryString());
 		
 		PrintWriter w = resp.getWriter();
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
@@ -42,14 +42,18 @@ public class RecordListServlet extends HttpServlet {
 		
 		try {
 			if (keygroupID == null) {
+				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
 			}
 			
 			KeygroupConfig config = null;
 			String IDJson = null;
-			
 			try {
 				config = Mastermind.connector.getKeygroupConfig(keygroupID);
+				if (config == null) {
+					// 404 Not Found
+					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+				}
 				
 				// create a set of dataidentifier strings
 				Set<String> IDs = Mastermind.connector.listDataRecords(keygroupID)
@@ -58,23 +62,26 @@ public class RecordListServlet extends HttpServlet {
 				ObjectMapper mapper = new ObjectMapper();
 				IDJson = mapper.writeValueAsString(IDs); // if this fails, error 500 will be thrown
 			} catch (FBaseStorageConnectorException e) {
+				// 404 Not Found
 				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 			}
-
+			
+			// 200 OK
+			resp.setStatus(200);
 			m.setTextualResponse("Success");
 			m.setContent(CryptoProvider.encrypt(IDJson,
 						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
-			m.setContent(IDJson);
+			m.setContent(IDJson); // Remove to encrypt
+			w.write(m.toJSON());
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
 		} catch (Exception e) {
-			resp.sendError(500, "Plesase consult server log");
+			// 500 Internal Server Error
+			resp.sendError(500, FBaseRestException.SERVER_ERROR);
 			e.printStackTrace();
 		}
 		
-		w.write(m.toJSON());
-		resp.setStatus(200);
 	}
 	
 }

@@ -2,6 +2,7 @@ package de.hasenburg.fbase.rest;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,6 +18,7 @@ import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
+import model.data.KeygroupID;
 import model.message.Message;
 
 public class RecordServlet extends HttpServlet {
@@ -39,89 +41,97 @@ public class RecordServlet extends HttpServlet {
 		
 		try {
 			if (dataIdentifier == null) {
+				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.DATAIDENTIFIER_MISSING, 400);
 			}
 			
 			KeygroupConfig config = null;
-			DataRecord record = null;
-			
+			DataRecord record = null;	
 			try {
-				config = Mastermind.connector.getKeygroupConfig(dataIdentifier.getKeygroup());
+				config = Mastermind.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
 				record = Mastermind.connector.getDataRecord(dataIdentifier);
+				if (config == null || record == null) {
+					// 404 Not Found
+					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+				}
 			} catch (FBaseStorageConnectorException e) {
+				// 404 Not Found
 				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 			}
 
+			// 200 OK
+			resp.setStatus(200);
 			m.setTextualResponse("Success");
 			m.setContent(CryptoProvider.encrypt(record.toJSON(), 
 						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
-			m.setContent(record.toJSON());
+			m.setContent(record.toJSON()); // remove to encrypt
+			w.write(m.toJSON());
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
 		} catch (Exception e) {
+			// 500 Internal Server Error
 			resp.sendError(500);
 			e.printStackTrace();
 		}
 		
-		w.write(m.toJSON());
-		resp.setStatus(200);
 	}
 	
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		/*
-		PrintWriter w = resp.getWriter();
-		String responseMessage = null;
+		logger.debug("Received put request with query string " + req.getQueryString());
 
-		Keygroup keygroup = Keygroup.createFromString((req.getParameter("keygroup")));
-		logger.info(keygroup);
-		String request = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
+		Message m = new Message();
 		
-		if (keygroup == null) {
-			// keygroup is missing
-			responseMessage = ("Missing parameter keygroup");
-			logger.warn(responseMessage);
-		} else {	
-			KeygroupConfiguration config = Mastermind.connector
-					.getKeygroupConfiguration(keygroup);
-			
-			if (config == null) {
-				responseMessage = ("No configuration for keygroup " + keygroup + " exists");
-				logger.warn(responseMessage);
-			} else {
-				// decrypt data record
-				String decryptedRequest = CryptoProvider.decrypt(request, config.getEncryptionSecret(), 
-						config.getEncryptionAlgorithm());
-				DataRecord record = DataRecord.createFromJSON(decryptedRequest);
-				
-				if (record == null) {
-					// content is malformatted
-					responseMessage = "Post reqeust has malformed content";
-					logger.error(responseMessage);
-				} else {
-					// check if data is valid TODO 2: add more validation
-					if (record.getKeygroup() == null) {
-						responseMessage = "Did not create data record because it had no keygroup";
-						logger.error(responseMessage);
-					}
-			
-					// put data record into database
-					DataIdentifier id = Mastermind.connector.putDataRecord(record);
-					if (id != null) {
-						responseMessage = "Created data record with ID " + id.toString();
-						logger.info(responseMessage);
-					} else {
-						responseMessage = "Could not create data record, please check server log";
-						logger.error(responseMessage);
-					}
-				}
+		try {
+			if (keygroupID == null) {
+				// 400 Bad Request
+				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
 			}
+			
+			KeygroupConfig config = null;	
+			try {
+				config = Mastermind.connector.getKeygroupConfig(keygroupID);
+				if (config == null) {
+					// 404 Not Found
+					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+				}
+			} catch (FBaseStorageConnectorException e) {
+				// 404 Not Found
+				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+			}
+			
+			// decrypt data record
+			String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+//			String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(), 
+//					config.getEncryptionAlgorithm());
+			String decryptedRequest = body; // Remove to decrypt
+			DataRecord record = DataRecord.createFromJSON(decryptedRequest, DataRecord.class);
+			if (record == null) {
+				// 400 Bad Request
+				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
+			}
+			
+			try {
+				Mastermind.connector.putDataRecord(record);
+			} catch (FBaseStorageConnectorException e) {
+				// 404 Not Found
+				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+			}
+
+			// 200 OK
+			resp.setStatus(200);
+			m.setTextualResponse("Success");
+		} catch (FBaseRestException e) {
+			logger.error(e.getMessage());
+			resp.sendError(e.getHttpErrorCode(), e.getMessage());
+		} catch (Exception e) {
+			// 500 Internal Server Error
+			resp.sendError(500);
+			e.printStackTrace();
 		}
-		
-		w.write(responseMessage);
-		*/
 	}
 	
 	@Override

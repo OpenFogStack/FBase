@@ -64,7 +64,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public void putDataRecord(DataRecord record)
 			throws FBaseStorageConnectorException {
-		Map<DataIdentifier, DataRecord> keygroupMap = records.get(record.getDataIdentifier().getKeygroup());
+		Map<DataIdentifier, DataRecord> keygroupMap = records.get(record.getDataIdentifier().getKeygroupID());
 		if (keygroupMap == null) throw new FBaseStorageConnectorException("Keygroup does not exist.");
 		keygroupMap.put(record.getDataIdentifier(), record);
 	}
@@ -78,7 +78,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 */
 	@Override
 	public DataRecord getDataRecord(DataIdentifier key) throws FBaseStorageConnectorException{
-		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroup());
+		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroupID());
 		if (keygroupMap == null)
 			throw new FBaseStorageConnectorException(
 					"Keygroup does not exist.");
@@ -94,7 +94,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public boolean deleteDataRecord(DataIdentifier key)
 			throws FBaseStorageConnectorException {
-		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroup());
+		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroupID());
 		if (keygroupMap == null)
 			throw new FBaseStorageConnectorException(
 					"Keygroup does not exist.");

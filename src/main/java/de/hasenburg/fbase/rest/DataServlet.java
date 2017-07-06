@@ -46,7 +46,7 @@ public class DataServlet extends HttpServlet {
 			
 			DataRecord record = new DataRecord();
 			record.setDataIdentifier(dataIdentifier);
-			record.setValue("Example value");
+			record.setValueWithoutKey("Example value");
 			// End Temporary
 			
 			if (record == null || config == null) {
@@ -62,6 +62,7 @@ public class DataServlet extends HttpServlet {
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
 		} catch (Exception e) {
 			resp.sendError(500);
+			e.printStackTrace();
 		}
 		
 		w.write(m.toJSON());

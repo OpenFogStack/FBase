@@ -136,8 +136,62 @@ public class RecordServlet extends HttpServlet {
 	
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		super.doDelete(req, resp);
+		
+		logger.debug("Received delete request with query string " + req.getQueryString());
+
+		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
+		Message m = new Message();
+		
+		try {
+			if (keygroupID == null) {
+				// 400 Bad Request
+				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
+			}
+			
+			KeygroupConfig config = null;	
+			try {
+				config = Mastermind.connector.getKeygroupConfig(keygroupID);
+				if (config == null) {
+					// 404 Not Found
+					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+				}
+			} catch (FBaseStorageConnectorException e) {
+				// 404 Not Found
+				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+			}
+			
+			// decrypt data record
+			String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+//			String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(), 
+//					config.getEncryptionAlgorithm());
+			String decryptedRequest = body; // Remove to decrypt
+			DataIdentifier dataIdentifier = DataIdentifier.createFromString(decryptedRequest);
+			if (dataIdentifier == null) {
+				// 400 Bad Request
+				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
+			}
+			
+			try {
+				if (!Mastermind.connector.deleteDataRecord(dataIdentifier)) {
+					// 500 Internal Server Error
+					throw new FBaseRestException(FBaseRestException.DELETION_FAILURE, 500);
+				}
+			} catch (FBaseStorageConnectorException e) {
+				// 404 Not Found
+				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+			}
+
+			// 200 OK
+			resp.setStatus(200);
+			m.setTextualResponse("Success");
+		} catch (FBaseRestException e) {
+			logger.error(e.getMessage());
+			resp.sendError(e.getHttpErrorCode(), e.getMessage());
+		} catch (Exception e) {
+			// 500 Internal Server Error
+			resp.sendError(500);
+			e.printStackTrace();
+		}
 	}
 	
 }

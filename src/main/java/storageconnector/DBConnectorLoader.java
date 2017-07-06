@@ -18,7 +18,7 @@ import java.util.jar.JarFile;
 import exceptions.FBaseStorageConnectorException;
 
 /**
- * Loads external implementations of {@link IDBConnector} from external jar
+ * Loads implementations of {@link AbstractDBConnector} from external jar
  * files.
  * 
  * @author Dave (adapted from https://stackoverflow.com/a/20586806)
@@ -26,19 +26,19 @@ import exceptions.FBaseStorageConnectorException;
  * 
  *
  */
-public class IDBConnectorLoader {
+public class DBConnectorLoader {
 
 	/**
 	 * adds the specified list of jar files to the classpath, loads
-	 * implementations of {@link IDBConnector} and instantiates one of those
+	 * implementations of {@link AbstractDBConnector} and instantiates one of those
 	 * instances.
 	 * 
 	 * @param jars
-	 * @return an instance of {@link IDBConnector} as found in the specified jar
+	 * @return an instance of {@link AbstractDBConnector} as found in the specified jar
 	 *         files or null.
 	 * @throws FBaseStorageConnectorException
 	 */
-	public IDBConnector createConnectorFromJars(String... jars)
+	public AbstractDBConnector createConnectorFromJars(String... jars)
 			throws FBaseStorageConnectorException {
 		List<URL> jarFileURLs = new ArrayList<>();
 		List<File> jarFiles = new ArrayList<>();
@@ -59,16 +59,15 @@ public class IDBConnectorLoader {
 					getClass().getClassLoader());
 
 			List<Class<?>> implementingClasses = findImplementingClassesInJarFiles(
-					jarFiles, IDBConnector.class, loader);
+					jarFiles, AbstractDBConnector.class, loader);
 			for (Class<?> clazz : implementingClasses) {
 				// assume there is a public default constructor available
-				IDBConnector instance = (IDBConnector) clazz.newInstance();
-				instance.getItem(null);
+				AbstractDBConnector instance = (AbstractDBConnector) clazz.newInstance();
 				return instance;
 			}
 		} catch (Exception e) {
 			throw new FBaseStorageConnectorException(
-					"Could not load IDBConnector.", e);
+					"Could not load AbstractDBConnector.", e);
 
 		}
 		return null;

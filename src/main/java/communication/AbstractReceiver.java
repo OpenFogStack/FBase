@@ -68,7 +68,7 @@ public abstract class AbstractReceiver {
 	 * If the used socket is a subscriber, the keygroup filter might be used to only receive messages with a
 	 * specific topic/keygroup.
 	 */
-	protected String keygroupFilter = "";
+	protected KeygroupID keygroupIDFilter = null;
 
 	private ZMQ.Context context = null;
 	private ZMQ.Socket socket = null;
@@ -114,10 +114,10 @@ public abstract class AbstractReceiver {
 	}
 	
 	/**
-	 * @return {@link #keygroupFilter}
+	 * @return {@link #keygroupIDFilter}
 	 */
-	public String getKeygroupFilter() {
-		return keygroupFilter;
+	public KeygroupID getkeygroupIDFilter() {
+		return keygroupIDFilter;
 	}
 	
 	/**
@@ -140,7 +140,11 @@ public abstract class AbstractReceiver {
 					context = ZMQ.context(1);
 					socket = context.socket(ZMQ.SUB);
 					socket.connect(getAddress() + ":" + getPort());
-					socket.subscribe(keygroupFilter.getBytes());
+					if (keygroupIDFilter != null) {
+						socket.subscribe(keygroupIDFilter.toString().getBytes());
+					} else {
+						socket.subscribe("".getBytes());
+					}
 					return true;
 				} else if (receiverType == ZMQ.REP) {
 					context = ZMQ.context(1);

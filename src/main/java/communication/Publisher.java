@@ -38,4 +38,11 @@ public class Publisher extends AbstractSender {
 		return null;
 	}
 	
+	public String sendKeygroupIDData(Envelope envelope, String secret, EncryptionAlgorithm algorithm) {
+		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID());
+		sender.sendMore(envelope.getKeygroupID().toString());
+		sender.send(CryptoProvider.encrypt(envelope.getMessage().toJSON(), secret, algorithm));
+		return null;
+	}
+	
 }

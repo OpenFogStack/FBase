@@ -8,6 +8,8 @@ import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 
+import model.config.KeygroupConfig;
+
 public class TaskManager {
 
 	private static Logger logger = Logger.getLogger(TaskManager.class.getName());
@@ -15,7 +17,7 @@ public class TaskManager {
 	private static ExecutorService pool = Executors.newCachedThreadPool();
 
 	public enum TaskName {
-		LOG, SLEEP
+		LOG, SLEEP, UpdateKeygroupConfig
 	}
 
 	private static Map<TaskName, Integer> runningTasks = new HashMap<TaskName, Integer>();
@@ -60,6 +62,11 @@ public class TaskManager {
 
 	public static Future<?> runSleepTask(int time) {
 		Future<?> future = pool.submit(new SleepTask(time));
+		return future;
+	}
+	
+	public static Future<?> runUpdateKeygroupConfigTask(KeygroupConfig config) {
+		Future<?> future = pool.submit(new UpdateKeygroupConfigTask(config));
 		return future;
 	}
 	

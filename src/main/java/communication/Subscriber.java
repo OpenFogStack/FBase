@@ -50,7 +50,7 @@ private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 		Message m = new Message();
 		try {
 			// Code to interpret message
-			DataRecord update = DataRecord.createFromJSON(envelope.getMessage().getContent(), DataRecord.class);
+			DataRecord update = DataRecord.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
 			TaskManager.runLogTask(update.toString());
 			m.setTextualResponse("Message processed");
 		} catch (IllegalArgumentException e) {

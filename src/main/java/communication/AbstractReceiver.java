@@ -174,7 +174,7 @@ public abstract class AbstractReceiver {
 								envelope.setKeygroupID(KeygroupID.createFromString(s));
 								logger.debug("Received keygroupID: " + envelope.getKeygroupID());
 							} else if (envelope.getMessage() == null) {
-								envelope.setMessage(Message.createFromJSON(
+								envelope.setMessage(Message.fromJSON(
 										CryptoProvider.decrypt(s, secret, algorithm), Message.class));
 								logger.debug("Received content: " + envelope.getMessage().getContent());
 							} else {

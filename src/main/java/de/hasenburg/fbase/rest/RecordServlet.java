@@ -113,7 +113,7 @@ public class RecordServlet extends HttpServlet {
 //			String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(), 
 //					config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
-			DataRecord record = DataRecord.createFromJSON(decryptedRequest, DataRecord.class);
+			DataRecord record = DataRecord.fromJSON(decryptedRequest, DataRecord.class);
 			if (record == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);

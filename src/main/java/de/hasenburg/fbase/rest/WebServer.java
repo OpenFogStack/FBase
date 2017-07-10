@@ -6,7 +6,7 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import control.Configuration;
+import control.FBase;
 
 public class WebServer {
 
@@ -18,7 +18,7 @@ public class WebServer {
 	private final Server server;
 
 	public WebServer() {
-		int port = Configuration.getServerPort();
+		int port = FBase.configuration.getRestPort();
 		logger.info("Setting up server at port " + port);
 
 		server = new Server(port);

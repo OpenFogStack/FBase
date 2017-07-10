@@ -3,12 +3,12 @@ package communication;
 import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 
+import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.message.Envelope;
 import model.message.Message;
-import tasks.TaskManager;
 
 /**
  * Subscribes to data streams of envelopes of different subscribers.
@@ -51,8 +51,8 @@ private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 		try {
 			// Code to interpret message
 			DataRecord update = DataRecord.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
-			TaskManager.runLogTask(update.toString());
-			TaskManager.runStoreDataRecordTask(update);
+			FBase.taskmanager.runLogTask(update.toString());
+			FBase.taskmanager.runStoreDataRecordTask(update);
 			m.setTextualResponse("Message processed");
 		} catch (IllegalArgumentException e) {
 			logger.warn(e.getMessage());

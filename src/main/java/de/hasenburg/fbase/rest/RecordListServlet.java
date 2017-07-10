@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import control.Mastermind;
+import control.FBase;
 import crypto.CryptoProvider;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
@@ -54,14 +54,14 @@ public class RecordListServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			String IDJson = null;
 			try {
-				config = Mastermind.connector.getKeygroupConfig(keygroupID);
+				config = FBase.connector.getKeygroupConfig(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 				}
 				
 				// create a set of dataidentifier strings
-				Set<String> IDs = Mastermind.connector.listDataRecords(keygroupID)
+				Set<String> IDs = FBase.connector.listDataRecords(keygroupID)
 						.stream().map(id -> id.toString()).collect(Collectors.toSet());
 				
 				ObjectMapper mapper = new ObjectMapper();

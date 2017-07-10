@@ -2,54 +2,125 @@ package control;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Properties;
 
-public class Configuration {
+import org.apache.log4j.Logger;
 
-	static {
-		loadProperties();
-	}
+import crypto.CryptoProvider.EncryptionAlgorithm;
+
+public class Configuration {
 	
-	private static Properties properties;
+	private static Logger logger = Logger.getLogger(Configuration.class.getName());
 	
+	private Properties properties;
+
 	// General
-	private static String machineName;
+	private String machineName = null;
+	private String nodeID = null;
+	private String location = null;
+	private String description = null;
+		
+	// Communication
+	private Integer restPort = null;
+	private Integer messagePort = null;
+	private Integer publisherPort = null;
 	
-	// Rest
-	private static int serverPort;
+	// Security
+	private String privateKey = null;
+	private EncryptionAlgorithm algorithm = null;
 	
-	private static void loadProperties() {
-		properties = new Properties();
-		InputStream is = Configuration.class.getClassLoader().getResourceAsStream("config.properties");
+	
+	public Configuration(String configName) {
+		this.properties = new Properties();
+		if (configName == null) {
+			configName = "config.properties";
+			logger.debug("Reading configuration with default name " + configName);
+		}
+		InputStream is = Configuration.class.getClassLoader().getResourceAsStream(configName);
 		try {
 			properties.load(is);
-			serverPort = Integer.parseInt(properties.getProperty("serverPort", "8080"));
+			// General
 			machineName = properties.getProperty("machineName");
-			// TODO 2: include check for mandatory fields
+			nodeID = properties.getProperty("nodeID");
+			location = properties.getProperty("location", "Unknown");
+			description = properties.getProperty("description", "Unknown");
+			
+			// Communication			
+			restPort = Integer.parseInt(properties.getProperty("restPort", "8080"));
+			messagePort = Integer.parseInt(properties.getProperty("messagePort", "6000"));
+			publisherPort = Integer.parseInt(properties.getProperty("publisherPort", "7000"));
+			
+			// Security
+			privateKey = properties.getProperty("privateKey", "Unknown");
+			String alg = properties.getProperty("algorithm");
+			if (alg != null) algorithm = EncryptionAlgorithm.valueOf(alg);
+
+			checkConsistency();
 		} catch (IOException | NumberFormatException e) {
-			System.err.println("Error while loading property file");
+			logger.fatal("Could not read property file, stopping machine");
 			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 
-	// ************************************************************
-	// Generated Code
-	// ************************************************************
-	
-	public static int getServerPort() {
-		return serverPort;
+	private void checkConsistency() throws IOException {
+		Method[] methods = getClass().getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			Method m = methods[i];
+			if (m.getName().startsWith("get")) {
+				if (!m.getName().equals("getAlgorithm")) {
+					try {
+						Object obj = m.invoke(this);
+						if (obj == null) {
+							throw new IOException(m.getName() + " must not be null");
+						}
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+		}
+
+		
 	}
 
-	public static void setServerPort(int serverPort) {
-		Configuration.serverPort = serverPort;
-	}
-
-	public static String getMachineName() {
+	public String getMachineName() {
 		return machineName;
 	}
 
-	public static void setMachineName(String machineName) {
-		Configuration.machineName = machineName;
+	public String getNodeID() {
+		return nodeID;
 	}
-	
+
+	public String getLocation() {
+		return location;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public Integer getRestPort() {
+		return restPort;
+	}
+
+	public Integer getMessagePort() {
+		return messagePort;
+	}
+
+	public Integer getPublisherPort() {
+		return publisherPort;
+	}
+
+	public String getPrivateKey() {
+		return privateKey;
+	}
+
+	public EncryptionAlgorithm getAlgorithm() {
+		return algorithm;
+	}
+
 }

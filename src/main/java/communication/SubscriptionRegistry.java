@@ -11,9 +11,12 @@ public class SubscriptionRegistry {
 
 	private static Logger logger = Logger.getLogger(SubscriptionRegistry.class.getName());
 
-	private static volatile HashMap<String, HashMap<Integer, Subscriber>> activeSubscriptions = 
-			new HashMap<String, HashMap<Integer, Subscriber>>();
+	private volatile HashMap<String, HashMap<Integer, Subscriber>> activeSubscriptions = null;
 
+	public SubscriptionRegistry() {
+		activeSubscriptions = new HashMap<String, HashMap<Integer, Subscriber>>();
+	}
+	
 	/**
 	 * Starts a new Subscriber.
 	 * 
@@ -27,7 +30,7 @@ public class SubscriptionRegistry {
 	 *            - the algorithm used for decryption
 	 * @return the subscriber or null
 	 */
-	public static synchronized Subscriber subscribeTo(String address, int port, String secret,
+	public synchronized Subscriber subscribeTo(String address, int port, String secret,
 			EncryptionAlgorithm algorithm, KeygroupID keygroupIDFilter) {
 		// Case 1: address port combination exists -> false
 		if (subscriptionExists(address, port)) {
@@ -59,7 +62,7 @@ public class SubscriptionRegistry {
 		return subscriber;
 	}
 
-	public static synchronized boolean unsubscribeFrom(String address, int port) {
+	public synchronized boolean unsubscribeFrom(String address, int port) {
 		// needs to delete port tuple
 		// Case 1: was not subscribed -> false
 		if (!subscriptionExists(address, port)) {
@@ -86,7 +89,7 @@ public class SubscriptionRegistry {
 	 * @param address
 	 * @return true, if subscriptions exists
 	 */
-	public static synchronized boolean subscribedToAddress(String address) {
+	public synchronized boolean subscribedToAddress(String address) {
 		return activeSubscriptions.containsKey(address);
 	}
 
@@ -97,7 +100,7 @@ public class SubscriptionRegistry {
 	 * @param port
 	 * @return true, if subscriptions exists
 	 */
-	public static synchronized boolean subscriptionExists(String address, int port) {
+	public synchronized boolean subscriptionExists(String address, int port) {
 		if (subscribedToAddress(address)) {
 			if (activeSubscriptions.get(address).containsKey(port)) {
 				return true;
@@ -112,7 +115,7 @@ public class SubscriptionRegistry {
 	 * @param address
 	 * @return the number or 0
 	 */
-	 public static synchronized int getNumberOfActiveSubscriptions(String address) {
+	 public synchronized int getNumberOfActiveSubscriptions(String address) {
 		 if (subscribedToAddress(address)) {
 			 return activeSubscriptions.get(address).size();
 		 }
@@ -123,7 +126,7 @@ public class SubscriptionRegistry {
 	  * Returns the number of all active subscriptions for all addresses and ports.
 	  * @return the number or 0
 	  */
-	 public static synchronized int getNumberOfActiveSubscriptions() {
+	 public synchronized int getNumberOfActiveSubscriptions() {
 		 if (activeSubscriptions.isEmpty()) {
 			 return 0;
 		 }
@@ -140,14 +143,14 @@ public class SubscriptionRegistry {
 	  * @param port
 	  * @return the subscriber or null, if not exists
 	  */
-	 public static synchronized Subscriber getSubscriber(String address, int port) {
+	 public synchronized Subscriber getSubscriber(String address, int port) {
 		 if (subscriptionExists(address, port)) {
 			 return activeSubscriptions.get(address).get(port);
 		 }
 		 return null;
 	 }
 	 
-	 public static synchronized void deleteAllData() {
+	 public synchronized void deleteAllData() {
 		 activeSubscriptions = new HashMap<String, HashMap<Integer, Subscriber>>();
 	 }
 

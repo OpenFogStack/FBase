@@ -15,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.zeromq.ZMQ;
 
+import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.DataIdentifier;
@@ -43,6 +44,8 @@ public class SubscriberTest {
 		contextPub = ZMQ.context(1);
 		publisher = contextPub.socket(ZMQ.PUB);
 		publisher.bind(address + ":" + port);
+		@SuppressWarnings("unused")
+		FBase fbase = new FBase(null);
 	}
 	
 	@Before

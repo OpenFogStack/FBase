@@ -2,7 +2,7 @@ package tasks;
 
 import org.apache.log4j.Logger;
 
-import control.Mastermind;
+import control.FBase;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.data.DataRecord;
@@ -22,8 +22,8 @@ class PutDataRecordTask extends Task<Boolean> {
 	
 	private DataRecord record;
 
-	public PutDataRecordTask(DataRecord record) {
-		super(TaskName.PutDataRecordTask);
+	public PutDataRecordTask(DataRecord record, TaskManager taskmanager) {
+		super(TaskName.PutDataRecordTask, taskmanager);
 		this.record = record;
 	}
 	
@@ -38,8 +38,8 @@ class PutDataRecordTask extends Task<Boolean> {
 		// get keygroup config and put into database
 		KeygroupConfig config = null;	
 		try {
-			config = Mastermind.connector.getKeygroupConfig(record.getKeygroupID());
-			Mastermind.connector.putDataRecord(record);
+			config = FBase.connector.getKeygroupConfig(record.getKeygroupID());
+			FBase.connector.putDataRecord(record);
 		} catch (FBaseStorageConnectorException e) {
 			logger.error(e.getMessage());
 			return false;
@@ -51,7 +51,7 @@ class PutDataRecordTask extends Task<Boolean> {
 		Envelope e = new Envelope(record.getKeygroupID(), m);
 		
 		// publish data
-		Mastermind.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+		FBase.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
 		
 		return true;
 	}

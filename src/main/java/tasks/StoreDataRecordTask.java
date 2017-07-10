@@ -2,7 +2,7 @@ package tasks;
 
 import org.apache.log4j.Logger;
 
-import control.Mastermind;
+import control.FBase;
 import exceptions.FBaseStorageConnectorException;
 import model.data.DataRecord;
 import tasks.TaskManager.TaskName;
@@ -18,8 +18,8 @@ class StoreDataRecordTask extends Task<Boolean> {
 	
 	private DataRecord record = null;
 
-	public StoreDataRecordTask(DataRecord record) {
-		super(TaskName.StoreDataRecordTask);
+	public StoreDataRecordTask(DataRecord record, TaskManager taskmanager) {
+		super(TaskName.StoreDataRecordTask, taskmanager);
 		this.record = record;
 	}
 	
@@ -33,7 +33,7 @@ class StoreDataRecordTask extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 		// get keygroup config and put into database
 		try {
-			Mastermind.connector.putDataRecord(record);
+			FBase.connector.putDataRecord(record);
 		} catch (FBaseStorageConnectorException e) {
 			logger.error(e.getMessage());
 			return false;

@@ -15,8 +15,8 @@ class SleepTask extends Task<Boolean> {
 	
 	private int time = -1;
 
-	public SleepTask(int time) {
-		super(TaskName.SLEEP);
+	public SleepTask(int time, TaskManager taskmanager) {
+		super(TaskName.SLEEP, taskmanager);
 		this.time = time;
 	}
 	

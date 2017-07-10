@@ -10,8 +10,8 @@ class LogTask extends Task<Boolean> {
 	
 	private String message = "";
 
-	public LogTask(String message) {
-		super(TaskName.LOG);
+	public LogTask(String message, TaskManager taskmanager) {
+		super(TaskName.LOG, taskmanager);
 		this.message = message;
 	}
 	

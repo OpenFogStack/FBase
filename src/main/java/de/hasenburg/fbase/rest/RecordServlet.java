@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-import control.Mastermind;
+import control.FBase;
 import crypto.CryptoProvider;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
@@ -22,7 +22,6 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.message.Message;
-import tasks.TaskManager;
 
 /**
  * 
@@ -56,8 +55,8 @@ public class RecordServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			DataRecord record = null;	
 			try {
-				config = Mastermind.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
-				record = Mastermind.connector.getDataRecord(dataIdentifier);
+				config = FBase.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
+				record = FBase.connector.getDataRecord(dataIdentifier);
 				if (config == null || record == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -101,7 +100,7 @@ public class RecordServlet extends HttpServlet {
 			
 			KeygroupConfig config = null;	
 			try {
-				config = Mastermind.connector.getKeygroupConfig(keygroupID);
+				config = FBase.connector.getKeygroupConfig(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -123,7 +122,7 @@ public class RecordServlet extends HttpServlet {
 			}
 			
 			// store data record
-			Future<Boolean> future = TaskManager.runPutDataRecordTask(record);
+			Future<Boolean> future = FBase.taskmanager.runPutDataRecordTask(record);
 			
 			// 404 Not Found
 			boolean success = future.get(5, TimeUnit.SECONDS);
@@ -158,7 +157,7 @@ public class RecordServlet extends HttpServlet {
 			
 			KeygroupConfig config = null;	
 			try {
-				config = Mastermind.connector.getKeygroupConfig(keygroupID);
+				config = FBase.connector.getKeygroupConfig(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -180,7 +179,7 @@ public class RecordServlet extends HttpServlet {
 			}
 			
 			try {
-				if (!Mastermind.connector.deleteDataRecord(dataIdentifier)) {
+				if (!FBase.connector.deleteDataRecord(dataIdentifier)) {
 					// 500 Internal Server Error
 					throw new FBaseRestException(FBaseRestException.DELETION_FAILURE, 500);
 				}

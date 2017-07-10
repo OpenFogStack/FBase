@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
@@ -18,17 +19,24 @@ public class SubscriptionRegistryTest {
 
 	private static Logger logger = Logger.getLogger(SubscriptionRegistryTest.class.getName());
 		
+	private SubscriptionRegistry subscriptionRegistry = null;
+	
+	@Before
+	public void setUp() throws Exception {
+		subscriptionRegistry = new SubscriptionRegistry();
+	}
+	
 	@After
 	public void tearDown() throws Exception {
-		SubscriptionRegistry.deleteAllData();
+		subscriptionRegistry.deleteAllData();
 		logger.debug("\n");
 	}
 	
 	@Test
 	public void testSubscribe() throws InterruptedException {
 		logger.debug("-------Starting testSubscribe-------");
-		Subscriber s = SubscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null);
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions());
+		Subscriber s = subscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null);
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions());
 		Publisher publisher = new Publisher("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES);
 		Thread.sleep(200);
 		Message m = new Message();
@@ -45,51 +53,51 @@ public class SubscriptionRegistryTest {
 	@Test
 	public void testUnSubscribe() {
 		logger.debug("-------Starting testUnSubscribe-------");
-		SubscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null);
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions());
-		SubscriptionRegistry.unsubscribeFrom("tcp://localhost", 8081);
-		assertEquals(0, SubscriptionRegistry.getNumberOfActiveSubscriptions());
+		subscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null);
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions());
+		subscriptionRegistry.unsubscribeFrom("tcp://localhost", 8081);
+		assertEquals(0, subscriptionRegistry.getNumberOfActiveSubscriptions());
 		logger.debug("Finished testUnSubscribe.");
 	}
 	
 	@Test
 	public void testSubscribeTwoSameAddressUnsubscribe() {
 		logger.debug("-------Starting testSubscribeTwoSameAddressUnsubscribe-------");
-		SubscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null);
-		SubscriptionRegistry.subscribeTo("tcp://localhost", 8082, "secret", EncryptionAlgorithm.AES, null);
-		assertEquals(2, SubscriptionRegistry.getNumberOfActiveSubscriptions());
-		SubscriptionRegistry.unsubscribeFrom("tcp://localhost", 8081);
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions());
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions("tcp://localhost"));
+		subscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null);
+		subscriptionRegistry.subscribeTo("tcp://localhost", 8082, "secret", EncryptionAlgorithm.AES, null);
+		assertEquals(2, subscriptionRegistry.getNumberOfActiveSubscriptions());
+		subscriptionRegistry.unsubscribeFrom("tcp://localhost", 8081);
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions());
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions("tcp://localhost"));
 		logger.debug("Finished testSubscribeTwoSameAddressUnsubscribe.");
 	}
 	
 	@Test
 	public void testSubscribeSamePortOneAddress() {
 		logger.debug("-------Starting testSubscribeSamePortOneAddress-------");
-		SubscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null);
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions());
-		assertNull(SubscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null));
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions());
+		subscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null);
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions());
+		assertNull(subscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES, null));
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions());
 		logger.debug("Finished testSubscribeSamePortOneAddress.");
 	}
 	
 	@Test
 	public void testSubscribeSamePortDifferentAddress() {
 		logger.debug("-------Starting testSubscribeSamePortDifferentAddress-------");
-		SubscriptionRegistry.subscribeTo("tcp://10.0.1.1", 8081, "secret", EncryptionAlgorithm.AES, null);
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions());
-		SubscriptionRegistry.subscribeTo("tcp://10.0.1.2", 8081, "secret", EncryptionAlgorithm.AES, null);
-		assertEquals(2, SubscriptionRegistry.getNumberOfActiveSubscriptions());
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions("tcp://10.0.1.1"));
-		assertEquals(1, SubscriptionRegistry.getNumberOfActiveSubscriptions("tcp://10.0.1.2"));
+		subscriptionRegistry.subscribeTo("tcp://10.0.1.1", 8081, "secret", EncryptionAlgorithm.AES, null);
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions());
+		subscriptionRegistry.subscribeTo("tcp://10.0.1.2", 8081, "secret", EncryptionAlgorithm.AES, null);
+		assertEquals(2, subscriptionRegistry.getNumberOfActiveSubscriptions());
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions("tcp://10.0.1.1"));
+		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions("tcp://10.0.1.2"));
 		logger.debug("Finished testSubscribeSamePortDifferentAddress.");
 	}
 	
 	@Test
 	public void failUnsubscribe() {
 		logger.debug("-------Starting failUnsubscribe-------");
-		assertFalse(SubscriptionRegistry.unsubscribeFrom("localhost", 8081));
+		assertFalse(subscriptionRegistry.unsubscribeFrom("localhost", 8081));
 		logger.debug("Finished failUnsubscribe.");
 	}
 	

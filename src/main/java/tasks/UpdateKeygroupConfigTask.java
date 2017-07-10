@@ -2,8 +2,7 @@ package tasks;
 
 import org.apache.log4j.Logger;
 
-import communication.SubscriptionRegistry;
-import control.Mastermind;
+import control.FBase;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -16,8 +15,8 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 	
 	private KeygroupConfig config = null;
 
-	public UpdateKeygroupConfigTask(KeygroupConfig config) {
-		super(TaskName.UpdateKeygroupConfig);
+	public UpdateKeygroupConfigTask(KeygroupConfig config, TaskManager taskmanager) {
+		super(TaskName.UpdateKeygroupConfig, taskmanager);
 		this.config = config;
 	}
 	
@@ -26,12 +25,12 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 		
 		// store config in database
 		try {
-			Mastermind.connector.createKeygroup(config.getKeygroupID());
+			FBase.connector.createKeygroup(config.getKeygroupID());
 		} catch (FBaseStorageConnectorException e) {
 			// no problem, it just already existed
 		}
 		try {
-			Mastermind.connector.putKeygroupConfig(config.getKeygroupID(), config);
+			FBase.connector.putKeygroupConfig(config.getKeygroupID(), config);
 		} catch (FBaseStorageConnectorException e) {
 			logger.fatal("Could not store keygroup configuration in node DB, nothing changed");
 			return false;
@@ -44,13 +43,13 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 				// get node configs
 				NodeConfig nodeConfig = null;
 				try {
-					nodeConfig = Mastermind.connector.getNodeConfig(rnConfig.getNodeID());
+					nodeConfig = FBase.connector.getNodeConfig(rnConfig.getNodeID());
 					// subscribe to all machines 
 					// TODO I: we currently don't load balance the subscriptions, no failover (it is just done by the machine that runs this task)
 					// TODO I: if this task is used more than once for the same keygroup config by different machines, they all subscribe to all publishers
 					int publisherPort = nodeConfig.getPublisherPort();
 					for (String machine: nodeConfig.getMachines()) {
-						SubscriptionRegistry.subscribeTo(machine, publisherPort, config.getEncryptionSecret(), 
+						FBase.subscriptionRegistry.subscribeTo(machine, publisherPort, config.getEncryptionSecret(), 
 								config.getEncryptionAlgorithm(), config.getKeygroupID());
 					}
 				} catch (FBaseStorageConnectorException e) {

@@ -14,16 +14,19 @@ import model.data.DataRecord;
 public class TaskManager {
 
 	private static Logger logger = Logger.getLogger(TaskManager.class.getName());
-	
-	private static ExecutorService pool = Executors.newCachedThreadPool();
+	private ExecutorService pool = null;
+	private Map<TaskName, Integer> runningTasks = null;
 
 	public enum TaskName {
 		LOG, SLEEP, UpdateKeygroupConfig, PutDataRecordTask, StoreDataRecordTask
 	}
 
-	private static Map<TaskName, Integer> runningTasks = new HashMap<TaskName, Integer>();
-
-	public static synchronized void registerTask(TaskName name) {
+	public TaskManager() {
+		 pool = Executors.newCachedThreadPool();
+		 runningTasks = new HashMap<TaskName, Integer>();
+	}
+	
+	public synchronized void registerTask(TaskName name) {
 		Integer value = runningTasks.get(name);
 		if (value != null) {
 			runningTasks.put(name, value + 1);
@@ -32,7 +35,7 @@ public class TaskManager {
 		}
 	}
 
-	public static synchronized void deregisterTask(TaskName name) {
+	public synchronized void deregisterTask(TaskName name) {
 		logger.debug("Deregistering task " + name);
 		if (runningTasks.containsKey(name)) {
 			int number = runningTasks.get(name) - 1;
@@ -44,11 +47,11 @@ public class TaskManager {
 		}
 	}
 
-	public static synchronized HashMap<TaskName, Integer> getRunningTaskNumbers() {
+	public synchronized HashMap<TaskName, Integer> getRunningTaskNumbers() {
 		return new HashMap<TaskName, Integer>(runningTasks);
 	}
 
-	public static synchronized void deleteAllData() {
+	public synchronized void deleteAllData() {
 		runningTasks = new HashMap<TaskName, Integer>();
 	}
 
@@ -56,28 +59,28 @@ public class TaskManager {
 	 * ------ Task Initiators ------
 	 */
 
-	public static Future<Boolean> runLogTask(String message) {
-		Future<Boolean> future = pool.submit(new LogTask(message));
+	public Future<Boolean> runLogTask(String message) {
+		Future<Boolean> future = pool.submit(new LogTask(message, this));
 		return future;
 	}
 
-	public static Future<Boolean> runSleepTask(int time) {
-		Future<Boolean> future = pool.submit(new SleepTask(time));
+	public Future<Boolean> runSleepTask(int time) {
+		Future<Boolean> future = pool.submit(new SleepTask(time, this));
 		return future;
 	}
 	
-	public static Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config));
+	public Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
+		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, this));
 		return future;
 	}
 	
-	public static Future<Boolean> runPutDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new PutDataRecordTask(record));
+	public Future<Boolean> runPutDataRecordTask(DataRecord record) {
+		Future<Boolean> future = pool.submit(new PutDataRecordTask(record, this));
 		return future;
 	}
 	
-	public static Future<Boolean> runStoreDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record));
+	public Future<Boolean> runStoreDataRecordTask(DataRecord record) {
+		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record, this));
 		return future;
 	}
 	

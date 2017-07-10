@@ -123,7 +123,7 @@ public class RecordServlet extends HttpServlet {
 			}
 			
 			// store data record
-			Future<Boolean> future = TaskManager.putDataRecordTask(record);
+			Future<Boolean> future = TaskManager.runPutDataRecordTask(record);
 			
 			// 404 Not Found
 			boolean success = future.get(5, TimeUnit.SECONDS);

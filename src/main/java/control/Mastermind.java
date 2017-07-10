@@ -30,7 +30,7 @@ public class Mastermind {
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "M-1"));
 		record.setValueWithoutKey("Test Value");
-		TaskManager.putDataRecordTask(record);
+		TaskManager.runPutDataRecordTask(record);
 		
 		WebServer server = new WebServer();
 		server.startServer();

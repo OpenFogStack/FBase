@@ -18,7 +18,7 @@ public class TaskManager {
 	private static ExecutorService pool = Executors.newCachedThreadPool();
 
 	public enum TaskName {
-		LOG, SLEEP, UpdateKeygroupConfig, PutDataRecordTask
+		LOG, SLEEP, UpdateKeygroupConfig, PutDataRecordTask, StoreDataRecordTask
 	}
 
 	private static Map<TaskName, Integer> runningTasks = new HashMap<TaskName, Integer>();
@@ -71,8 +71,13 @@ public class TaskManager {
 		return future;
 	}
 	
-	public static Future<Boolean> putDataRecordTask(DataRecord record) {
+	public static Future<Boolean> runPutDataRecordTask(DataRecord record) {
 		Future<Boolean> future = pool.submit(new PutDataRecordTask(record));
+		return future;
+	}
+	
+	public static Future<Boolean> runStoreDataRecordTask(DataRecord record) {
+		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record));
 		return future;
 	}
 	

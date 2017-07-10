@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import model.config.KeygroupConfig;
+import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
@@ -28,7 +29,10 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 			.getLogger(AbstractDBConnector.class);
 
 	/** stores keygroup config data */
-	private final Map<KeygroupID, KeygroupConfig> configs = new HashMap<>();
+	private final Map<KeygroupID, KeygroupConfig> keygroupConfigs = new HashMap<>();
+	
+	/** stores node config data */
+	private final Map<String, NodeConfig> nodeConfigs = new HashMap<>();
 
 	/** stores data records */
 	private final Map<KeygroupID, Map<DataIdentifier, DataRecord>> records = new HashMap<>();
@@ -159,7 +163,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public void putKeygroupConfig(KeygroupID id, KeygroupConfig config)
 			throws FBaseStorageConnectorException {
-		configs.put(id, config);
+		keygroupConfigs.put(id, config);
 	}
 
 	/*
@@ -172,7 +176,30 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public KeygroupConfig getKeygroupConfig(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException {
-		return configs.get(keygroupID);
+		return keygroupConfigs.get(keygroupID);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * storageconnector.AbstractDBConnector#putNodeConfig()
+	 */
+	@Override
+	public void putNodeConfig(String nodeID, NodeConfig config) throws FBaseStorageConnectorException {
+		nodeConfigs.put(nodeID, config);
+		
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * storageconnector.AbstractDBConnector#getNodeConfig()
+	 */
+	@Override
+	public NodeConfig getNodeConfig(String nodeID) throws FBaseStorageConnectorException {
+		return nodeConfigs.get(nodeID);
 	}
 
 }

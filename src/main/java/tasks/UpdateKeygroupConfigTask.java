@@ -40,16 +40,21 @@ class UpdateKeygroupConfigTask extends Task {
 		for (ReplicaNodeConfig rnConfig: config.getReplicaNodes()) {
 			logger.debug("Subscribing to machines of node " + rnConfig.getNodeID());
 			// get node configs
-			NodeConfig nodeConfig = new NodeConfig(); // TODO 1: access database based on rnConfig
-			
-			// subscribe to all machines 
-			// TODO I: we currently don't load balance the subscriptions, no failover (it is just done by the machine that runs this task)
-			// TODO I: if this task is used more than once for the same keygroup config by different machines, they all subscribe to all publishers
-			int publisherPort = nodeConfig.getPublisherPort();
-			for (String machine: nodeConfig.getMachines()) {
-				SubscriptionRegistry.subscribeTo(machine, publisherPort, config.getEncryptionSecret(), 
-						config.getEncryptionAlgorithm(), config.getKeygroupID());
+			NodeConfig nodeConfig = null;
+			try {
+				nodeConfig = Mastermind.connector.getNodeConfig(rnConfig.getNodeID());
+				// subscribe to all machines 
+				// TODO I: we currently don't load balance the subscriptions, no failover (it is just done by the machine that runs this task)
+				// TODO I: if this task is used more than once for the same keygroup config by different machines, they all subscribe to all publishers
+				int publisherPort = nodeConfig.getPublisherPort();
+				for (String machine: nodeConfig.getMachines()) {
+					SubscriptionRegistry.subscribeTo(machine, publisherPort, config.getEncryptionSecret(), 
+							config.getEncryptionAlgorithm(), config.getKeygroupID());
+				}
+			} catch (FBaseStorageConnectorException e) {
+				logger.error("Could not get node configuration from node DB for " + rnConfig.getNodeID());
 			}
+					
 		}
 		
 	}

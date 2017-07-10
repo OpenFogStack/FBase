@@ -8,6 +8,7 @@ import java.util.Set;
 
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
+import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
@@ -153,6 +154,31 @@ public abstract class AbstractDBConnector {
 	public abstract KeygroupConfig getKeygroupConfig(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
 
+	/**
+	 * stores configuration details of a node
+	 * 
+	 * @param nodeID
+	 *            identifier of the node
+	 * @param config
+	 *            configuration data
+	 * @throws FBaseStorageConnectorException
+	 *             when the operation fails
+	 */
+	public abstract void putNodeConfig(String nodeID, NodeConfig config)
+			throws FBaseStorageConnectorException;
+
+	/**
+	 * retrieves configuration details of a node
+	 * 
+	 * @param keygroupID
+	 *            identifier of the node
+	 * @return the {@link NodeConfig} or null if none was found
+	 * @throws FBaseStorageConnectorException
+	 *             when the operation fails
+	 */
+	public abstract NodeConfig getNodeConfig(String nodeID)
+			throws FBaseStorageConnectorException;
+	
 	/**
 	 * 
 	 * persists a data item in the datastore

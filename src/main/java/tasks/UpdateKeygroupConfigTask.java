@@ -36,26 +36,32 @@ class UpdateKeygroupConfigTask extends Task {
 			logger.fatal("Could not store keygroup configuration in node DB, nothing changed");
 			return;
 		}
-		
-		for (ReplicaNodeConfig rnConfig: config.getReplicaNodes()) {
-			logger.debug("Subscribing to machines of node " + rnConfig.getNodeID());
-			// get node configs
-			NodeConfig nodeConfig = null;
-			try {
-				nodeConfig = Mastermind.connector.getNodeConfig(rnConfig.getNodeID());
-				// subscribe to all machines 
-				// TODO I: we currently don't load balance the subscriptions, no failover (it is just done by the machine that runs this task)
-				// TODO I: if this task is used more than once for the same keygroup config by different machines, they all subscribe to all publishers
-				int publisherPort = nodeConfig.getPublisherPort();
-				for (String machine: nodeConfig.getMachines()) {
-					SubscriptionRegistry.subscribeTo(machine, publisherPort, config.getEncryptionSecret(), 
-							config.getEncryptionAlgorithm(), config.getKeygroupID());
+
+		if (config.getReplicaNodes() != null) {
+			logger.debug("Subscribing to replica nodes of config " + config.getKeygroupID());
+			for (ReplicaNodeConfig rnConfig: config.getReplicaNodes()) {
+				logger.debug("Subscribing to machines of node " + rnConfig.getNodeID());
+				// get node configs
+				NodeConfig nodeConfig = null;
+				try {
+					nodeConfig = Mastermind.connector.getNodeConfig(rnConfig.getNodeID());
+					// subscribe to all machines 
+					// TODO I: we currently don't load balance the subscriptions, no failover (it is just done by the machine that runs this task)
+					// TODO I: if this task is used more than once for the same keygroup config by different machines, they all subscribe to all publishers
+					int publisherPort = nodeConfig.getPublisherPort();
+					for (String machine: nodeConfig.getMachines()) {
+						SubscriptionRegistry.subscribeTo(machine, publisherPort, config.getEncryptionSecret(), 
+								config.getEncryptionAlgorithm(), config.getKeygroupID());
+					}
+				} catch (FBaseStorageConnectorException e) {
+					logger.error("Could not get node configuration from node DB for " + rnConfig.getNodeID());
 				}
-			} catch (FBaseStorageConnectorException e) {
-				logger.error("Could not get node configuration from node DB for " + rnConfig.getNodeID());
+						
 			}
-					
+		} else {
+			logger.debug("No replica nodes exist config " + config.getKeygroupID());
 		}
+		
 		
 	}
 

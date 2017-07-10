@@ -19,7 +19,7 @@ class StoreDataRecordTask extends Task<Boolean> {
 	private DataRecord record = null;
 
 	public StoreDataRecordTask(DataRecord record, TaskManager taskmanager) {
-		super(TaskName.StoreDataRecordTask, taskmanager);
+		super(TaskName.STORE_DATA_RECORD, taskmanager);
 		this.record = record;
 	}
 	

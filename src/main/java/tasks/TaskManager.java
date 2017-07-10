@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 
 import model.config.KeygroupConfig;
+import model.config.NodeConfig;
 import model.data.DataRecord;
 
 public class TaskManager {
@@ -18,7 +19,7 @@ public class TaskManager {
 	private Map<TaskName, Integer> runningTasks = null;
 
 	public enum TaskName {
-		LOG, SLEEP, UpdateKeygroupConfig, PutDataRecordTask, StoreDataRecordTask
+		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, PUT_DATA_RECORD, STORE_DATA_RECORD, UPDATE_NODE_CONFIG
 	}
 
 	public TaskManager() {
@@ -71,6 +72,11 @@ public class TaskManager {
 	
 	public Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
 		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, this));
+		return future;
+	}
+	
+	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config) {
+		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, this));
 		return future;
 	}
 	

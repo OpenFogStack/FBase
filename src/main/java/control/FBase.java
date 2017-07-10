@@ -6,6 +6,7 @@ import crypto.CryptoProvider.EncryptionAlgorithm;
 import de.hasenburg.fbase.rest.WebServer;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
+import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
@@ -46,6 +47,12 @@ public class FBase {
 		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"), 
 				"secret", EncryptionAlgorithm.AES);
 		taskmanager.runUpdateKeygroupConfigTask(config);
+		
+		NodeConfig nodeConfig = new NodeConfig();
+		nodeConfig.setNodeID(FBase.configuration.getNodeID());
+		nodeConfig.setMessagePort(FBase.configuration.getMessagePort());
+		nodeConfig.setPublisherPort(FBase.configuration.getPublisherPort());
+		taskmanager.runUpdateNodeConfigTask(nodeConfig);
 		
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "M-1"));

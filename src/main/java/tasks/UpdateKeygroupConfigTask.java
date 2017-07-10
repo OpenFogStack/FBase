@@ -16,7 +16,7 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 	private KeygroupConfig config = null;
 
 	public UpdateKeygroupConfigTask(KeygroupConfig config, TaskManager taskmanager) {
-		super(TaskName.UpdateKeygroupConfig, taskmanager);
+		super(TaskName.UPDATE_KEYGROUP_CONFIG, taskmanager);
 		this.config = config;
 	}
 	
@@ -37,6 +37,7 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 		}
 
 		if (config.getReplicaNodes() != null) {
+			// TODO I: one should unsubscribe from outdated replica nodes (that no longer exist)
 			logger.debug("Subscribing to replica nodes of config " + config.getKeygroupID());
 			for (ReplicaNodeConfig rnConfig: config.getReplicaNodes()) {
 				logger.debug("Subscribing to machines of node " + rnConfig.getNodeID());
@@ -47,6 +48,7 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 					// subscribe to all machines 
 					// TODO I: we currently don't load balance the subscriptions, no failover (it is just done by the machine that runs this task)
 					// TODO I: if this task is used more than once for the same keygroup config by different machines, they all subscribe to all publishers
+					// TODO I: one should not subscribe to machines of the same node
 					int publisherPort = nodeConfig.getPublisherPort();
 					for (String machine: nodeConfig.getMachines()) {
 						FBase.subscriptionRegistry.subscribeTo(machine, publisherPort, config.getEncryptionSecret(), 

@@ -23,7 +23,7 @@ class PutDataRecordTask extends Task<Boolean> {
 	private DataRecord record;
 
 	public PutDataRecordTask(DataRecord record, TaskManager taskmanager) {
-		super(TaskName.PutDataRecordTask, taskmanager);
+		super(TaskName.PUT_DATA_RECORD, taskmanager);
 		this.record = record;
 	}
 	

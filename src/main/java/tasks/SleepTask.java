@@ -9,7 +9,7 @@ import tasks.TaskManager.TaskName;
  * @author jonathanhasenburg
  *
  */
-class SleepTask extends Task {
+class SleepTask extends Task<Boolean> {
 
 	private static Logger logger = Logger.getLogger(SleepTask.class.getName());
 	
@@ -21,16 +21,18 @@ class SleepTask extends Task {
 	}
 	
 	@Override
-	public void executeFunctionality() {
+	public Boolean executeFunctionality() {
 		if (time > 0) {
 			try {
 				Thread.sleep(time);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				return false;
 			}
 		} else {
 			logger.warn("Sleep time must be greater than 0, but is " + time + ".");
 		}
+		return true;
 	}
 	
 

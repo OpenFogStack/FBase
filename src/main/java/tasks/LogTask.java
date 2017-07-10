@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 
 import tasks.TaskManager.TaskName;
 
-class LogTask extends Task {
+class LogTask extends Task<Boolean> {
 
 	private static Logger logger = Logger.getLogger(LogTask.class.getName());
 	
@@ -16,8 +16,9 @@ class LogTask extends Task {
 	}
 	
 	@Override
-	public void executeFunctionality() {
+	public Boolean executeFunctionality() {
 		logger.info(message);
+		return true;
 	}
 
 	

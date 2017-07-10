@@ -25,7 +25,7 @@ public class Publisher extends AbstractSender {
 	}
 
 	/**
-	 * Publishes a new envelope to all subscribers.
+	 * Publishes a new envelope to all subscribers
 	 * 
 	 * @param envelope - the published envelope
 	 * @return null
@@ -38,11 +38,17 @@ public class Publisher extends AbstractSender {
 		return null;
 	}
 	
-	public String sendKeygroupIDData(Envelope envelope, String secret, EncryptionAlgorithm algorithm) {
+	/**
+	 * Publishes a new envelope to all subscribers
+	 * 
+	 * @param envelope - the published envelope
+	 * @param secret - the secret used for encryption
+	 * @param algorithm - the algorithm used for encryption
+	 */
+	public void sendKeygroupIDData(Envelope envelope, String secret, EncryptionAlgorithm algorithm) {
 		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID());
 		sender.sendMore(envelope.getKeygroupID().toString());
 		sender.send(CryptoProvider.encrypt(envelope.getMessage().toJSON(), secret, algorithm));
-		return null;
 	}
 	
 }

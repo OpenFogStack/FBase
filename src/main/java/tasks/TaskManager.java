@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 
 import model.config.KeygroupConfig;
+import model.data.DataRecord;
 
 public class TaskManager {
 
@@ -17,7 +18,7 @@ public class TaskManager {
 	private static ExecutorService pool = Executors.newCachedThreadPool();
 
 	public enum TaskName {
-		LOG, SLEEP, UpdateKeygroupConfig
+		LOG, SLEEP, UpdateKeygroupConfig, PutDataRecordTask
 	}
 
 	private static Map<TaskName, Integer> runningTasks = new HashMap<TaskName, Integer>();
@@ -55,18 +56,23 @@ public class TaskManager {
 	 * ------ Task Initiators ------
 	 */
 
-	public static Future<?> runLogTask(String message) {
-		Future<?> future = pool.submit(new LogTask(message));
+	public static Future<Boolean> runLogTask(String message) {
+		Future<Boolean> future = pool.submit(new LogTask(message));
 		return future;
 	}
 
-	public static Future<?> runSleepTask(int time) {
-		Future<?> future = pool.submit(new SleepTask(time));
+	public static Future<Boolean> runSleepTask(int time) {
+		Future<Boolean> future = pool.submit(new SleepTask(time));
 		return future;
 	}
 	
-	public static Future<?> runUpdateKeygroupConfigTask(KeygroupConfig config) {
-		Future<?> future = pool.submit(new UpdateKeygroupConfigTask(config));
+	public static Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
+		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config));
+		return future;
+	}
+	
+	public static Future<Boolean> putDataRecordTask(DataRecord record) {
+		Future<Boolean> future = pool.submit(new PutDataRecordTask(record));
 		return future;
 	}
 	

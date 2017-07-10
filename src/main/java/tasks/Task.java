@@ -1,10 +1,12 @@
 package tasks;
 
+import java.util.concurrent.Callable;
+
 import org.apache.log4j.Logger;
 
 import tasks.TaskManager.TaskName;
 
-abstract class Task implements Runnable {
+abstract class Task<V> implements Callable<V> {
 
 	private static Logger logger = Logger.getLogger(Task.class.getName());
 	
@@ -15,15 +17,16 @@ abstract class Task implements Runnable {
 	}
 	
 	@Override
-	public void run() {
+	public V call() {
 		logger.debug("Executing task " + name);
 		TaskManager.registerTask(name);
-		executeFunctionality();
+		V answer = executeFunctionality();
 		TaskManager.deregisterTask(name);
 		logger.debug("Task " + name + " completed");
+		return answer;
 	}
 	
-	public abstract void executeFunctionality();
+	public abstract V executeFunctionality();
 
 	
 }

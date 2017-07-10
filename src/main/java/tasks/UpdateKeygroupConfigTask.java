@@ -10,7 +10,7 @@ import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
 import tasks.TaskManager.TaskName;
 
-class UpdateKeygroupConfigTask extends Task {
+class UpdateKeygroupConfigTask extends Task<Boolean> {
 
 	private static Logger logger = Logger.getLogger(UpdateKeygroupConfigTask.class.getName());
 	
@@ -22,7 +22,7 @@ class UpdateKeygroupConfigTask extends Task {
 	}
 	
 	@Override
-	public void executeFunctionality() {
+	public Boolean executeFunctionality() {
 		
 		// store config in database
 		try {
@@ -34,7 +34,7 @@ class UpdateKeygroupConfigTask extends Task {
 			Mastermind.connector.putKeygroupConfig(config.getKeygroupID(), config);
 		} catch (FBaseStorageConnectorException e) {
 			logger.fatal("Could not store keygroup configuration in node DB, nothing changed");
-			return;
+			return false;
 		}
 
 		if (config.getReplicaNodes() != null) {
@@ -62,6 +62,7 @@ class UpdateKeygroupConfigTask extends Task {
 			logger.debug("No replica nodes exist config " + config.getKeygroupID());
 		}
 		
+		return true;
 		
 	}
 

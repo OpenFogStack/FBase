@@ -2,6 +2,8 @@ package de.hasenburg.fbase.rest;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
@@ -20,6 +22,7 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.message.Message;
+import tasks.TaskManager;
 
 /**
  * 
@@ -113,18 +116,18 @@ public class RecordServlet extends HttpServlet {
 //			String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(), 
 //					config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
-			DataRecord record = DataRecord.createFromJSON(decryptedRequest, DataRecord.class);
+			DataRecord record = DataRecord.fromJSON(decryptedRequest, DataRecord.class);
 			if (record == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
 			}
 			
-			try {
-				Mastermind.connector.putDataRecord(record);
-			} catch (FBaseStorageConnectorException e) {
-				// 404 Not Found
-				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
-			}
+			// store data record
+			Future<Boolean> future = TaskManager.putDataRecordTask(record);
+			
+			// 404 Not Found
+			boolean success = future.get(5, TimeUnit.SECONDS);
+			if (!success) throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 
 			// 200 OK
 			resp.setStatus(200);

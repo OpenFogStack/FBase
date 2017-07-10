@@ -64,13 +64,9 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public void putDataRecord(DataRecord record)
 			throws FBaseStorageConnectorException {
-		Map<DataIdentifier, DataRecord> keygroupMap = records.get(record
-				.getDataIdentifier().getKeygroup());
-		if (keygroupMap == null)
-			throw new FBaseStorageConnectorException(
-					"Keygroup does not exist.");
+		Map<DataIdentifier, DataRecord> keygroupMap = records.get(record.getDataIdentifier().getKeygroupID());
+		if (keygroupMap == null) throw new FBaseStorageConnectorException("Keygroup does not exist.");
 		keygroupMap.put(record.getDataIdentifier(), record);
-
 	}
 
 	/*
@@ -82,7 +78,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 */
 	@Override
 	public DataRecord getDataRecord(DataIdentifier key) throws FBaseStorageConnectorException{
-		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroup());
+		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroupID());
 		if (keygroupMap == null)
 			throw new FBaseStorageConnectorException(
 					"Keygroup does not exist.");
@@ -98,7 +94,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public boolean deleteDataRecord(DataIdentifier key)
 			throws FBaseStorageConnectorException {
-		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroup());
+		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroupID());
 		if (keygroupMap == null)
 			throw new FBaseStorageConnectorException(
 					"Keygroup does not exist.");
@@ -134,8 +130,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	public boolean createKeygroup(KeygroupID id)
 			throws FBaseStorageConnectorException {
 		Map<DataIdentifier, DataRecord> keygroupMap = records.get(id);
-		if(keygroupMap!=null)throw new FBaseStorageConnectorException(
-				"Keygroup already exists.");
+		if (keygroupMap!=null) throw new FBaseStorageConnectorException("Keygroup already exists.");
 		records.put(id, new HashMap<>());
 		return records.containsKey(id);
 	}
@@ -165,7 +160,6 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	public void putKeygroupConfig(KeygroupID id, KeygroupConfig config)
 			throws FBaseStorageConnectorException {
 		configs.put(id, config);
-
 	}
 
 	/*

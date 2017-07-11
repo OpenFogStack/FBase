@@ -38,7 +38,8 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 
 		if (config.getReplicaNodes() != null) {
 			// TODO I: one should unsubscribe from outdated replica nodes (that no longer exist)
-			logger.debug("Subscribing to replica nodes of config " + config.getKeygroupID());
+			logger.debug("Subscribing to replica nodes (" + config.getReplicaNodes().size() 
+					+ ") of config " + config.getKeygroupID());
 			for (ReplicaNodeConfig rnConfig: config.getReplicaNodes()) {
 				logger.debug("Subscribing to machines of node " + rnConfig.getNodeID());
 				// get node configs

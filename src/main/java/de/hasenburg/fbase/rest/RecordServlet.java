@@ -89,6 +89,7 @@ public class RecordServlet extends HttpServlet {
 		
 		logger.debug("Received put request with query string " + req.getQueryString());
 
+		PrintWriter w = resp.getWriter();
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
 		Message m = new Message();
 		
@@ -131,6 +132,7 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
+			w.write(m.toJSON());
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
@@ -146,6 +148,7 @@ public class RecordServlet extends HttpServlet {
 		
 		logger.debug("Received delete request with query string " + req.getQueryString());
 
+		PrintWriter w = resp.getWriter();
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
 		Message m = new Message();
 		
@@ -191,6 +194,7 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
+			w.write(m.toJSON());
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());

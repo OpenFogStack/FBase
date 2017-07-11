@@ -47,6 +47,12 @@
 			<artifactId>jetty-servlet</artifactId>
 			<version>9.4.6.v20170531</version>
 		</dependency>
+		<!-- Client -->
+		<dependency>
+			<groupId>com.mashape.unirest</groupId>
+			<artifactId>unirest-java</artifactId>
+			<version>1.4.9</version>
+		</dependency>
 	</dependencies>
 
 </project>

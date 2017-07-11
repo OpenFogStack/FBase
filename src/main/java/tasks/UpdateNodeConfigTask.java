@@ -13,8 +13,8 @@ class UpdateNodeConfigTask extends Task<Boolean> {
 	
 	private NodeConfig config = null;
 
-	public UpdateNodeConfigTask(NodeConfig config, TaskManager taskmanager) {
-		super(TaskName.UPDATE_NODE_CONFIG, taskmanager);
+	public UpdateNodeConfigTask(NodeConfig config, FBase fBase) {
+		super(TaskName.UPDATE_NODE_CONFIG, fBase);
 		this.config = config;
 	}
 	
@@ -23,7 +23,7 @@ class UpdateNodeConfigTask extends Task<Boolean> {
 		
 		// store config in database
 		try {
-			FBase.connector.putNodeConfig(config.getNodeID(), config);
+			fBase.connector.putNodeConfig(config.getNodeID(), config);
 			logger.debug("Put node config into database");
 		} catch (FBaseStorageConnectorException e) {
 			logger.fatal("Could not store node configuration in node DB, nothing changed");

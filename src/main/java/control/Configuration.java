@@ -48,7 +48,7 @@ public class Configuration {
 			description = properties.getProperty("description", "Unknown");
 			
 			// Communication			
-			restPort = Integer.parseInt(properties.getProperty("restPort", "8080"));
+			restPort = Integer.parseInt(properties.getProperty("restPort", "-1"));
 			messagePort = Integer.parseInt(properties.getProperty("messagePort", "6000"));
 			publisherPort = Integer.parseInt(properties.getProperty("publisherPort", "7000"));
 			

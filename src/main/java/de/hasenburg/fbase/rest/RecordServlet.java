@@ -35,7 +35,12 @@ public class RecordServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(RecordServlet.class.getName());
+	private FBase fBase = null;
 
+	public RecordServlet(FBase fBase) {
+		this.fBase = fBase;
+	}
+	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {		
@@ -55,8 +60,8 @@ public class RecordServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			DataRecord record = null;	
 			try {
-				config = FBase.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
-				record = FBase.connector.getDataRecord(dataIdentifier);
+				config = fBase.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
+				record = fBase.connector.getDataRecord(dataIdentifier);
 				if (config == null || record == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -101,7 +106,7 @@ public class RecordServlet extends HttpServlet {
 			
 			KeygroupConfig config = null;	
 			try {
-				config = FBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.getKeygroupConfig(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -123,7 +128,7 @@ public class RecordServlet extends HttpServlet {
 			}
 			
 			// store data record
-			Future<Boolean> future = FBase.taskmanager.runPutDataRecordTask(record);
+			Future<Boolean> future = fBase.taskmanager.runPutDataRecordTask(record);
 			
 			// 404 Not Found
 			boolean success = future.get(5, TimeUnit.SECONDS);
@@ -160,7 +165,7 @@ public class RecordServlet extends HttpServlet {
 			
 			KeygroupConfig config = null;	
 			try {
-				config = FBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.getKeygroupConfig(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -182,7 +187,7 @@ public class RecordServlet extends HttpServlet {
 			}
 			
 			try {
-				if (!FBase.connector.deleteDataRecord(dataIdentifier)) {
+				if (!fBase.connector.deleteDataRecord(dataIdentifier)) {
 					// 500 Internal Server Error
 					throw new FBaseRestException(FBaseRestException.DELETION_FAILURE, 500);
 				}

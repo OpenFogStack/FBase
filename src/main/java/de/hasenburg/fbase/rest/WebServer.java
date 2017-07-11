@@ -17,8 +17,8 @@ public class WebServer {
 	 */
 	private final Server server;
 
-	public WebServer() {
-		int port = FBase.configuration.getRestPort();
+	public WebServer(FBase fBase) {
+		int port = fBase.configuration.getRestPort();
 		logger.info("Setting up server at port " + port);
 
 		server = new Server(port);
@@ -26,8 +26,8 @@ public class WebServer {
 		// servlet handlers
 		ServletContextHandler servletContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		servletContext.setContextPath("/");
-		servletContext.addServlet(new ServletHolder(new RecordServlet()), "/record");
-		servletContext.addServlet(new ServletHolder(new RecordListServlet()), "/record/list");
+		servletContext.addServlet(new ServletHolder(new RecordServlet(fBase)), "/record");
+		servletContext.addServlet(new ServletHolder(new RecordListServlet(fBase)), "/record/list");
 
 		// add handlers to HandlerList
 		HandlerList handlers = new HandlerList();

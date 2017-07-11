@@ -22,36 +22,45 @@ import tasks.TaskManager;
  */
 public class FBase {
 
-	public static Configuration configuration = null;
-	public static AbstractDBConnector connector = null;
-	public static TaskManager taskmanager = null;
-	public static Publisher publisher = null;
-	public static SubscriptionRegistry subscriptionRegistry = null;
+	public Configuration configuration = null;
+	public AbstractDBConnector connector = null;
+	public TaskManager taskmanager = null;
+	public Publisher publisher = null;
+	public SubscriptionRegistry subscriptionRegistry = null;
 	
 	public FBase(String configName) throws FBaseStorageConnectorException {
-		FBase.configuration = new Configuration(configName);
-		FBase.connector = new OnHeapDBConnector();
-		FBase.connector.initiateDatabaseConnection();
-		taskmanager = new TaskManager();
-		WebServer server = new WebServer();
-		server.startServer();
-		publisher = new Publisher("tcp://localhost", FBase.configuration.getPublisherPort(), null, null);
-		subscriptionRegistry = new SubscriptionRegistry();
+		configuration = new Configuration(configName);
+		connector = new OnHeapDBConnector();
+		connector.initiateDatabaseConnection();
+		taskmanager = new TaskManager(this);
+		if (configuration.getRestPort() > 0) {
+			WebServer server = new WebServer(this);
+			server.startServer();
+		}
+		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort(), null, null);
+		subscriptionRegistry = new SubscriptionRegistry(this);
 		
-		// fill with inital data
-		fillWithData();
 	}
 	
-	private void fillWithData() {
+	public void tearDown() {
+		publisher.shutdown();
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void fillWithData() {
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
 		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"), 
 				"secret", EncryptionAlgorithm.AES);
 		taskmanager.runUpdateKeygroupConfigTask(config);
 		
 		NodeConfig nodeConfig = new NodeConfig();
-		nodeConfig.setNodeID(FBase.configuration.getNodeID());
-		nodeConfig.setMessagePort(FBase.configuration.getMessagePort());
-		nodeConfig.setPublisherPort(FBase.configuration.getPublisherPort());
+		nodeConfig.setNodeID(configuration.getNodeID());
+		nodeConfig.setMessagePort(configuration.getMessagePort());
+		nodeConfig.setPublisherPort(configuration.getPublisherPort());
 		taskmanager.runUpdateNodeConfigTask(nodeConfig);
 		
 		DataRecord record = new DataRecord();

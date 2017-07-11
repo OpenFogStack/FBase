@@ -22,8 +22,8 @@ class PutDataRecordTask extends Task<Boolean> {
 	
 	private DataRecord record;
 
-	public PutDataRecordTask(DataRecord record, TaskManager taskmanager) {
-		super(TaskName.PUT_DATA_RECORD, taskmanager);
+	public PutDataRecordTask(DataRecord record, FBase fBase) {
+		super(TaskName.PUT_DATA_RECORD, fBase);
 		this.record = record;
 	}
 	
@@ -38,8 +38,8 @@ class PutDataRecordTask extends Task<Boolean> {
 		// get keygroup config and put into database
 		KeygroupConfig config = null;	
 		try {
-			config = FBase.connector.getKeygroupConfig(record.getKeygroupID());
-			FBase.connector.putDataRecord(record);
+			config = fBase.connector.getKeygroupConfig(record.getKeygroupID());
+			fBase.connector.putDataRecord(record);
 		} catch (FBaseStorageConnectorException e) {
 			logger.error(e.getMessage());
 			return false;
@@ -51,7 +51,7 @@ class PutDataRecordTask extends Task<Boolean> {
 		Envelope e = new Envelope(record.getKeygroupID(), m);
 		
 		// publish data
-		FBase.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+		fBase.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
 		
 		return true;
 	}

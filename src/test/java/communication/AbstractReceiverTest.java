@@ -202,7 +202,7 @@ public class AbstractReceiverTest {
 
 		public Receiver(String address, int port, String secret, EncryptionAlgorithm algorithm, 
 				int receiverType) {
-			super(address, port, secret, algorithm, receiverType);
+			super(address, port, secret, algorithm, receiverType, null);
 		}
 
 		@Override

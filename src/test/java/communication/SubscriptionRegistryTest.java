@@ -23,7 +23,7 @@ public class SubscriptionRegistryTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		subscriptionRegistry = new SubscriptionRegistry();
+		subscriptionRegistry = new SubscriptionRegistry(null);
 	}
 	
 	@After

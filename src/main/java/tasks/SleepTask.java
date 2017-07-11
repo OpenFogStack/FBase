@@ -2,6 +2,7 @@ package tasks;
 
 import org.apache.log4j.Logger;
 
+import control.FBase;
 import tasks.TaskManager.TaskName;
 
 /**
@@ -15,8 +16,8 @@ class SleepTask extends Task<Boolean> {
 	
 	private int time = -1;
 
-	public SleepTask(int time, TaskManager taskmanager) {
-		super(TaskName.SLEEP, taskmanager);
+	public SleepTask(int time, FBase fBase) {
+		super(TaskName.SLEEP, fBase);
 		this.time = time;
 	}
 	

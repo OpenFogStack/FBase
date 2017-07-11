@@ -2,6 +2,7 @@ package tasks;
 
 import org.apache.log4j.Logger;
 
+import control.FBase;
 import tasks.TaskManager.TaskName;
 
 class LogTask extends Task<Boolean> {
@@ -10,8 +11,8 @@ class LogTask extends Task<Boolean> {
 	
 	private String message = "";
 
-	public LogTask(String message, TaskManager taskmanager) {
-		super(TaskName.LOG, taskmanager);
+	public LogTask(String message, FBase fBase) {
+		super(TaskName.LOG, fBase);
 		this.message = message;
 	}
 	

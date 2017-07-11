@@ -34,6 +34,7 @@ public class SubscriberTest {
 	public static String address = "tcp://localhost";
 	public static int port = 6701;
 	Subscriber subscriber = null;
+	public static FBase fBase = null;
 	
 	static ZMQ.Context contextPub = null;
 	static ZMQ.Socket publisher = null;
@@ -44,8 +45,7 @@ public class SubscriberTest {
 		contextPub = ZMQ.context(1);
 		publisher = contextPub.socket(ZMQ.PUB);
 		publisher.bind(address + ":" + port);
-		@SuppressWarnings("unused")
-		FBase fbase = new FBase(null);
+		fBase = new FBase("config_no_webserver.properties");
 	}
 	
 	@Before
@@ -72,13 +72,14 @@ public class SubscriberTest {
 		executor.shutdownNow();
 		publisher.close();
 	    contextPub.term();
+	    fBase.tearDown();
 	}
 
 	@Test
 	public void testSubscribe() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testSubscribe-------");
 		Message m = new Message();
-		Subscriber subscriber = new Subscriber(address, port, secret, algorithm);
+		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase);
 		subscriber.startReception();
 		m.setContent(update.toJSON());
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
@@ -98,7 +99,7 @@ public class SubscriberTest {
 	TimeoutException {
 		logger.debug("-------Starting testSubscribeWithFilter-------");
 		Message m = new Message();
-		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, update.getKeygroupID());
+		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase, update.getKeygroupID());
 		subscriber.startReception();
 		m.setContent(update.toJSON());
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());

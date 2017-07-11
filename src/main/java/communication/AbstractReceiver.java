@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQException;
 
+import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.KeygroupID;
@@ -72,8 +73,14 @@ public abstract class AbstractReceiver {
 
 	private ZMQ.Context context = null;
 	private ZMQ.Socket socket = null;
+	
+	/**
+	 * The related fbase instance
+	 */
+	protected FBase fBase;
 
-	public AbstractReceiver(String address, int port, String secret, EncryptionAlgorithm algorithm, int receiverType) {
+	public AbstractReceiver(String address, int port, String secret, EncryptionAlgorithm algorithm, int receiverType, 
+			FBase fBase) {
 		this.address = address;
 		this.port = port;
 		this.secret = secret;
@@ -82,6 +89,7 @@ public abstract class AbstractReceiver {
 			throw new IllegalArgumentException("Receiver type " + receiverType + " is not valid.");
 		}
 		this.receiverType = receiverType;
+		this.fBase = fBase;
 		this.executor = Executors.newSingleThreadExecutor();
 	}
 

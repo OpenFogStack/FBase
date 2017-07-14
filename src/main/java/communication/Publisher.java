@@ -5,7 +5,7 @@ import org.zeromq.ZMQ;
 
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
-import model.message.Envelope;
+import model.message.keygroup.KeygroupEnvelope;
 
 /**
  * Publishes envelopes to all subscribers.
@@ -31,7 +31,7 @@ public class Publisher extends AbstractSender {
 	 * @return null
 	 */
 	@Override
-	public String send(Envelope envelope) {
+	public String send(KeygroupEnvelope envelope) {
 		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID());
 		sender.sendMore(envelope.getKeygroupID().toString());
 		sender.send(CryptoProvider.encrypt(envelope.getMessage().toJSON(), secret, algorithm));
@@ -45,7 +45,7 @@ public class Publisher extends AbstractSender {
 	 * @param secret - the secret used for encryption
 	 * @param algorithm - the algorithm used for encryption
 	 */
-	public void sendKeygroupIDData(Envelope envelope, String secret, EncryptionAlgorithm algorithm) {
+	public void sendKeygroupIDData(KeygroupEnvelope envelope, String secret, EncryptionAlgorithm algorithm) {
 		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID());
 		sender.sendMore(envelope.getKeygroupID().toString());
 		sender.send(CryptoProvider.encrypt(envelope.getMessage().toJSON(), secret, algorithm));

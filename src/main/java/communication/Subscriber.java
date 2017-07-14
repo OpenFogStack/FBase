@@ -7,8 +7,8 @@ import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.message.keygroup.KeygroupEnvelope;
+import model.message.keygroup.KeygroupMessage;
 
 /**
  * Subscribes to data streams of envelopes of different subscribers.
@@ -46,8 +46,8 @@ private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 	}
 
 	@Override
-	protected void interpetReceivedEnvelope(Envelope envelope, ZMQ.Socket responseSocket) {
-		Message m = new Message();
+	protected void interpetReceivedEnvelope(KeygroupEnvelope envelope, ZMQ.Socket responseSocket) {
+		KeygroupMessage m = new KeygroupMessage();
 		try {
 			// Code to interpret message
 			DataRecord update = DataRecord.fromJSON(envelope.getMessage().getContent(), DataRecord.class);

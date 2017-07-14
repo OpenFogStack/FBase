@@ -11,8 +11,8 @@ import org.zeromq.ZMQException;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.message.keygroup.KeygroupEnvelope;
+import model.message.keygroup.KeygroupMessage;
 
 /**
  * Abstract class for {@link Subscriber} and {@link GetRequestHandler}
@@ -163,7 +163,7 @@ public abstract class AbstractReceiver {
 				if (!init()) return;
 				
 				while (true) {
-					Envelope envelope = new Envelope(null, null);
+					KeygroupEnvelope envelope = new KeygroupEnvelope(null, null);
 					boolean envelopeFine = true;
 					
 					try {
@@ -174,8 +174,8 @@ public abstract class AbstractReceiver {
 								envelope.setKeygroupID(KeygroupID.createFromString(s));
 								logger.debug("Received keygroupID: " + envelope.getKeygroupID());
 							} else if (envelope.getMessage() == null) {
-								envelope.setMessage(Message.fromJSON(
-										CryptoProvider.decrypt(s, secret, algorithm), Message.class));
+								envelope.setMessage(KeygroupMessage.fromJSON(
+										CryptoProvider.decrypt(s, secret, algorithm), KeygroupMessage.class));
 								logger.debug("Received content: " + envelope.getMessage().getContent());
 							} else {
 								logger.error("Received more mulitpart messages than expected, dismissing: " + s);
@@ -234,6 +234,6 @@ public abstract class AbstractReceiver {
 		return false;
 	}
 
-	protected abstract void interpetReceivedEnvelope(Envelope envelope, ZMQ.Socket responseSocket);
+	protected abstract void interpetReceivedEnvelope(KeygroupEnvelope envelope, ZMQ.Socket responseSocket);
 
 }

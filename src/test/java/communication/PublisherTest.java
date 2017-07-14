@@ -16,8 +16,8 @@ import org.zeromq.ZMQ;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.message.keygroup.KeygroupEnvelope;
+import model.message.keygroup.KeygroupMessage;
 
 public class PublisherTest {
 
@@ -49,9 +49,9 @@ public class PublisherTest {
 	@Test
 	public void testPublishOne() throws InterruptedException {
 		logger.debug("-------Starting testPublishOne-------");
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		m.setContent("Test content");
-		Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
+		KeygroupEnvelope e = new KeygroupEnvelope(new KeygroupID("app", "tenant", "group"), m);
 		Thread t = new Thread(new SubscribeHelper(e));
 		t.start();
 		Thread.sleep(400);
@@ -63,9 +63,9 @@ public class PublisherTest {
 	@Test
 	public void testPublishTwo() throws InterruptedException {
 		logger.debug("-------Starting testPublishTwo-------");
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		m.setContent("Test content");
-		Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
+		KeygroupEnvelope e = new KeygroupEnvelope(new KeygroupID("app", "tenant", "group"), m);
 		Thread t1 = new Thread(new SubscribeHelper(e));
 		Thread t2 = new Thread(new SubscribeHelper(e));
 		t1.start();
@@ -80,9 +80,9 @@ public class PublisherTest {
 	@Test
 	public void testPublishMany() throws InterruptedException {
 		logger.debug("-------Starting testPublishMany-------");
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		m.setContent("Test content");
-		Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
+		KeygroupEnvelope e = new KeygroupEnvelope(new KeygroupID("app", "tenant", "group"), m);
 		List<Thread> list = new ArrayList<Thread>();
 		for (int i = 0; i < 100; i++) {
 			Thread t = new Thread(new SubscribeHelper(e));
@@ -101,9 +101,9 @@ public class PublisherTest {
 
 	class SubscribeHelper implements Runnable {
 
-		private Envelope e = null;
+		private KeygroupEnvelope e = null;
 		
-		public SubscribeHelper(Envelope	e) {
+		public SubscribeHelper(KeygroupEnvelope	e) {
 			this.e = e;
 		}
 		

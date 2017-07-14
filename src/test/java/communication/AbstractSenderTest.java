@@ -19,8 +19,8 @@ import org.zeromq.ZMQ;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.message.keygroup.KeygroupEnvelope;
+import model.message.keygroup.KeygroupMessage;
 
 public class AbstractSenderTest {
 
@@ -52,9 +52,9 @@ public class AbstractSenderTest {
 	@Test
 	public void test() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting test-------");
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		m.setContent("Test content");
-		Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
+		KeygroupEnvelope e = new KeygroupEnvelope(new KeygroupID("app", "tenant", "group"), m);
 		Future<?> future = executor.submit(new ReceiveHelper(e));
 		String response = sender.send(e);
 		future.get(5, TimeUnit.SECONDS);
@@ -69,7 +69,7 @@ public class AbstractSenderTest {
 		}
 
 		@Override
-		public String send(Envelope envelope) {
+		public String send(KeygroupEnvelope envelope) {
 			logger.debug("Sending " + envelope.toString());
 			sender.sendMore(envelope.getKeygroupID().toString());
 			sender.send(envelope.getMessage().getContent());
@@ -80,9 +80,9 @@ public class AbstractSenderTest {
 	
 	class ReceiveHelper implements Runnable {
 
-		private Envelope envelope = null;
+		private KeygroupEnvelope envelope = null;
 		
-		public ReceiveHelper(Envelope envelope) {
+		public ReceiveHelper(KeygroupEnvelope envelope) {
 			this.envelope = envelope;
 		}
 		
@@ -92,9 +92,9 @@ public class AbstractSenderTest {
 			ZMQ.Socket receiver = context.socket(ZMQ.REP);
 			receiver.bind(sender.getAddress() + ":" + sender.getPort());
 			KeygroupID keygroupID = KeygroupID.createFromString(receiver.recvStr());
-			Message m = new Message();
+			KeygroupMessage m = new KeygroupMessage();
 			m.setContent(receiver.recvStr());
-			logger.info("Received " + new Envelope(keygroupID, m).toString());
+			logger.info("Received " + new KeygroupEnvelope(keygroupID, m).toString());
 			receiver.send("Success");
 			receiver.close();
 			context.term();

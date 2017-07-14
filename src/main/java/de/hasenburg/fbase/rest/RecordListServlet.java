@@ -20,7 +20,7 @@ import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.data.KeygroupID;
-import model.message.Message;
+import model.message.keygroup.KeygroupMessage;
 
 /**
  * 
@@ -43,7 +43,7 @@ public class RecordListServlet extends HttpServlet {
 		
 		PrintWriter w = resp.getWriter();
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		
 		try {
 			if (keygroupID == null) {

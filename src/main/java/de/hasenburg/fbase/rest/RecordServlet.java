@@ -21,7 +21,7 @@ import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Message;
+import model.message.keygroup.KeygroupMessage;
 
 /**
  * 
@@ -44,7 +44,7 @@ public class RecordServlet extends HttpServlet {
 		
 		PrintWriter w = resp.getWriter();
 		DataIdentifier dataIdentifier = DataIdentifier.createFromString((req.getParameter("dataIdentifier")));
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		
 		try {
 			if (dataIdentifier == null) {
@@ -90,7 +90,7 @@ public class RecordServlet extends HttpServlet {
 		logger.debug("Received put request with query string " + req.getQueryString());
 
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		
 		try {
 			if (keygroupID == null) {
@@ -147,7 +147,7 @@ public class RecordServlet extends HttpServlet {
 		logger.debug("Received delete request with query string " + req.getQueryString());
 
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		
 		try {
 			if (keygroupID == null) {

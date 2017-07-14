@@ -20,7 +20,7 @@ import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
-import model.message.Message;
+import model.message.keygroup.KeygroupMessage;
 
 public class SubscriberTest {
 
@@ -77,7 +77,7 @@ public class SubscriberTest {
 	@Test
 	public void testSubscribe() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testSubscribe-------");
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm);
 		subscriber.startReception();
 		m.setContent(update.toJSON());
@@ -97,7 +97,7 @@ public class SubscriberTest {
 	public void testSubscribeWithFilter() throws InterruptedException, ExecutionException, 
 	TimeoutException {
 		logger.debug("-------Starting testSubscribeWithFilter-------");
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, update.getKeygroupID());
 		subscriber.startReception();
 		m.setContent(update.toJSON());

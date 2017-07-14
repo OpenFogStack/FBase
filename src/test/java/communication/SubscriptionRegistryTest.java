@@ -12,8 +12,8 @@ import org.junit.Test;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.message.keygroup.KeygroupEnvelope;
+import model.message.keygroup.KeygroupMessage;
 
 public class SubscriptionRegistryTest {
 
@@ -39,11 +39,11 @@ public class SubscriptionRegistryTest {
 		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions());
 		Publisher publisher = new Publisher("tcp://localhost", 8081, "secret", EncryptionAlgorithm.AES);
 		Thread.sleep(200);
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		DataRecord record = new DataRecord();
 		record.setValueWithoutKey("Test Value");
 		m.setContent(record.toJSON());
-		Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
+		KeygroupEnvelope e = new KeygroupEnvelope(new KeygroupID("app", "tenant", "group"), m);
 		publisher.send(e);
 		Thread.sleep(200);
 		assertEquals(1, s.getNumberOfReceivedMessages());

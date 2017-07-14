@@ -6,8 +6,8 @@ import control.FBase;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.data.DataRecord;
-import model.message.Envelope;
-import model.message.Message;
+import model.message.keygroup.KeygroupEnvelope;
+import model.message.keygroup.KeygroupMessage;
 import tasks.TaskManager.TaskName;
 
 /**
@@ -46,9 +46,9 @@ class PutDataRecordTask extends Task<Boolean> {
 		}
 		
 		// create envelope
-		Message m = new Message();
+		KeygroupMessage m = new KeygroupMessage();
 		m.setContent(record.toJSON());
-		Envelope e = new Envelope(record.getKeygroupID(), m);
+		KeygroupEnvelope e = new KeygroupEnvelope(record.getKeygroupID(), m);
 		
 		// publish data
 		FBase.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());

@@ -26,8 +26,8 @@ import org.zeromq.ZMQ.Socket;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.message.keygroup.KeygroupEnvelope;
+import model.message.keygroup.KeygroupMessage;
 
 public class AbstractReceiverTest {
 	
@@ -206,7 +206,7 @@ public class AbstractReceiverTest {
 		}
 
 		@Override
-		protected void interpetReceivedEnvelope(Envelope envelope, Socket responseSocket) {
+		protected void interpetReceivedEnvelope(KeygroupEnvelope envelope, Socket responseSocket) {
 			logger.debug("Received envelope " + envelope.getKeygroupID() + " - " + envelope.getMessage().getContent());
 			responseSocket.send(CryptoProvider.encrypt("received", secret, algorithm));
 		}
@@ -231,7 +231,7 @@ public class AbstractReceiverTest {
 		public void run() {
 			ZMQ.Context context = ZMQ.context(1);
 			ZMQ.Socket requester = context.socket(ZMQ.REQ);
-			Message m = new Message();
+			KeygroupMessage m = new KeygroupMessage();
 			m.setContent("\"Test Message\"");
 		    requester.connect(receiver.getAddress() + ":" + receiver.getPort());
 		    logger.info("Sending request.");

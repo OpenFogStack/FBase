@@ -8,11 +8,13 @@ import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQException;
 
+import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 /**
  * Abstract class for {@link Subscriber} and {@link GetRequestHandler}
@@ -72,8 +74,14 @@ public abstract class AbstractReceiver {
 
 	private ZMQ.Context context = null;
 	private ZMQ.Socket socket = null;
+	
+	/**
+	 * The related fbase instance
+	 */
+	protected FBase fBase;
 
-	public AbstractReceiver(String address, int port, String secret, EncryptionAlgorithm algorithm, int receiverType) {
+	public AbstractReceiver(String address, int port, String secret, EncryptionAlgorithm algorithm, int receiverType, 
+			FBase fBase) {
 		this.address = address;
 		this.port = port;
 		this.secret = secret;
@@ -82,6 +90,7 @@ public abstract class AbstractReceiver {
 			throw new IllegalArgumentException("Receiver type " + receiverType + " is not valid.");
 		}
 		this.receiverType = receiverType;
+		this.fBase = fBase;
 		this.executor = Executors.newSingleThreadExecutor();
 	}
 
@@ -174,7 +183,7 @@ public abstract class AbstractReceiver {
 								envelope.setKeygroupID(KeygroupID.createFromString(s));
 								logger.debug("Received keygroupID: " + envelope.getKeygroupID());
 							} else if (envelope.getMessage() == null) {
-								envelope.setMessage(Message.fromJSON(
+								envelope.setMessage(JSONable.fromJSON(
 										CryptoProvider.decrypt(s, secret, algorithm), Message.class));
 								logger.debug("Received content: " + envelope.getMessage().getContent());
 							} else {

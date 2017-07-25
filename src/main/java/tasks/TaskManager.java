@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 
+import control.FBase;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.data.DataRecord;
@@ -17,14 +18,16 @@ public class TaskManager {
 	private static Logger logger = Logger.getLogger(TaskManager.class.getName());
 	private ExecutorService pool = null;
 	private Map<TaskName, Integer> runningTasks = null;
+	private FBase fBase;
 
 	public enum TaskName {
 		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, PUT_DATA_RECORD, STORE_DATA_RECORD, UPDATE_NODE_CONFIG
 	}
 
-	public TaskManager() {
-		 pool = Executors.newCachedThreadPool();
-		 runningTasks = new HashMap<TaskName, Integer>();
+	public TaskManager(FBase fBase) {
+		this.fBase = fBase;
+		pool = Executors.newCachedThreadPool();
+		runningTasks = new HashMap<TaskName, Integer>();
 	}
 	
 	public synchronized void registerTask(TaskName name) {
@@ -61,32 +64,32 @@ public class TaskManager {
 	 */
 
 	public Future<Boolean> runLogTask(String message) {
-		Future<Boolean> future = pool.submit(new LogTask(message, this));
+		Future<Boolean> future = pool.submit(new LogTask(message, fBase));
 		return future;
 	}
 
 	public Future<Boolean> runSleepTask(int time) {
-		Future<Boolean> future = pool.submit(new SleepTask(time, this));
+		Future<Boolean> future = pool.submit(new SleepTask(time, fBase));
 		return future;
 	}
 	
 	public Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, this));
+		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, fBase));
 		return future;
 	}
 	
 	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, this));
+		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, fBase));
 		return future;
 	}
 	
 	public Future<Boolean> runPutDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new PutDataRecordTask(record, this));
+		Future<Boolean> future = pool.submit(new PutDataRecordTask(record, fBase));
 		return future;
 	}
 	
 	public Future<Boolean> runStoreDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record, this));
+		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record, fBase));
 		return future;
 	}
 	

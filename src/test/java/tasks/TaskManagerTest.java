@@ -10,10 +10,13 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.zeromq.ZMQ;
 
+import control.FBase;
 import tasks.TaskManager.TaskName;
 
 public class TaskManagerTest {
@@ -23,13 +26,19 @@ public class TaskManagerTest {
 	ZMQ.Context context = null;
 	ZMQ.Socket publisher = null;
 
-	TaskManager taskmanager = null;
+	static TaskManager taskmanager = null;
+	public static FBase fBase = null;
+	
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		fBase = new FBase("config_no_webserver.properties");
+		taskmanager = fBase.taskmanager;
+	}
 	
 	@Before
 	public void setUp() throws Exception {
 		context = ZMQ.context(1);
 		publisher = context.socket(ZMQ.PUB);
-		taskmanager = new TaskManager();
 	}
 
 	@After
@@ -37,6 +46,11 @@ public class TaskManagerTest {
 		publisher.close();
 	    context.term();
 	    taskmanager.deleteAllData();
+	}
+	
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		fBase.tearDown();
 	}
 
 	@Test

@@ -17,11 +17,12 @@ import control.FBase;
 import crypto.CryptoProvider;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
+import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Message;
+import model.messages.datarecords.Message;
 
 /**
  * 
@@ -35,7 +36,12 @@ public class RecordServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(RecordServlet.class.getName());
+	private FBase fBase = null;
 
+	public RecordServlet(FBase fBase) {
+		this.fBase = fBase;
+	}
+	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {		
@@ -55,8 +61,8 @@ public class RecordServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			DataRecord record = null;	
 			try {
-				config = FBase.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
-				record = FBase.connector.getDataRecord(dataIdentifier);
+				config = fBase.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
+				record = fBase.connector.getDataRecord(dataIdentifier);
 				if (config == null || record == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -69,10 +75,10 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
-			m.setContent(CryptoProvider.encrypt(record.toJSON(), 
+			m.setContent(CryptoProvider.encrypt(JSONable.toJSON(record), 
 						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
-			m.setContent(record.toJSON()); // remove to encrypt
-			w.write(m.toJSON());
+			m.setContent(JSONable.toJSON(record)); // remove to encrypt
+			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
@@ -89,6 +95,7 @@ public class RecordServlet extends HttpServlet {
 		
 		logger.debug("Received put request with query string " + req.getQueryString());
 
+		PrintWriter w = resp.getWriter();
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
 		Message m = new Message();
 		
@@ -100,7 +107,7 @@ public class RecordServlet extends HttpServlet {
 			
 			KeygroupConfig config = null;	
 			try {
-				config = FBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.getKeygroupConfig(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -115,14 +122,14 @@ public class RecordServlet extends HttpServlet {
 //			String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(), 
 //					config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
-			DataRecord record = DataRecord.fromJSON(decryptedRequest, DataRecord.class);
+			DataRecord record = JSONable.fromJSON(decryptedRequest, DataRecord.class);
 			if (record == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
 			}
 			
 			// store data record
-			Future<Boolean> future = FBase.taskmanager.runPutDataRecordTask(record);
+			Future<Boolean> future = fBase.taskmanager.runPutDataRecordTask(record);
 			
 			// 404 Not Found
 			boolean success = future.get(5, TimeUnit.SECONDS);
@@ -131,6 +138,7 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
+			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
@@ -146,6 +154,7 @@ public class RecordServlet extends HttpServlet {
 		
 		logger.debug("Received delete request with query string " + req.getQueryString());
 
+		PrintWriter w = resp.getWriter();
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
 		Message m = new Message();
 		
@@ -157,7 +166,7 @@ public class RecordServlet extends HttpServlet {
 			
 			KeygroupConfig config = null;	
 			try {
-				config = FBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.getKeygroupConfig(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -179,7 +188,7 @@ public class RecordServlet extends HttpServlet {
 			}
 			
 			try {
-				if (!FBase.connector.deleteDataRecord(dataIdentifier)) {
+				if (!fBase.connector.deleteDataRecord(dataIdentifier)) {
 					// 500 Internal Server Error
 					throw new FBaseRestException(FBaseRestException.DELETION_FAILURE, 500);
 				}
@@ -191,6 +200,7 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
+			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());

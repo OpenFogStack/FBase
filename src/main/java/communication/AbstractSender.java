@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
-import model.message.Envelope;
+import model.messages.datarecords.Envelope;
 
 /**
  * Abstract class for {@link Publisher} and {@link DirectSender}.

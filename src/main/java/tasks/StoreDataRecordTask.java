@@ -18,8 +18,8 @@ class StoreDataRecordTask extends Task<Boolean> {
 	
 	private DataRecord record = null;
 
-	public StoreDataRecordTask(DataRecord record, TaskManager taskmanager) {
-		super(TaskName.STORE_DATA_RECORD, taskmanager);
+	public StoreDataRecordTask(DataRecord record, FBase fBase) {
+		super(TaskName.STORE_DATA_RECORD, fBase);
 		this.record = record;
 	}
 	
@@ -33,7 +33,7 @@ class StoreDataRecordTask extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 		// get keygroup config and put into database
 		try {
-			FBase.connector.putDataRecord(record);
+			fBase.connector.putDataRecord(record);
 		} catch (FBaseStorageConnectorException e) {
 			logger.error(e.getMessage());
 			return false;

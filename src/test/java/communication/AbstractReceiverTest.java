@@ -25,9 +25,10 @@ import org.zeromq.ZMQ.Socket;
 
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 public class AbstractReceiverTest {
 	
@@ -202,7 +203,7 @@ public class AbstractReceiverTest {
 
 		public Receiver(String address, int port, String secret, EncryptionAlgorithm algorithm, 
 				int receiverType) {
-			super(address, port, secret, algorithm, receiverType);
+			super(address, port, secret, algorithm, receiverType, null);
 		}
 
 		@Override
@@ -236,7 +237,7 @@ public class AbstractReceiverTest {
 		    requester.connect(receiver.getAddress() + ":" + receiver.getPort());
 		    logger.info("Sending request.");
 		    if (this.sendKeygroupID) requester.sendMore(new KeygroupID("app", "tenant", "group").toString());
-		    if (this.sendContent) requester.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+		    if (this.sendContent) requester.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		    if (sendKeygroupID && sendContent) {
 		    	String reply = CryptoProvider.decrypt(requester.recvStr(), secret, algorithm);
 			    assertEquals("received", reply);

@@ -15,9 +15,10 @@ import org.zeromq.ZMQ;
 
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 public class PublisherTest {
 
@@ -120,7 +121,7 @@ public class PublisherTest {
 			subscriber.close();
 			context.term();
 			assertEquals(namespace, e.getKeygroupID().toString());
-			assertEquals(content, e.getMessage().toJSON());
+			assertEquals(content, JSONable.toJSON(e.getMessage()));
 		}
 		
 	}

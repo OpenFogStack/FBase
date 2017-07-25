@@ -5,10 +5,11 @@ import org.zeromq.ZMQ;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 /**
  * Subscribes to data streams of envelopes of different subscribers.
@@ -27,8 +28,8 @@ private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 	 * @param secret
 	 * @param algorithm
 	 */
-	public Subscriber(String address, int port, String secret, EncryptionAlgorithm algorithm) {
-		super(address, port, secret, algorithm, ZMQ.SUB);
+	public Subscriber(String address, int port, String secret, EncryptionAlgorithm algorithm, FBase fBase) {
+		super(address, port, secret, algorithm, ZMQ.SUB, fBase);
 	}
 	
 	/**
@@ -39,9 +40,9 @@ private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 	 * @param algorithm
 	 * @param keygroupIDFilter
 	 */
-	public Subscriber(String address, int port, String secret, EncryptionAlgorithm algorithm, 
+	public Subscriber(String address, int port, String secret, EncryptionAlgorithm algorithm, FBase fBase,
 			KeygroupID keygroupIDFilter) {
-		super(address, port, secret, algorithm, ZMQ.SUB);
+		super(address, port, secret, algorithm, ZMQ.SUB, fBase);
 		this.keygroupIDFilter = keygroupIDFilter;
 	}
 
@@ -50,9 +51,9 @@ private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 		Message m = new Message();
 		try {
 			// Code to interpret message
-			DataRecord update = DataRecord.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
-			FBase.taskmanager.runLogTask(update.toString());
-			FBase.taskmanager.runStoreDataRecordTask(update);
+			DataRecord update = JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
+			fBase.taskmanager.runLogTask(update.toString());
+			fBase.taskmanager.runStoreDataRecordTask(update);
 			m.setTextualResponse("Message processed");
 		} catch (IllegalArgumentException e) {
 			logger.warn(e.getMessage());

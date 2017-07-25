@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>de.hasenburg</groupId>
 			<artifactId>fbasecommons</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -46,6 +46,12 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
 			<version>9.4.6.v20170531</version>
+		</dependency>
+		<!-- Client -->
+		<dependency>
+			<groupId>com.mashape.unirest</groupId>
+			<artifactId>unirest-java</artifactId>
+			<version>1.4.9</version>
 		</dependency>
 	</dependencies>
 

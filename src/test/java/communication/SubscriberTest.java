@@ -18,9 +18,10 @@ import org.zeromq.ZMQ;
 import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
-import model.message.Message;
+import model.messages.datarecords.Message;
 
 public class SubscriberTest {
 
@@ -34,6 +35,7 @@ public class SubscriberTest {
 	public static String address = "tcp://localhost";
 	public static int port = 6701;
 	Subscriber subscriber = null;
+	public static FBase fBase = null;
 	
 	static ZMQ.Context contextPub = null;
 	static ZMQ.Socket publisher = null;
@@ -44,8 +46,7 @@ public class SubscriberTest {
 		contextPub = ZMQ.context(1);
 		publisher = contextPub.socket(ZMQ.PUB);
 		publisher.bind(address + ":" + port);
-		@SuppressWarnings("unused")
-		FBase fbase = new FBase(null);
+		fBase = new FBase("config_no_webserver.properties");
 	}
 	
 	@Before
@@ -72,22 +73,23 @@ public class SubscriberTest {
 		executor.shutdownNow();
 		publisher.close();
 	    contextPub.term();
+	    fBase.tearDown();
 	}
 
 	@Test
 	public void testSubscribe() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testSubscribe-------");
 		Message m = new Message();
-		Subscriber subscriber = new Subscriber(address, port, secret, algorithm);
+		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase);
 		subscriber.startReception();
-		m.setContent(update.toJSON());
+		m.setContent(JSONable.toJSON(update));
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
-		m.setContent(update2.toJSON());
+		m.setContent(JSONable.toJSON(update2));
 		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(2, subscriber.getNumberOfReceivedMessages());
 		logger.debug("Finished testSubscribe.");
@@ -98,16 +100,16 @@ public class SubscriberTest {
 	TimeoutException {
 		logger.debug("-------Starting testSubscribeWithFilter-------");
 		Message m = new Message();
-		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, update.getKeygroupID());
+		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase, update.getKeygroupID());
 		subscriber.startReception();
-		m.setContent(update.toJSON());
+		m.setContent(JSONable.toJSON(update));
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
-		m.setContent(update2.toJSON());
+		m.setContent(JSONable.toJSON(update2));
 		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		logger.debug("Finished testSubscribeWithFilter.");

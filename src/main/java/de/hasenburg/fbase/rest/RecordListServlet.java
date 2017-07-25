@@ -18,9 +18,10 @@ import control.FBase;
 import crypto.CryptoProvider;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
+import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.KeygroupID;
-import model.message.Message;
+import model.messages.datarecords.Message;
 
 /**
  * 
@@ -34,7 +35,12 @@ public class RecordListServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(RecordListServlet.class.getName());
+	private FBase fBase = null;
 
+	public RecordListServlet(FBase fBase) {
+		this.fBase = fBase;
+	}
+	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {		
@@ -54,14 +60,14 @@ public class RecordListServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			String IDJson = null;
 			try {
-				config = FBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.getKeygroupConfig(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 				}
 				
 				// create a set of dataidentifier strings
-				Set<String> IDs = FBase.connector.listDataRecords(keygroupID)
+				Set<String> IDs = fBase.connector.listDataRecords(keygroupID)
 						.stream().map(id -> id.toString()).collect(Collectors.toSet());
 				
 				ObjectMapper mapper = new ObjectMapper();
@@ -77,7 +83,7 @@ public class RecordListServlet extends HttpServlet {
 			m.setContent(CryptoProvider.encrypt(IDJson,
 						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
 			m.setContent(IDJson); // Remove to encrypt
-			w.write(m.toJSON());
+			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());

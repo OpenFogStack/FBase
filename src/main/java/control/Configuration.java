@@ -9,6 +9,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.data.NodeID;
 
 public class Configuration {
 	
@@ -18,7 +19,7 @@ public class Configuration {
 
 	// General
 	private String machineName = null;
-	private String nodeID = null;
+	private NodeID nodeID = null;
 	private String location = null;
 	private String description = null;
 		
@@ -43,12 +44,12 @@ public class Configuration {
 			properties.load(is);
 			// General
 			machineName = properties.getProperty("machineName");
-			nodeID = properties.getProperty("nodeID");
+			nodeID = new NodeID(properties.getProperty("nodeID"));
 			location = properties.getProperty("location", "Unknown");
 			description = properties.getProperty("description", "Unknown");
 			
 			// Communication			
-			restPort = Integer.parseInt(properties.getProperty("restPort", "8080"));
+			restPort = Integer.parseInt(properties.getProperty("restPort", "-1"));
 			messagePort = Integer.parseInt(properties.getProperty("messagePort", "6000"));
 			publisherPort = Integer.parseInt(properties.getProperty("publisherPort", "7000"));
 			
@@ -91,7 +92,7 @@ public class Configuration {
 		return machineName;
 	}
 
-	public String getNodeID() {
+	public NodeID getNodeID() {
 		return nodeID;
 	}
 

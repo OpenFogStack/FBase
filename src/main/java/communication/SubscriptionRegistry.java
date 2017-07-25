@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.KeygroupID;
 
@@ -12,8 +13,10 @@ public class SubscriptionRegistry {
 	private static Logger logger = Logger.getLogger(SubscriptionRegistry.class.getName());
 
 	private volatile HashMap<String, HashMap<Integer, Subscriber>> activeSubscriptions = null;
+	private FBase fBase;
 
-	public SubscriptionRegistry() {
+	public SubscriptionRegistry(FBase fBase) {
+		this.fBase = fBase;
 		activeSubscriptions = new HashMap<String, HashMap<Integer, Subscriber>>();
 	}
 	
@@ -40,7 +43,7 @@ public class SubscriptionRegistry {
 
 		Subscriber subscriber = null;
 		try {
-			subscriber = new Subscriber(address, port, secret, algorithm, keygroupIDFilter);
+			subscriber = new Subscriber(address, port, secret, algorithm, fBase, keygroupIDFilter);
 			if (subscriber.startReception() == null) {
 				throw new Exception("Could not start receiving.");
 			}

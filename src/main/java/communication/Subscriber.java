@@ -5,10 +5,11 @@ import org.zeromq.ZMQ;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 /**
  * Subscribes to data streams of envelopes of different subscribers.
@@ -50,7 +51,7 @@ private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 		Message m = new Message();
 		try {
 			// Code to interpret message
-			DataRecord update = DataRecord.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
+			DataRecord update = JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
 			fBase.taskmanager.runLogTask(update.toString());
 			fBase.taskmanager.runStoreDataRecordTask(update);
 			m.setTextualResponse("Message processed");

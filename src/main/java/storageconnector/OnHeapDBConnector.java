@@ -14,6 +14,7 @@ import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
+import model.data.NodeID;
 import exceptions.FBaseStorageConnectorException;
 
 /**
@@ -32,7 +33,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	private final Map<KeygroupID, KeygroupConfig> keygroupConfigs = new HashMap<>();
 	
 	/** stores node config data */
-	private final Map<String, NodeConfig> nodeConfigs = new HashMap<>();
+	private final Map<NodeID, NodeConfig> nodeConfigs = new HashMap<>();
 
 	/** stores data records */
 	private final Map<KeygroupID, Map<DataIdentifier, DataRecord>> records = new HashMap<>();
@@ -186,7 +187,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * storageconnector.AbstractDBConnector#putNodeConfig()
 	 */
 	@Override
-	public void putNodeConfig(String nodeID, NodeConfig config) throws FBaseStorageConnectorException {
+	public void putNodeConfig(NodeID nodeID, NodeConfig config) throws FBaseStorageConnectorException {
 		nodeConfigs.put(nodeID, config);
 		
 	}
@@ -198,7 +199,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * storageconnector.AbstractDBConnector#getNodeConfig()
 	 */
 	@Override
-	public NodeConfig getNodeConfig(String nodeID) throws FBaseStorageConnectorException {
+	public NodeConfig getNodeConfig(NodeID nodeID) throws FBaseStorageConnectorException {
 		return nodeConfigs.get(nodeID);
 	}
 

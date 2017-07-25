@@ -10,10 +10,11 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Message;
+import model.messages.datarecords.Message;
 
 /**
  * A client implemantation which allows the usage of the FBase rest interface
@@ -30,10 +31,10 @@ public class Client {
 		DataIdentifier dataIdentifier = new DataIdentifier("smartlight", "h1", "brightness", "M-1");
 		record.setDataIdentifier(new DataIdentifier(dataIdentifier.getKeygroupID(), "M-4"));
 		Message m = c.runPutRecordRequest("http://localhost", 8080, record);
-		logger.info(m.toJSON());
+		logger.info(JSONable.toJSON(m));
 		
 		DataRecord record2 = c.runGetRecordRequest("http://localhost", 8080, dataIdentifier);
-		logger.info(record2.toJSON());
+		logger.info(JSONable.toJSON(record2));
 		
 		List<String> list = c.runGetListRecordRequest("http://localhost", 8080, dataIdentifier.getKeygroupID());
 		list.stream().forEach(i -> logger.info(i));
@@ -53,9 +54,9 @@ public class Client {
 					  .asString();
 			if (response.getStatus() == 200) {
 				logger.info("Status = 200");
-				Message m = Message.fromJSON(response.getBody(), Message.class);
+				Message m = JSONable.fromJSON(response.getBody(), Message.class);
 				// Insert decryption here if needed
-				record = DataRecord.fromJSON(m.getContent(), DataRecord.class);
+				record = JSONable.fromJSON(m.getContent(), DataRecord.class);
 			} else {
 				logger.info("Status = " + response.getStatus());
 			}
@@ -77,7 +78,7 @@ public class Client {
 					  .asString();
 			if (response.getStatus() == 200) {
 				logger.info("Status = 200");
-				Message m = Message.fromJSON(response.getBody(), Message.class);
+				Message m = JSONable.fromJSON(response.getBody(), Message.class);
 				// Insert decryption here if needed
 				ObjectMapper mapper = new ObjectMapper();
 				list = mapper.readValue(m.getContent(), List.class);
@@ -98,10 +99,10 @@ public class Client {
 			HttpResponse<String> response = Unirest.put(target)
 					  .header("accept", "application/json")
 					  .queryString("keygroupID", record.getKeygroupID())
-					  .body(record.toJSON()) // insert encryption here if needed
+					  .body(JSONable.toJSON(record)) // insert encryption here if needed
 					  .asString();
 			if (response.getStatus() == 200) {
-				m = Message.fromJSON(response.getBody(), Message.class);
+				m = JSONable.fromJSON(response.getBody(), Message.class);
 			} else {
 				logger.info("Status = " + response.getStatus());
 			}

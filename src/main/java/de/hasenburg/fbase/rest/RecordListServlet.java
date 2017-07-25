@@ -18,9 +18,10 @@ import control.FBase;
 import crypto.CryptoProvider;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
+import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.KeygroupID;
-import model.message.Message;
+import model.messages.datarecords.Message;
 
 /**
  * 
@@ -82,7 +83,7 @@ public class RecordListServlet extends HttpServlet {
 			m.setContent(CryptoProvider.encrypt(IDJson,
 						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
 			m.setContent(IDJson); // Remove to encrypt
-			w.write(m.toJSON());
+			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());

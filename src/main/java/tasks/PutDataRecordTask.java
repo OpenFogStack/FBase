@@ -4,10 +4,11 @@ import org.apache.log4j.Logger;
 
 import control.FBase;
 import exceptions.FBaseStorageConnectorException;
+import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataRecord;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 import tasks.TaskManager.TaskName;
 
 /**
@@ -47,7 +48,7 @@ class PutDataRecordTask extends Task<Boolean> {
 		
 		// create envelope
 		Message m = new Message();
-		m.setContent(record.toJSON());
+		m.setContent(JSONable.toJSON(record));
 		Envelope e = new Envelope(record.getKeygroupID(), m);
 		
 		// publish data

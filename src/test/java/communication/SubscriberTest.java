@@ -18,9 +18,10 @@ import org.zeromq.ZMQ;
 import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
-import model.message.Message;
+import model.messages.datarecords.Message;
 
 public class SubscriberTest {
 
@@ -81,14 +82,14 @@ public class SubscriberTest {
 		Message m = new Message();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase);
 		subscriber.startReception();
-		m.setContent(update.toJSON());
+		m.setContent(JSONable.toJSON(update));
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
-		m.setContent(update2.toJSON());
+		m.setContent(JSONable.toJSON(update2));
 		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(2, subscriber.getNumberOfReceivedMessages());
 		logger.debug("Finished testSubscribe.");
@@ -101,14 +102,14 @@ public class SubscriberTest {
 		Message m = new Message();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase, update.getKeygroupID());
 		subscriber.startReception();
-		m.setContent(update.toJSON());
+		m.setContent(JSONable.toJSON(update));
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
-		m.setContent(update2.toJSON());
+		m.setContent(JSONable.toJSON(update2));
 		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(m.toJSON(), secret, algorithm));
+	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		logger.debug("Finished testSubscribeWithFilter.");

@@ -19,8 +19,8 @@ import org.zeromq.ZMQ;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 public class AbstractSenderTest {
 

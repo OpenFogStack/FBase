@@ -17,11 +17,12 @@ import control.FBase;
 import crypto.CryptoProvider;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
+import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Message;
+import model.messages.datarecords.Message;
 
 /**
  * 
@@ -74,10 +75,10 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
-			m.setContent(CryptoProvider.encrypt(record.toJSON(), 
+			m.setContent(CryptoProvider.encrypt(JSONable.toJSON(record), 
 						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
-			m.setContent(record.toJSON()); // remove to encrypt
-			w.write(m.toJSON());
+			m.setContent(JSONable.toJSON(record)); // remove to encrypt
+			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
@@ -121,7 +122,7 @@ public class RecordServlet extends HttpServlet {
 //			String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(), 
 //					config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
-			DataRecord record = DataRecord.fromJSON(decryptedRequest, DataRecord.class);
+			DataRecord record = JSONable.fromJSON(decryptedRequest, DataRecord.class);
 			if (record == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
@@ -137,7 +138,7 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
-			w.write(m.toJSON());
+			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
@@ -199,7 +200,7 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
-			w.write(m.toJSON());
+			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());

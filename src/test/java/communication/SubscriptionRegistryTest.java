@@ -10,10 +10,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 public class SubscriptionRegistryTest {
 
@@ -42,7 +43,7 @@ public class SubscriptionRegistryTest {
 		Message m = new Message();
 		DataRecord record = new DataRecord();
 		record.setValueWithoutKey("Test Value");
-		m.setContent(record.toJSON());
+		m.setContent(JSONable.toJSON(record));
 		Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
 		publisher.send(e);
 		Thread.sleep(200);

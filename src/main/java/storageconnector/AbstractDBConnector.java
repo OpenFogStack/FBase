@@ -12,6 +12,7 @@ import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
+import model.data.NodeID;
 
 /**
  * 
@@ -164,7 +165,7 @@ public abstract class AbstractDBConnector {
 	 * @throws FBaseStorageConnectorException
 	 *             when the operation fails
 	 */
-	public abstract void putNodeConfig(String nodeID, NodeConfig config)
+	public abstract void putNodeConfig(NodeID nodeID, NodeConfig config)
 			throws FBaseStorageConnectorException;
 
 	/**
@@ -176,7 +177,7 @@ public abstract class AbstractDBConnector {
 	 * @throws FBaseStorageConnectorException
 	 *             when the operation fails
 	 */
-	public abstract NodeConfig getNodeConfig(String nodeID)
+	public abstract NodeConfig getNodeConfig(NodeID nodeID)
 			throws FBaseStorageConnectorException;
 	
 	/**

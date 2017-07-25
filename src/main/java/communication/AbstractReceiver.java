@@ -11,9 +11,10 @@ import org.zeromq.ZMQException;
 import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.JSONable;
 import model.data.KeygroupID;
-import model.message.Envelope;
-import model.message.Message;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 /**
  * Abstract class for {@link Subscriber} and {@link GetRequestHandler}
@@ -182,7 +183,7 @@ public abstract class AbstractReceiver {
 								envelope.setKeygroupID(KeygroupID.createFromString(s));
 								logger.debug("Received keygroupID: " + envelope.getKeygroupID());
 							} else if (envelope.getMessage() == null) {
-								envelope.setMessage(Message.fromJSON(
+								envelope.setMessage(JSONable.fromJSON(
 										CryptoProvider.decrypt(s, secret, algorithm), Message.class));
 								logger.debug("Received content: " + envelope.getMessage().getContent());
 							} else {

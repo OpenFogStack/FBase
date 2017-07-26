@@ -6,6 +6,7 @@ import org.zeromq.ZMQ;
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.JSONable;
+import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.messages.datarecords.Envelope;
@@ -54,10 +55,17 @@ public class Subscriber extends AbstractReceiver {
 		Message m = new Message();
 		try {
 			// Code to interpret message
-			DataRecord update = JSONable.fromJSON(envelope.getMessage().getContent(),
-					DataRecord.class);
-			fBase.taskmanager.runLogTask(update.toString());
-			fBase.taskmanager.runStoreDataRecordTask(update);
+			fBase.taskmanager.runLogTask(envelope.getMessage().getTextualResponse() + " - "
+					+ envelope.getMessage().getContent());
+			if ("PUT".equals(envelope.getMessage().getTextualResponse())) {
+				DataRecord update = JSONable.fromJSON(envelope.getMessage().getContent(),
+						DataRecord.class);
+				fBase.taskmanager.runStoreDataRecordTask(update);
+			} else if ("DELETE".equals(envelope.getMessage().getTextualResponse())) {
+				DataIdentifier identifier = JSONable.fromJSON(envelope.getMessage().getContent(),
+						DataIdentifier.class);
+				fBase.taskmanager.runDeleteDataRecordTask(identifier);
+			}
 			m.setTextualResponse("Message processed");
 		} catch (IllegalArgumentException e) {
 			logger.warn(e.getMessage());

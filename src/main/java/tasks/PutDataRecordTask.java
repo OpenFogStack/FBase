@@ -48,6 +48,7 @@ class PutDataRecordTask extends Task<Boolean> {
 
 		// create envelope
 		Message m = new Message();
+		m.setTextualResponse("PUT");
 		m.setContent(JSONable.toJSON(record));
 		Envelope e = new Envelope(record.getKeygroupID(), m);
 

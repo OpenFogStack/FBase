@@ -110,5 +110,26 @@ public class Client {
 		}
 		return m;
 	}
-
+	
+	public Message runDeleteRecordRequest(String address, int port, DataIdentifier identifier) {
+		Message m = null;
+		try {
+			String target = address + ":" + port + "/record";
+			logger.info("Running delete request targeting " + target);
+			HttpResponse<String> response = Unirest.delete(target)
+					  .header("accept", "application/json")
+					  .queryString("keygroupID", identifier.getKeygroupID())
+					  .body(JSONable.toJSON(identifier)) // insert encryption here if needed
+					  .asString();
+			if (response.getStatus() == 200) {
+				m = JSONable.fromJSON(response.getBody(), Message.class);
+			} else {
+				logger.info("Status = " + response.getStatus());
+			}
+		} catch (UnirestException e) {
+			e.printStackTrace();
+		}
+		return m;
+	}
+	
 }

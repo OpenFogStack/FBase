@@ -7,13 +7,11 @@ package exceptions;
  * @author Dave
  *
  */
-public class FBaseStorageConnectorException extends FBaseException{
+public class FBaseStorageConnectorException extends FBaseException {
 
-	public static final String CONNECTION_FAILED ="Connection to the storage system failed";
-	public static final String DATABASE_FULL ="Database has no more storage capacity left";
-	
-	
-	
+	public static final String CONNECTION_FAILED = "Connection to the storage system failed";
+	public static final String DATABASE_FULL = "Database has no more storage capacity left";
+
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -55,8 +53,5 @@ public class FBaseStorageConnectorException extends FBaseException{
 	public FBaseStorageConnectorException(Throwable cause) {
 		super(cause);
 	}
-	
-	
-	
 
 }

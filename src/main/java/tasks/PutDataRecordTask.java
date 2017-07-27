@@ -12,22 +12,22 @@ import model.messages.datarecords.Message;
 import tasks.TaskManager.TaskName;
 
 /**
- * This task takes a {@link DataRecord} and puts it into the local database using the default database connector.
- * Furthermore, it instructs the publisher to publish the given data record.
+ * This task takes a {@link DataRecord} and puts it into the local database using the default
+ * database connector. Furthermore, it instructs the publisher to publish the given data record.
  * 
  * @author jonathanhasenburg
  */
 class PutDataRecordTask extends Task<Boolean> {
 
 	private static Logger logger = Logger.getLogger(PutDataRecordTask.class.getName());
-	
+
 	private DataRecord record;
 
 	public PutDataRecordTask(DataRecord record, FBase fBase) {
 		super(TaskName.PUT_DATA_RECORD, fBase);
 		this.record = record;
 	}
-	
+
 	/**
 	 * Put a {@link DataRecord} into the local database and instruct the publisher to publish it.
 	 * Fails, if no keygroup exists for the given record, or no related keygroup config is found.
@@ -37,26 +37,25 @@ class PutDataRecordTask extends Task<Boolean> {
 	@Override
 	public Boolean executeFunctionality() {
 		// get keygroup config and put into database
-		KeygroupConfig config = null;	
+		KeygroupConfig config = null;
 		try {
-			config = fBase.connector.getKeygroupConfig(record.getKeygroupID());
-			fBase.connector.putDataRecord(record);
+			config = fBase.connector.keygroupConfig_get(record.getKeygroupID());
+			fBase.connector.dataRecords_put(record);
 		} catch (FBaseStorageConnectorException e) {
 			logger.error(e.getMessage());
 			return false;
 		}
-		
+
 		// create envelope
 		Message m = new Message();
 		m.setContent(JSONable.toJSON(record));
 		Envelope e = new Envelope(record.getKeygroupID(), m);
-		
+
 		// publish data
-		fBase.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
-		
+		fBase.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(),
+				config.getEncryptionAlgorithm());
+
 		return true;
 	}
-
-	
 
 }

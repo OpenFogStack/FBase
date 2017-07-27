@@ -27,17 +27,17 @@ import model.data.KeygroupID;
 public class TwoNodeScenario {
 
 	private static Logger logger = Logger.getLogger(TwoNodeScenario.class.getName());
-	
+
 	private static FBase fbase1 = null;
 	private static FBase fbase2 = null;
 	private static Client client = null;
-	
+
 	private static NodeConfig nConfig1 = null;
 	private static NodeConfig nConfig2 = null;
-	
+
 	private static KeygroupID keygroupID = new KeygroupID("app", "tenant", "group");
 	private static KeygroupConfig kConfig = null;
-	
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 
@@ -51,10 +51,10 @@ public class TwoNodeScenario {
 	public void setUp() throws Exception {
 		fbase1 = new FBase("config1.properties");
 		fbase2 = new FBase("config2.properties");
-		
+
 		nConfig1 = createNodeConfig(fbase1);
 		nConfig2 = createNodeConfig(fbase2);
-		
+
 		kConfig = new KeygroupConfig(keygroupID, "secret", EncryptionAlgorithm.AES);
 		ReplicaNodeConfig repConfig1 = new ReplicaNodeConfig();
 		repConfig1.setNodeID(nConfig1.getNodeID());
@@ -65,7 +65,7 @@ public class TwoNodeScenario {
 		replicaNodeConfigs.add(repConfig2);
 		kConfig.setReplicaNodes(replicaNodeConfigs);
 		logger.debug(kConfig.getReplicaNodes().size());
-		
+
 		client = new Client();
 	}
 
@@ -98,7 +98,7 @@ public class TwoNodeScenario {
 		assertFalse(nConfig1.getRestPort().equals(nConfig2.getRestPort()));
 		logger.debug("Finished testDifferentConfigurations.");
 	}
-	
+
 	@Test
 	public void testOnePublish() throws InterruptedException, FBaseStorageConnectorException {
 		logger.debug("-------Starting testOnePublish-------");
@@ -108,27 +108,26 @@ public class TwoNodeScenario {
 		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig);
 		Thread.sleep(2000);
 		logger.debug("FBase1 ready");
-		
-		
+
 		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1);
 		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2);
 		Thread.sleep(2000);
 		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig);
 		Thread.sleep(2000);
 		logger.debug("FBase2 ready");
-		
+
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "X35"));
 		record.setValueWithoutKey("Test value");
-		
+
 		client.runPutRecordRequest("http://localhost", 8081, record);
-		
-		DataRecord recordAtNode1 = fbase1.connector.getDataRecord(record.getDataIdentifier());
-		DataRecord recordAtNode2 = fbase2.connector.getDataRecord(record.getDataIdentifier());
-		
+
+		DataRecord recordAtNode1 = fbase1.connector.dataRecords_get(record.getDataIdentifier());
+		DataRecord recordAtNode2 = fbase2.connector.dataRecords_get(record.getDataIdentifier());
+
 		assertEquals(record, recordAtNode1);
 		assertEquals(record, recordAtNode2);
-		
+
 		logger.debug("Finished testOnePublish.");
 	}
 

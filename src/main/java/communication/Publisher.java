@@ -17,7 +17,7 @@ import model.messages.datarecords.Envelope;
 public class Publisher extends AbstractSender {
 
 	private static Logger logger = Logger.getLogger(Publisher.class.getName());
-	
+
 	/**
 	 * Initializes the Publisher, it then can be used without further modifications.
 	 */
@@ -35,10 +35,11 @@ public class Publisher extends AbstractSender {
 	public String send(Envelope envelope) {
 		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID());
 		sender.sendMore(envelope.getKeygroupID().toString());
-		sender.send(CryptoProvider.encrypt(JSONable.toJSON(envelope.getMessage()), secret, algorithm));
+		sender.send(
+				CryptoProvider.encrypt(JSONable.toJSON(envelope.getMessage()), secret, algorithm));
 		return null;
 	}
-	
+
 	/**
 	 * Publishes a new envelope to all subscribers
 	 * 
@@ -46,10 +47,12 @@ public class Publisher extends AbstractSender {
 	 * @param secret - the secret used for encryption
 	 * @param algorithm - the algorithm used for encryption
 	 */
-	public void sendKeygroupIDData(Envelope envelope, String secret, EncryptionAlgorithm algorithm) {
+	public void sendKeygroupIDData(Envelope envelope, String secret,
+			EncryptionAlgorithm algorithm) {
 		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID());
 		sender.sendMore(envelope.getKeygroupID().toString());
-		sender.send(CryptoProvider.encrypt(JSONable.toJSON(envelope.getMessage()), secret, algorithm));
+		sender.send(
+				CryptoProvider.encrypt(JSONable.toJSON(envelope.getMessage()), secret, algorithm));
 	}
-	
+
 }

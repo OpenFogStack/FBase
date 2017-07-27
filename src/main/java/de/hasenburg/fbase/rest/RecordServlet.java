@@ -41,28 +41,29 @@ public class RecordServlet extends HttpServlet {
 	public RecordServlet(FBase fBase) {
 		this.fBase = fBase;
 	}
-	
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {		
-		
+			throws ServletException, IOException {
+
 		logger.debug("Received get request with query string " + req.getQueryString());
-		
+
 		PrintWriter w = resp.getWriter();
-		DataIdentifier dataIdentifier = DataIdentifier.createFromString((req.getParameter("dataIdentifier")));
+		DataIdentifier dataIdentifier = DataIdentifier
+				.createFromString((req.getParameter("dataIdentifier")));
 		Message m = new Message();
-		
+
 		try {
 			if (dataIdentifier == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.DATAIDENTIFIER_MISSING, 400);
 			}
-			
+
 			KeygroupConfig config = null;
-			DataRecord record = null;	
+			DataRecord record = null;
 			try {
-				config = fBase.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
-				record = fBase.connector.getDataRecord(dataIdentifier);
+				config = fBase.connector.keygroupConfig_get(dataIdentifier.getKeygroupID());
+				record = fBase.connector.dataRecords_get(dataIdentifier);
 				if (config == null || record == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -75,8 +76,8 @@ public class RecordServlet extends HttpServlet {
 			// 200 OK
 			resp.setStatus(200);
 			m.setTextualResponse("Success");
-			m.setContent(CryptoProvider.encrypt(JSONable.toJSON(record), 
-						config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
+			m.setContent(CryptoProvider.encrypt(JSONable.toJSON(record),
+					config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
 			m.setContent(JSONable.toJSON(record)); // remove to encrypt
 			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
@@ -87,27 +88,28 @@ public class RecordServlet extends HttpServlet {
 			resp.sendError(500);
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	@Override
-	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
 		logger.debug("Received put request with query string " + req.getQueryString());
 
 		PrintWriter w = resp.getWriter();
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
 		Message m = new Message();
-		
+
 		try {
 			if (keygroupID == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
 			}
-			
-			KeygroupConfig config = null;	
+
+			KeygroupConfig config = null;
 			try {
-				config = fBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.keygroupConfig_get(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -116,24 +118,26 @@ public class RecordServlet extends HttpServlet {
 				// 404 Not Found
 				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 			}
-			
+
 			// decrypt data record
-			String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-//			String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(), 
-//					config.getEncryptionAlgorithm());
+			String body = req.getReader().lines()
+					.collect(Collectors.joining(System.lineSeparator()));
+			// String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(),
+			// config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
 			DataRecord record = JSONable.fromJSON(decryptedRequest, DataRecord.class);
 			if (record == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
 			}
-			
+
 			// store data record
 			Future<Boolean> future = fBase.taskmanager.runPutDataRecordTask(record);
-			
+
 			// 404 Not Found
 			boolean success = future.get(5, TimeUnit.SECONDS);
-			if (!success) throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
+			if (!success)
+				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 
 			// 200 OK
 			resp.setStatus(200);
@@ -148,25 +152,26 @@ public class RecordServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
-	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
+	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
 		logger.debug("Received delete request with query string " + req.getQueryString());
 
 		PrintWriter w = resp.getWriter();
 		KeygroupID keygroupID = KeygroupID.createFromString((req.getParameter("keygroupID")));
 		Message m = new Message();
-		
+
 		try {
 			if (keygroupID == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
 			}
-			
-			KeygroupConfig config = null;	
+
+			KeygroupConfig config = null;
 			try {
-				config = fBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.keygroupConfig_get(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -175,20 +180,21 @@ public class RecordServlet extends HttpServlet {
 				// 404 Not Found
 				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 			}
-			
+
 			// decrypt data record
-			String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-//			String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(), 
-//					config.getEncryptionAlgorithm());
+			String body = req.getReader().lines()
+					.collect(Collectors.joining(System.lineSeparator()));
+			// String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(),
+			// config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
 			DataIdentifier dataIdentifier = DataIdentifier.createFromString(decryptedRequest);
 			if (dataIdentifier == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
 			}
-			
+
 			try {
-				if (!fBase.connector.deleteDataRecord(dataIdentifier)) {
+				if (!fBase.connector.dataRecords_delete(dataIdentifier)) {
 					// 500 Internal Server Error
 					throw new FBaseRestException(FBaseRestException.DELETION_FAILURE, 500);
 				}
@@ -210,5 +216,5 @@ public class RecordServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

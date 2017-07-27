@@ -13,8 +13,7 @@ import crypto.CryptoProvider.EncryptionAlgorithm;
 
 public class SubscriptionRegistry {
 
-	private static Logger logger = Logger.getLogger(SubscriptionRegistry.class
-			.getName());
+	private static Logger logger = Logger.getLogger(SubscriptionRegistry.class.getName());
 
 	private final Map<String, Map<Integer, Subscriber>> activeSubscriptions = new HashMap<>();
 	private FBase fBase;
@@ -24,21 +23,16 @@ public class SubscriptionRegistry {
 	}
 
 	/**
-	 * Starts a new Subscriber.
+	 * starts a new Subscriber
 	 * 
-	 * @param address
-	 *            - the address to subscribe to
-	 * @param port
-	 *            - the port to subscribe to
-	 * @param secret
-	 *            - the secret used to decrypt received data
-	 * @param algorithm
-	 *            - the algorithm used for decryption
+	 * @param address - the address to subscribe to
+	 * @param port - the port to subscribe to
+	 * @param secret - the secret used to decrypt received data
+	 * @param algorithm - the algorithm used for decryption
 	 * @return the new subscriber or null
 	 */
-	public synchronized Subscriber subscribeTo(String address, int port,
-			String secret, EncryptionAlgorithm algorithm,
-			KeygroupID keygroupIDFilter) {
+	public synchronized Subscriber subscribeTo(String address, int port, String secret,
+			EncryptionAlgorithm algorithm, KeygroupID keygroupIDFilter) {
 		// Case 1: address port combination exists -> false
 		if (subscriptionExists(address, port)) {
 			logger.warn("Already subscribed to " + address + ":" + port);
@@ -48,8 +42,7 @@ public class SubscriptionRegistry {
 		// create subscriber
 		Subscriber subscriber = null;
 		try {
-			subscriber = new Subscriber(address, port, secret, algorithm,
-					fBase, keygroupIDFilter);
+			subscriber = new Subscriber(address, port, secret, algorithm, fBase, keygroupIDFilter);
 			if (subscriber.startReceiving() == null) {
 				throw new RuntimeException("Could not start receiving.");
 			}
@@ -68,12 +61,10 @@ public class SubscriptionRegistry {
 	/**
 	 * gets or create the inner map associated with the specified address
 	 * 
-	 * 
 	 * @param address
 	 * @return the inner map associated with the specified address
 	 */
-	private synchronized Map<Integer, Subscriber> getOrCreateInnerMap(
-			String address) {
+	private synchronized Map<Integer, Subscriber> getOrCreateInnerMap(String address) {
 		Map<Integer, Subscriber> tmp = activeSubscriptions.get(address);
 		if (tmp == null) {
 			tmp = new ConcurrentHashMap<>();
@@ -107,8 +98,7 @@ public class SubscriptionRegistry {
 	}
 
 	/**
-	 * Subscriptions to the given address exist, a value for the given key is
-	 * present.
+	 * Subscriptions to the given address exist, a value for the given key is present.
 	 * 
 	 * @param address
 	 * @return true, if subscriptions exists
@@ -118,8 +108,8 @@ public class SubscriptionRegistry {
 	}
 
 	/**
-	 * A subscription to the given address port combination exists, a value for
-	 * this combination is present.
+	 * A subscription to the given address port combination exists, a value for this combination is
+	 * present.
 	 * 
 	 * @param address
 	 * @param port
@@ -136,8 +126,7 @@ public class SubscriptionRegistry {
 	}
 
 	/**
-	 * Returns the number of active subscriptions for a given address (over all
-	 * ports).
+	 * Returns the number of active subscriptions for a given address (over all ports).
 	 * 
 	 * @param address
 	 * @return the number or 0
@@ -150,8 +139,7 @@ public class SubscriptionRegistry {
 	}
 
 	/**
-	 * Returns the number of all active subscriptions for all addresses and
-	 * ports.
+	 * Returns the number of all active subscriptions for all addresses and ports.
 	 * 
 	 * @return the number or 0
 	 */

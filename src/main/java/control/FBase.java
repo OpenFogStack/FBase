@@ -27,7 +27,7 @@ public class FBase {
 	public TaskManager taskmanager = null;
 	public Publisher publisher = null;
 	public SubscriptionRegistry subscriptionRegistry = null;
-	
+
 	public FBase(String configName) throws FBaseStorageConnectorException {
 		configuration = new Configuration(configName);
 		connector = new OnHeapDBConnector();
@@ -39,9 +39,9 @@ public class FBase {
 		}
 		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort(), null, null);
 		subscriptionRegistry = new SubscriptionRegistry(this);
-		
+
 	}
-	
+
 	public void tearDown() {
 		publisher.shutdown();
 		try {
@@ -50,23 +50,23 @@ public class FBase {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void fillWithData() {
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
-		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"), 
+		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"),
 				"secret", EncryptionAlgorithm.AES);
 		taskmanager.runUpdateKeygroupConfigTask(config);
-		
+
 		NodeConfig nodeConfig = new NodeConfig();
 		nodeConfig.setNodeID(configuration.getNodeID());
 		nodeConfig.setMessagePort(configuration.getMessagePort());
 		nodeConfig.setPublisherPort(configuration.getPublisherPort());
 		taskmanager.runUpdateNodeConfigTask(nodeConfig);
-		
+
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "M-1"));
 		record.setValueWithoutKey("Test Value");
 		taskmanager.runPutDataRecordTask(record);
 	}
-	
+
 }

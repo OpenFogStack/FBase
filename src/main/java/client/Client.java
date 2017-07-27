@@ -18,13 +18,14 @@ import model.messages.datarecords.Message;
 
 /**
  * A client implemantation which allows the usage of the FBase rest interface
+ * 
  * @author jonathanhasenburg
  *
  */
 public class Client {
-	
+
 	private static Logger logger = Logger.getLogger(Client.class.getName());
-	
+
 	public static void main(String[] args) throws UnirestException {
 		Client c = new Client();
 		DataRecord record = new DataRecord();
@@ -32,26 +33,26 @@ public class Client {
 		record.setDataIdentifier(new DataIdentifier(dataIdentifier.getKeygroupID(), "M-4"));
 		Message m = c.runPutRecordRequest("http://localhost", 8080, record);
 		logger.info(JSONable.toJSON(m));
-		
+
 		DataRecord record2 = c.runGetRecordRequest("http://localhost", 8080, dataIdentifier);
 		logger.info(JSONable.toJSON(record2));
-		
-		List<String> list = c.runGetListRecordRequest("http://localhost", 8080, dataIdentifier.getKeygroupID());
+
+		List<String> list = c.runGetListRecordRequest("http://localhost", 8080,
+				dataIdentifier.getKeygroupID());
 		list.stream().forEach(i -> logger.info(i));
 	}
-	
-	public Client () {
+
+	public Client() {
 	}
-	
-	public DataRecord runGetRecordRequest(String address, int port, DataIdentifier dataIdentifier) 
+
+	public DataRecord runGetRecordRequest(String address, int port, DataIdentifier dataIdentifier)
 			throws UnirestException {
 		DataRecord record = null;
 		try {
 			String target = address + ":" + port + "/record";
 			logger.info("Running get request targeting " + target);
 			HttpResponse<String> response = Unirest.get(target)
-					  .queryString("dataIdentifier", dataIdentifier)
-					  .asString();
+					.queryString("dataIdentifier", dataIdentifier).asString();
 			if (response.getStatus() == 200) {
 				logger.info("Status = 200");
 				Message m = JSONable.fromJSON(response.getBody(), Message.class);
@@ -63,10 +64,10 @@ public class Client {
 		} catch (UnirestException e) {
 			e.printStackTrace();
 		}
-		
+
 		return record;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<String> runGetListRecordRequest(String address, int port, KeygroupID keygroupID) {
 		List<String> list = null;
@@ -74,8 +75,7 @@ public class Client {
 			String target = address + ":" + port + "/record/list";
 			logger.info("Running get request targeting " + target);
 			HttpResponse<String> response = Unirest.get(target)
-					  .queryString("keygroupID", keygroupID)
-					  .asString();
+					.queryString("keygroupID", keygroupID).asString();
 			if (response.getStatus() == 200) {
 				logger.info("Status = 200");
 				Message m = JSONable.fromJSON(response.getBody(), Message.class);
@@ -90,17 +90,16 @@ public class Client {
 		}
 		return list;
 	}
-	
+
 	public Message runPutRecordRequest(String address, int port, DataRecord record) {
 		Message m = null;
 		try {
 			String target = address + ":" + port + "/record";
 			logger.info("Running put request targeting " + target);
-			HttpResponse<String> response = Unirest.put(target)
-					  .header("accept", "application/json")
-					  .queryString("keygroupID", record.getKeygroupID())
-					  .body(JSONable.toJSON(record)) // insert encryption here if needed
-					  .asString();
+			HttpResponse<String> response = Unirest.put(target).header("accept", "application/json")
+					// insert decryption here if needed
+					.queryString("keygroupID", record.getKeygroupID()).body(JSONable.toJSON(record))
+					.asString();
 			if (response.getStatus() == 200) {
 				m = JSONable.fromJSON(response.getBody(), Message.class);
 			} else {
@@ -111,5 +110,5 @@ public class Client {
 		}
 		return m;
 	}
-	
+
 }

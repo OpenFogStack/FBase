@@ -26,7 +26,7 @@ import model.messages.datarecords.Message;
 public class SubscriberTest {
 
 	private static Logger logger = Logger.getLogger(SubscriberTest.class.getName());
-	
+
 	private static ExecutorService executor;
 	public String secret = "testSecret";
 	public EncryptionAlgorithm algorithm = EncryptionAlgorithm.AES;
@@ -36,10 +36,10 @@ public class SubscriberTest {
 	public static int port = 6701;
 	Subscriber subscriber = null;
 	public static FBase fBase = null;
-	
+
 	static ZMQ.Context contextPub = null;
 	static ZMQ.Socket publisher = null;
-	
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		executor = Executors.newCachedThreadPool();
@@ -48,7 +48,7 @@ public class SubscriberTest {
 		publisher.bind(address + ":" + port);
 		fBase = new FBase("config_no_webserver.properties");
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		update = new DataRecord();
@@ -67,13 +67,13 @@ public class SubscriberTest {
 		}
 		logger.debug("\n");
 	}
-	
+
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		executor.shutdownNow();
 		publisher.close();
-	    contextPub.term();
-	    fBase.tearDown();
+		contextPub.term();
+		fBase.tearDown();
 	}
 
 	@Test
@@ -84,32 +84,33 @@ public class SubscriberTest {
 		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
+		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		m.setContent(JSONable.toJSON(update2));
 		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
+		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(2, subscriber.getNumberOfReceivedMessages());
 		logger.debug("Finished testSubscribe.");
 	}
-	
+
 	@Test
-	public void testSubscribeWithFilter() throws InterruptedException, ExecutionException, 
-	TimeoutException {
+	public void testSubscribeWithFilter()
+			throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testSubscribeWithFilter-------");
 		Message m = new Message();
-		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase, update.getKeygroupID());
+		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase,
+				update.getKeygroupID());
 		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
+		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		m.setContent(JSONable.toJSON(update2));
 		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().toString());
-	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
+		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		logger.debug("Finished testSubscribeWithFilter.");

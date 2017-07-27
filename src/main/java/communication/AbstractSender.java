@@ -15,7 +15,7 @@ import model.messages.datarecords.Envelope;
 public abstract class AbstractSender {
 
 	private static Logger logger = Logger.getLogger(AbstractSender.class.getName());
-	
+
 	/**
 	 * The address used for the sending of messages.
 	 */
@@ -25,21 +25,21 @@ public abstract class AbstractSender {
 	 * The port used for the sending of messages.
 	 */
 	private int port = -1;
-	
+
 	/**
 	 * The secret used for the encryption of messages
 	 */
 	protected String secret;
-	
+
 	/**
 	 * The algorithm used for the encryption of messages
 	 */
 	protected EncryptionAlgorithm algorithm;
-	
+
 	protected ZMQ.Context context = null;
 	protected ZMQ.Socket sender = null;
-	
-	public AbstractSender(String address, int port, String secret, EncryptionAlgorithm algorithm, 
+
+	public AbstractSender(String address, int port, String secret, EncryptionAlgorithm algorithm,
 			int senderType) {
 		this.address = address;
 		this.port = port;
@@ -57,7 +57,7 @@ public abstract class AbstractSender {
 		}
 		logger.debug("Initialized Sender, ready to send.");
 	}
-	
+
 	/**
 	 * @return address used for the sending of messages
 	 */
@@ -71,7 +71,7 @@ public abstract class AbstractSender {
 	public int getPort() {
 		return port;
 	}
-	
+
 	/**
 	 * Shuts down the sender. After it was shutdown, it cannot be used anymore for anything.
 	 */
@@ -83,7 +83,7 @@ public abstract class AbstractSender {
 			logger.info("Shutdown sender, it cannot be reused.");
 		}
 	}
-	
+
 	public boolean isShutdown() {
 		if (sender == null) {
 			return true;
@@ -99,5 +99,5 @@ public abstract class AbstractSender {
 	 * @return the answer of the request or null
 	 */
 	public abstract String send(Envelope envelope);
-	
+
 }

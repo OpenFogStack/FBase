@@ -77,7 +77,7 @@ public class PublisherTest {
 		t2.join();
 		logger.debug("Finished testPublishTwo.");
 	}
-	
+
 	@Test
 	public void testPublishMany() throws InterruptedException {
 		logger.debug("-------Starting testPublishMany-------");
@@ -103,11 +103,11 @@ public class PublisherTest {
 	class SubscribeHelper implements Runnable {
 
 		private Envelope e = null;
-		
-		public SubscribeHelper(Envelope	e) {
+
+		public SubscribeHelper(Envelope e) {
 			this.e = e;
 		}
-		
+
 		@Override
 		public void run() {
 			ZMQ.Context context = ZMQ.context(1);
@@ -123,7 +123,7 @@ public class PublisherTest {
 			assertEquals(namespace, e.getKeygroupID().toString());
 			assertEquals(content, JSONable.toJSON(e.getMessage()));
 		}
-		
+
 	}
-	
+
 }

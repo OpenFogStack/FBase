@@ -17,11 +17,9 @@ import control.FBase;
 
 public class TaskManager {
 
-	private static Logger logger = Logger
-			.getLogger(TaskManager.class.getName());
+	private static Logger logger = Logger.getLogger(TaskManager.class.getName());
 	private ExecutorService pool = null;
-	private final AtomicInteger[] runningTasks = new AtomicInteger[TaskName
-			.values().length];
+	private final AtomicInteger[] runningTasks = new AtomicInteger[TaskName.values().length];
 
 	private FBase fBase;
 
@@ -45,15 +43,16 @@ public class TaskManager {
 		runningTasks[name.ordinal()].decrementAndGet();
 	}
 
-	
 	public Map<TaskName, Integer> getRunningTaskNumbers() {
 		Map<TaskName, Integer> res = new HashMap<>();
-		for(int i=0;i<runningTasks.length;i++) res.put(TaskName.values()[i], runningTasks[i].get());
+		for (int i = 0; i < runningTasks.length; i++)
+			res.put(TaskName.values()[i], runningTasks[i].get());
 		return res;
 	}
 
 	public void deleteAllData() {
-		for(AtomicInteger ai: runningTasks)ai.set(0);
+		for (AtomicInteger ai : runningTasks)
+			ai.set(0);
 	}
 
 	/*
@@ -71,26 +70,22 @@ public class TaskManager {
 	}
 
 	public Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(
-				config, fBase));
+		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, fBase));
 		return future;
 	}
 
 	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config,
-				fBase));
+		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, fBase));
 		return future;
 	}
 
 	public Future<Boolean> runPutDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new PutDataRecordTask(record,
-				fBase));
+		Future<Boolean> future = pool.submit(new PutDataRecordTask(record, fBase));
 		return future;
 	}
 
 	public Future<Boolean> runStoreDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record,
-				fBase));
+		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record, fBase));
 		return future;
 	}
 

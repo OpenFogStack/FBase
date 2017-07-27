@@ -1,7 +1,6 @@
 package communication;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -27,8 +26,7 @@ import crypto.CryptoProvider.EncryptionAlgorithm;
  */
 public abstract class AbstractReceiver {
 
-	private static Logger logger = Logger.getLogger(AbstractReceiver.class
-			.getName());
+	private static Logger logger = Logger.getLogger(AbstractReceiver.class.getName());
 
 	/**
 	 * The address used for the reception of messages.
@@ -56,11 +54,9 @@ public abstract class AbstractReceiver {
 	private int numberOfReceivedMessages = 0;
 
 	/**
-	 * The executor that is used to execute the runnable which is used for
-	 * reception.
+	 * The executor that is used to execute the runnable which is used for reception.
 	 */
-	private final ExecutorService executor = Executors
-			.newSingleThreadExecutor();
+	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	/**
 	 * Future of the runnable which is used for reception.
@@ -73,8 +69,8 @@ public abstract class AbstractReceiver {
 	private int receiverType;
 
 	/**
-	 * If the used socket is a subscriber, the keygroup filter might be used to
-	 * only receive messages with a specific topic/keygroup.
+	 * If the used socket is a subscriber, the keygroup filter might be used to only receive
+	 * messages with a specific topic/keygroup.
 	 */
 	protected KeygroupID keygroupIDFilter = null;
 
@@ -86,15 +82,14 @@ public abstract class AbstractReceiver {
 	 */
 	protected final FBase fBase;
 
-	public AbstractReceiver(String address, int port, String secret,
-			EncryptionAlgorithm algorithm, int receiverType, FBase fBase) {
+	public AbstractReceiver(String address, int port, String secret, EncryptionAlgorithm algorithm,
+			int receiverType, FBase fBase) {
 		this.address = address;
 		this.port = port;
 		this.secret = secret;
 		this.algorithm = algorithm;
 		if (receiverType != ZMQ.SUB && receiverType != ZMQ.REP) {
-			throw new IllegalArgumentException("Receiver type " + receiverType
-					+ " is not valid.");
+			throw new IllegalArgumentException("Receiver type " + receiverType + " is not valid.");
 		}
 		this.receiverType = receiverType;
 		this.fBase = fBase;
@@ -138,8 +133,8 @@ public abstract class AbstractReceiver {
 	/**
 	 * Starts receiving and interpreting incoming envelopes..
 	 * 
-	 * @return a Future instance if reception was not running before and
-	 *         operation successful, <code>null</code> otherwise
+	 * @return a Future instance if reception was not running before and operation successful,
+	 *         <code>null</code> otherwise
 	 */
 	public Future<?> startReceiving() {
 		if (runnableFuture != null && !runnableFuture.isDone()) {
@@ -198,19 +193,17 @@ public abstract class AbstractReceiver {
 						while (more) {
 							String s = socket.recvStr();
 							if (envelope.getKeygroupID() == null) {
-								envelope.setKeygroupID(KeygroupID
-										.createFromString(s));
-								logger.debug("Received keygroupID: "
-										+ envelope.getKeygroupID());
+								envelope.setKeygroupID(KeygroupID.createFromString(s));
+								logger.debug("Received keygroupID: " + envelope.getKeygroupID());
 							} else if (envelope.getMessage() == null) {
 								envelope.setMessage(JSONable.fromJSON(
-										CryptoProvider.decrypt(s, secret,
-												algorithm), Message.class));
-								logger.debug("Received content: "
-										+ envelope.getMessage().getContent());
+										CryptoProvider.decrypt(s, secret, algorithm),
+										Message.class));
+								logger.debug(
+										"Received content: " + envelope.getMessage().getContent());
 							} else {
-								logger.error("Received more multipart messages than expected, dismissing: "
-										+ s);
+								logger.error("Received more multipart messages than expected, "
+										+ "dismissing: " + s);
 								envelopeFine = false;
 							}
 							more = socket.hasReceiveMore();
@@ -220,8 +213,7 @@ public abstract class AbstractReceiver {
 						return;
 					}
 
-					if (envelope.getKeygroupID() == null
-							|| envelope.getMessage() == null) {
+					if (envelope.getKeygroupID() == null || envelope.getMessage() == null) {
 						logger.error("Envelope incomplete");
 					} else if (!envelopeFine) {
 						logger.error("Envelope broken");
@@ -233,12 +225,9 @@ public abstract class AbstractReceiver {
 					}
 				}
 			}
-
 		});
-
 		logger.info("Started receiving incoming envelopes.");
 		return runnableFuture;
-
 	}
 
 	/**
@@ -253,8 +242,7 @@ public abstract class AbstractReceiver {
 		}
 		executor.shutdownNow();
 		logger.info("Reception of incoming envelopes is stopped."
-				+ (executor.isTerminated() ? ""
-						: " Some tasks may still be running."));
+				+ (executor.isTerminated() ? "" : " Some tasks may still be running."));
 	}
 
 	/**

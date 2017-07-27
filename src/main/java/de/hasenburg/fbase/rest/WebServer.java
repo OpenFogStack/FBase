@@ -11,7 +11,7 @@ import control.FBase;
 public class WebServer {
 
 	private static Logger logger = Logger.getLogger(WebServer.class.getName());
-	
+
 	/**
 	 * The jetty server serving all requests.
 	 */
@@ -24,7 +24,8 @@ public class WebServer {
 		server = new Server(port);
 
 		// servlet handlers
-		ServletContextHandler servletContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		ServletContextHandler servletContext = new ServletContextHandler(
+				ServletContextHandler.SESSIONS);
 		servletContext.setContextPath("/");
 		servletContext.addServlet(new ServletHolder(new RecordServlet(fBase)), "/record");
 		servletContext.addServlet(new ServletHolder(new RecordListServlet(fBase)), "/record/list");

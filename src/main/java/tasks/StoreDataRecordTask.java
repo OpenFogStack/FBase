@@ -8,24 +8,26 @@ import model.data.DataRecord;
 import tasks.TaskManager.TaskName;
 
 /**
- * This task takes a {@link DataRecord} and puts it into the local database using the default database connector.
+ * This task takes a {@link DataRecord} and puts it into the local database using the default
+ * database connector.
+ * 
  * @author jonathanhasenburg
  *
  */
 class StoreDataRecordTask extends Task<Boolean> {
 
 	private static Logger logger = Logger.getLogger(StoreDataRecordTask.class.getName());
-	
+
 	private DataRecord record = null;
 
 	public StoreDataRecordTask(DataRecord record, FBase fBase) {
 		super(TaskName.STORE_DATA_RECORD, fBase);
 		this.record = record;
 	}
-	
+
 	/**
-	 * Put a {@link DataRecord} into the local database.
-	 * Fails, if no keygroup exists for the given record.
+	 * Put a {@link DataRecord} into the local database. Fails, if no keygroup exists for the given
+	 * record.
 	 * 
 	 * @return true, if everything works, otherwise false
 	 */
@@ -40,7 +42,5 @@ class StoreDataRecordTask extends Task<Boolean> {
 		}
 		return true;
 	}
-
-	
 
 }

@@ -2,7 +2,7 @@ package control;
 
 import exceptions.FBaseStorageConnectorException;
 
-public class Mastermind {
+public class Starter {
 		
 	public static void main(String[] args) throws FBaseStorageConnectorException {
 		FBase fbase = new FBase(null);

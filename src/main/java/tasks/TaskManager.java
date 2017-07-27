@@ -5,19 +5,24 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.log4j.Logger;
-
-import control.FBase;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.data.DataRecord;
 
+import org.apache.log4j.Logger;
+
+import control.FBase;
+
 public class TaskManager {
 
-	private static Logger logger = Logger.getLogger(TaskManager.class.getName());
+	private static Logger logger = Logger
+			.getLogger(TaskManager.class.getName());
 	private ExecutorService pool = null;
-	private Map<TaskName, Integer> runningTasks = null;
+	private final AtomicInteger[] runningTasks = new AtomicInteger[TaskName
+			.values().length];
+
 	private FBase fBase;
 
 	public enum TaskName {
@@ -27,36 +32,28 @@ public class TaskManager {
 	public TaskManager(FBase fBase) {
 		this.fBase = fBase;
 		pool = Executors.newCachedThreadPool();
-		runningTasks = new HashMap<TaskName, Integer>();
-	}
-	
-	public synchronized void registerTask(TaskName name) {
-		Integer value = runningTasks.get(name);
-		if (value != null) {
-			runningTasks.put(name, value + 1);
-		} else {
-			runningTasks.put(name, 1);
-		}
+		for (int i = 0; i < runningTasks.length; i++)
+			runningTasks[i] = new AtomicInteger(0);
 	}
 
-	public synchronized void deregisterTask(TaskName name) {
+	public void registerTask(TaskName name) {
+		runningTasks[name.ordinal()].incrementAndGet();
+	}
+
+	public void deregisterTask(TaskName name) {
 		logger.debug("Deregistering task " + name);
-		if (runningTasks.containsKey(name)) {
-			int number = runningTasks.get(name) - 1;
-			if (number > 0) {
-				runningTasks.put(name, number);
-			} else {
-				runningTasks.remove(name);
-			}
-		}
+		runningTasks[name.ordinal()].decrementAndGet();
 	}
 
-	public synchronized HashMap<TaskName, Integer> getRunningTaskNumbers() {
-		return new HashMap<TaskName, Integer>(runningTasks);
+	
+	public Map<TaskName, Integer> getRunningTaskNumbers() {
+		Map<TaskName, Integer> res = new HashMap<>();
+		for(int i=0;i<runningTasks.length;i++) res.put(TaskName.values()[i], runningTasks[i].get());
+		return res;
 	}
 
-	public synchronized void deleteAllData() {
-		runningTasks = new HashMap<TaskName, Integer>();
+	public void deleteAllData() {
+		for(AtomicInteger ai: runningTasks)ai.set(0);
 	}
 
 	/*
@@ -72,25 +69,29 @@ public class TaskManager {
 		Future<Boolean> future = pool.submit(new SleepTask(time, fBase));
 		return future;
 	}
-	
+
 	public Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, fBase));
+		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(
+				config, fBase));
 		return future;
 	}
-	
+
 	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, fBase));
+		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config,
+				fBase));
 		return future;
 	}
-	
+
 	public Future<Boolean> runPutDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new PutDataRecordTask(record, fBase));
+		Future<Boolean> future = pool.submit(new PutDataRecordTask(record,
+				fBase));
 		return future;
 	}
-	
+
 	public Future<Boolean> runStoreDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record, fBase));
+		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record,
+				fBase));
 		return future;
 	}
-	
+
 }

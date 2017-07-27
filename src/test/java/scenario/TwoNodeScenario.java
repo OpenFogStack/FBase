@@ -127,7 +127,14 @@ public class TwoNodeScenario {
 
 		assertEquals(record, recordAtNode1);
 		assertEquals(record, recordAtNode2);
-
+		
+		// delete data
+		
+		client.runDeleteRecordRequest("http://localhost", 8081, record.getDataIdentifier());
+		
+		assertNull(fbase1.connector.dataRecords_get(record.getDataIdentifier()));
+		assertNull(fbase2.connector.dataRecords_get(record.getDataIdentifier()));
+		
 		logger.debug("Finished testOnePublish.");
 	}
 

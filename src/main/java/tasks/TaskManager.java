@@ -7,13 +7,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import model.config.KeygroupConfig;
-import model.config.NodeConfig;
-import model.data.DataRecord;
-
 import org.apache.log4j.Logger;
 
 import control.FBase;
+import model.config.KeygroupConfig;
+import model.config.NodeConfig;
+import model.data.DataIdentifier;
+import model.data.DataRecord;
 
 public class TaskManager {
 
@@ -24,7 +24,7 @@ public class TaskManager {
 	private FBase fBase;
 
 	public enum TaskName {
-		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, PUT_DATA_RECORD, STORE_DATA_RECORD, UPDATE_NODE_CONFIG
+		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, PUT_DATA_RECORD, DELETE_DATA_RECORD, STORE_DATA_RECORD, UPDATE_NODE_CONFIG
 	}
 
 	public TaskManager(FBase fBase) {
@@ -81,6 +81,11 @@ public class TaskManager {
 
 	public Future<Boolean> runPutDataRecordTask(DataRecord record) {
 		Future<Boolean> future = pool.submit(new PutDataRecordTask(record, fBase));
+		return future;
+	}
+
+	public Future<Boolean> runDeleteDataRecordTask(DataIdentifier identifier) {
+		Future<Boolean> future = pool.submit(new DeleteDataRecordTask(identifier, fBase));
 		return future;
 	}
 

@@ -187,21 +187,19 @@ public class RecordServlet extends HttpServlet {
 			// String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(),
 			// config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
-			DataIdentifier dataIdentifier = DataIdentifier.createFromString(decryptedRequest);
+			DataIdentifier dataIdentifier = JSONable.fromJSON(decryptedRequest,
+					DataIdentifier.class);
 			if (dataIdentifier == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
 			}
 
-			try {
-				if (!fBase.connector.dataRecords_delete(dataIdentifier)) {
-					// 500 Internal Server Error
-					throw new FBaseRestException(FBaseRestException.DELETION_FAILURE, 500);
-				}
-			} catch (FBaseStorageConnectorException e) {
-				// 404 Not Found
+			Future<Boolean> future = fBase.taskmanager.runDeleteDataRecordTask(dataIdentifier);
+
+			// 404 Not Found
+			boolean success = future.get(5, TimeUnit.SECONDS);
+			if (!success)
 				throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
-			}
 
 			// 200 OK
 			resp.setStatus(200);

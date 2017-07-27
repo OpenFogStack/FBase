@@ -60,14 +60,14 @@ public class RecordListServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			String IDJson = null;
 			try {
-				config = fBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.keygroupConfig_get(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
 				}
 
 				// create a set of dataidentifier strings
-				Set<String> IDs = fBase.connector.listDataRecords(keygroupID).stream()
+				Set<String> IDs = fBase.connector.dataRecords_list(keygroupID).stream()
 						.map(id -> id.toString()).collect(Collectors.toSet());
 
 				ObjectMapper mapper = new ObjectMapper();

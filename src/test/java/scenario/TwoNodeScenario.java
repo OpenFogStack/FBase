@@ -122,8 +122,8 @@ public class TwoNodeScenario {
 
 		client.runPutRecordRequest("http://localhost", 8081, record);
 
-		DataRecord recordAtNode1 = fbase1.connector.getDataRecord(record.getDataIdentifier());
-		DataRecord recordAtNode2 = fbase2.connector.getDataRecord(record.getDataIdentifier());
+		DataRecord recordAtNode1 = fbase1.connector.dataRecords_get(record.getDataIdentifier());
+		DataRecord recordAtNode2 = fbase2.connector.dataRecords_get(record.getDataIdentifier());
 
 		assertEquals(record, recordAtNode1);
 		assertEquals(record, recordAtNode2);

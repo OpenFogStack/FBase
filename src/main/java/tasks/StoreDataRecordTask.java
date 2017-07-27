@@ -35,7 +35,7 @@ class StoreDataRecordTask extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 		// get keygroup config and put into database
 		try {
-			fBase.connector.putDataRecord(record);
+			fBase.connector.dataRecords_put(record);
 		} catch (FBaseStorageConnectorException e) {
 			logger.error(e.getMessage());
 			return false;

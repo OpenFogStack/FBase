@@ -23,7 +23,7 @@ class UpdateNodeConfigTask extends Task<Boolean> {
 
 		// store config in database
 		try {
-			fBase.connector.putNodeConfig(config.getNodeID(), config);
+			fBase.connector.nodeConfig_put(config.getNodeID(), config);
 			logger.debug("Put node config into database");
 		} catch (FBaseStorageConnectorException e) {
 			logger.fatal("Could not store node configuration in node DB, nothing changed");

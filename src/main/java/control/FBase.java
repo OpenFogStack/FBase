@@ -31,7 +31,7 @@ public class FBase {
 	public FBase(String configName) throws FBaseStorageConnectorException {
 		configuration = new Configuration(configName);
 		connector = new OnHeapDBConnector();
-		connector.initiateDatabaseConnection();
+		connector.dbConnection_initiate();
 		taskmanager = new TaskManager(this);
 		if (configuration.getRestPort() > 0) {
 			WebServer server = new WebServer(this);

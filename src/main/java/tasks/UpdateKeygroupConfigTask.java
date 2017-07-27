@@ -25,12 +25,12 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 
 		// store config in database
 		try {
-			fBase.connector.createKeygroup(config.getKeygroupID());
+			fBase.connector.keygroup_create(config.getKeygroupID());
 		} catch (FBaseStorageConnectorException e) {
 			// no problem, it just already existed
 		}
 		try {
-			fBase.connector.putKeygroupConfig(config.getKeygroupID(), config);
+			fBase.connector.keygroupConfig_put(config.getKeygroupID(), config);
 		} catch (FBaseStorageConnectorException e) {
 			logger.fatal("Could not store keygroup configuration in node DB, nothing changed");
 			return false;
@@ -45,7 +45,7 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 				// get node configs
 				NodeConfig nodeConfig = null;
 				try {
-					nodeConfig = fBase.connector.getNodeConfig(rnConfig.getNodeID());
+					nodeConfig = fBase.connector.nodeConfig_get(rnConfig.getNodeID());
 					// subscribe to all machines
 					// TODO I: we currently don't load balance the subscriptions, no failover (it is
 					// just done by the machine that runs this task)

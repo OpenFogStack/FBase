@@ -62,8 +62,8 @@ public class RecordServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			DataRecord record = null;
 			try {
-				config = fBase.connector.getKeygroupConfig(dataIdentifier.getKeygroupID());
-				record = fBase.connector.getDataRecord(dataIdentifier);
+				config = fBase.connector.keygroupConfig_get(dataIdentifier.getKeygroupID());
+				record = fBase.connector.dataRecords_get(dataIdentifier);
 				if (config == null || record == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -109,7 +109,7 @@ public class RecordServlet extends HttpServlet {
 
 			KeygroupConfig config = null;
 			try {
-				config = fBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.keygroupConfig_get(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -171,7 +171,7 @@ public class RecordServlet extends HttpServlet {
 
 			KeygroupConfig config = null;
 			try {
-				config = fBase.connector.getKeygroupConfig(keygroupID);
+				config = fBase.connector.keygroupConfig_get(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -194,7 +194,7 @@ public class RecordServlet extends HttpServlet {
 			}
 
 			try {
-				if (!fBase.connector.deleteDataRecord(dataIdentifier)) {
+				if (!fBase.connector.dataRecords_delete(dataIdentifier)) {
 					// 500 Internal Server Error
 					throw new FBaseRestException(FBaseRestException.DELETION_FAILURE, 500);
 				}

@@ -63,7 +63,7 @@ public class AbstractReceiverTest {
 	@Test
 	public void testIsListining() {
 		logger.debug("-------Starting testIsListining-------");
-		receiver.startReception();
+		receiver.startReceiving();
 		assertTrue(receiver.isReceiving());
 		logger.debug("Finished testIsListining.");
 	}
@@ -71,7 +71,7 @@ public class AbstractReceiverTest {
 	@Test
 	public void testStopListining() {
 		logger.debug("-------Starting testStopListining-------");
-		receiver.startReception();
+		receiver.startReceiving();
 		receiver.stopReception();
 		assertFalse(receiver.isReceiving());
 		logger.debug("Finished testStopListining.");
@@ -80,8 +80,8 @@ public class AbstractReceiverTest {
 	@Test
 	public void testMultipleStartListening() {
 		logger.debug("-------Starting testMultipleStartListening-------");
-		receiver.startReception();
-		assertNull(receiver.startReception());
+		receiver.startReceiving();
+		assertNull(receiver.startReceiving());
 		logger.debug("Finished testMultipleStartListening.");
 	}
 	
@@ -89,7 +89,7 @@ public class AbstractReceiverTest {
 	public void testProcessRequest() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testProcessRequest-------");
 		assertEquals(0, receiver.getNumberOfReceivedMessages());
-		receiver.startReception();
+		receiver.startReceiving();
 		Future<?> future = executor.submit(new RequestHelper());
 		future.get(5, TimeUnit.SECONDS);
 		assertEquals(1, receiver.getNumberOfReceivedMessages());
@@ -100,7 +100,7 @@ public class AbstractReceiverTest {
 	public void testProcessMultipleRequest() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testProcessMultipleRequest-------");
 		assertEquals(0, receiver.getNumberOfReceivedMessages());
-		receiver.startReception();
+		receiver.startReceiving();
 		Future<?> future = executor.submit(new RequestHelper());
 		future.get(5, TimeUnit.SECONDS);
 		assertEquals(1, receiver.getNumberOfReceivedMessages());
@@ -114,7 +114,7 @@ public class AbstractReceiverTest {
 	public void testParallelRequests() throws InterruptedException {
 		int number = 10;
 		logger.debug("-------Starting testParallelRequests-------");
-		receiver.startReception();
+		receiver.startReceiving();
 		List<Thread> threads = new ArrayList<Thread>();
 		for (int i = 0; i < number; i++) {
 			Thread t = new Thread(new RequestHelper());
@@ -132,7 +132,7 @@ public class AbstractReceiverTest {
 	public void testMissingContent() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testMissingContent-------");
 		assertEquals(0, receiver.getNumberOfReceivedMessages());
-		receiver.startReception();
+		receiver.startReceiving();
 		Future<?> future = executor.submit(new RequestHelper(true, false));
 		future.get(5, TimeUnit.SECONDS);
 		assertEquals(0, receiver.getNumberOfReceivedMessages());
@@ -143,7 +143,7 @@ public class AbstractReceiverTest {
 	public void testMissingContentCompleteMessage() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testMissingContentCompleteMessage-------");
 		assertEquals(0, receiver.getNumberOfReceivedMessages());
-		receiver.startReception();
+		receiver.startReceiving();
 		// missing content
 		Future<?> future = executor.submit(new RequestHelper(true, false));
 		future.get(5, TimeUnit.SECONDS);
@@ -163,7 +163,7 @@ public class AbstractReceiverTest {
 	public void testMissingKeygroupID() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting missingKeygroupID-------");
 		assertEquals(0, receiver.getNumberOfReceivedMessages());
-		receiver.startReception();
+		receiver.startReceiving();
 		Future<?> future = executor.submit(new RequestHelper(false, true));
 		future.get(5, TimeUnit.SECONDS);
 		assertEquals(0, receiver.getNumberOfReceivedMessages());
@@ -178,7 +178,7 @@ public class AbstractReceiverTest {
 	public void testMissingKeygroupIDCompleteMessage() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting testMissingKeygroupIDCompleteMessage-------");
 		assertEquals(0, receiver.getNumberOfReceivedMessages());
-		receiver.startReception();
+		receiver.startReceiving();
 		// missing keygroupID
 		Future<?> future = executor.submit(new RequestHelper(false, true));
 		try {
@@ -207,7 +207,7 @@ public class AbstractReceiverTest {
 		}
 
 		@Override
-		protected void interpetReceivedEnvelope(Envelope envelope, Socket responseSocket) {
+		protected void interpreteReceivedEnvelope(Envelope envelope, Socket responseSocket) {
 			logger.debug("Received envelope " + envelope.getKeygroupID() + " - " + envelope.getMessage().getContent());
 			responseSocket.send(CryptoProvider.encrypt("received", secret, algorithm));
 		}

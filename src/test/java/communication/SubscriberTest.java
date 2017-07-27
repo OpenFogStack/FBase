@@ -81,7 +81,7 @@ public class SubscriberTest {
 		logger.debug("-------Starting testSubscribe-------");
 		Message m = new Message();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase);
-		subscriber.startReception();
+		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
 	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
@@ -101,7 +101,7 @@ public class SubscriberTest {
 		logger.debug("-------Starting testSubscribeWithFilter-------");
 		Message m = new Message();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase, update.getKeygroupID());
-		subscriber.startReception();
+		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
 	    publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));

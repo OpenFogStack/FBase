@@ -47,7 +47,7 @@ private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 	}
 
 	@Override
-	protected void interpetReceivedEnvelope(Envelope envelope, ZMQ.Socket responseSocket) {
+	protected void interpreteReceivedEnvelope(Envelope envelope, ZMQ.Socket responseSocket) {
 		Message m = new Message();
 		try {
 			// Code to interpret message

@@ -1,8 +1,15 @@
 package communication;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import model.JSONable;
+import model.data.KeygroupID;
+import model.messages.datarecords.Envelope;
+import model.messages.datarecords.Message;
 
 import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
@@ -11,10 +18,6 @@ import org.zeromq.ZMQException;
 import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
-import model.JSONable;
-import model.data.KeygroupID;
-import model.messages.datarecords.Envelope;
-import model.messages.datarecords.Message;
 
 /**
  * Abstract class for {@link Subscriber} and {@link GetRequestHandler}
@@ -24,17 +27,18 @@ import model.messages.datarecords.Message;
  */
 public abstract class AbstractReceiver {
 
-	private static Logger logger = Logger.getLogger(AbstractReceiver.class.getName());
+	private static Logger logger = Logger.getLogger(AbstractReceiver.class
+			.getName());
 
 	/**
 	 * The address used for the reception of messages.
 	 */
-	private String address = "";
+	private final String address;
 
 	/**
 	 * The port used for the reception of messages.
 	 */
-	private int port = -1;
+	private final int port;
 
 	/**
 	 * The secret used for the encryption of messages
@@ -52,9 +56,11 @@ public abstract class AbstractReceiver {
 	private int numberOfReceivedMessages = 0;
 
 	/**
-	 * The executor that is used to execute the runnable which is used for reception.
+	 * The executor that is used to execute the runnable which is used for
+	 * reception.
 	 */
-	private ExecutorService executor = null;
+	private final ExecutorService executor = Executors
+			.newSingleThreadExecutor();
 
 	/**
 	 * Future of the runnable which is used for reception.
@@ -65,33 +71,33 @@ public abstract class AbstractReceiver {
 	 * The receiver type. Possible values are ZMQ.SUB and ZMQ.REP.
 	 */
 	private int receiverType;
-	
+
 	/**
-	 * If the used socket is a subscriber, the keygroup filter might be used to only receive messages with a
-	 * specific topic/keygroup.
+	 * If the used socket is a subscriber, the keygroup filter might be used to
+	 * only receive messages with a specific topic/keygroup.
 	 */
 	protected KeygroupID keygroupIDFilter = null;
 
 	private ZMQ.Context context = null;
 	private ZMQ.Socket socket = null;
-	
+
 	/**
 	 * The related fbase instance
 	 */
-	protected FBase fBase;
+	protected final FBase fBase;
 
-	public AbstractReceiver(String address, int port, String secret, EncryptionAlgorithm algorithm, int receiverType, 
-			FBase fBase) {
+	public AbstractReceiver(String address, int port, String secret,
+			EncryptionAlgorithm algorithm, int receiverType, FBase fBase) {
 		this.address = address;
 		this.port = port;
 		this.secret = secret;
 		this.algorithm = algorithm;
 		if (receiverType != ZMQ.SUB && receiverType != ZMQ.REP) {
-			throw new IllegalArgumentException("Receiver type " + receiverType + " is not valid.");
+			throw new IllegalArgumentException("Receiver type " + receiverType
+					+ " is not valid.");
 		}
 		this.receiverType = receiverType;
 		this.fBase = fBase;
-		this.executor = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -121,30 +127,31 @@ public abstract class AbstractReceiver {
 	protected void incrementNumberOfReceivedMessages() {
 		numberOfReceivedMessages++;
 	}
-	
+
 	/**
 	 * @return {@link #keygroupIDFilter}
 	 */
 	public KeygroupID getkeygroupIDFilter() {
 		return keygroupIDFilter;
 	}
-	
+
 	/**
-	 * Starts reception and interpretation of incoming envelopes..
+	 * Starts receiving and interpreting incoming envelopes..
 	 * 
-	 * @return <code>true</code> if reception was not running before and operation successful, 
-	 * <code>false</code> otherwise
+	 * @return a Future instance if reception was not running before and
+	 *         operation successful, <code>null</code> otherwise
 	 */
-	public Future<?> startReception() {
-		if (runnableFuture != null) {
-			if (!runnableFuture.isDone()) {
-				logger.error("Did not start reception because already running.");
-				return null;
-			}
+	public Future<?> startReceiving() {
+		if (runnableFuture != null && !runnableFuture.isDone()) {
+			logger.error("Did not start reception because already running.");
+			return null;
 		}
-		runnableFuture = executor.submit(new Runnable() {
-			
-			private boolean init() {
+		Future<Boolean> fut = executor.submit(new Callable<Boolean>() {
+
+			@Override
+			public Boolean call() throws Exception {
+				if (executor.isShutdown())
+					return false;
 				if (receiverType == ZMQ.SUB) {
 					context = ZMQ.context(1);
 					socket = context.socket(ZMQ.SUB);
@@ -165,70 +172,89 @@ public abstract class AbstractReceiver {
 					return false;
 				}
 			}
-			
+
+		});
+
+		try {
+			if (!fut.get()) {
+				logger.error("Initialization failed.");
+				return null;
+			}
+		} catch (Exception e) {
+			logger.error("Initialization was interrupted.");
+			return null;
+		}
+		// init was successful
+		runnableFuture = executor.submit(new Runnable() {
 			@Override
 			public void run() {
-				
-				if (!init()) return;
-				
-				while (true) {
+
+				while (!Thread.currentThread().isInterrupted()) {
 					Envelope envelope = new Envelope(null, null);
 					boolean envelopeFine = true;
-					
+
 					try {
 						boolean more = true;
 						while (more) {
 							String s = socket.recvStr();
 							if (envelope.getKeygroupID() == null) {
-								envelope.setKeygroupID(KeygroupID.createFromString(s));
-								logger.debug("Received keygroupID: " + envelope.getKeygroupID());
+								envelope.setKeygroupID(KeygroupID
+										.createFromString(s));
+								logger.debug("Received keygroupID: "
+										+ envelope.getKeygroupID());
 							} else if (envelope.getMessage() == null) {
 								envelope.setMessage(JSONable.fromJSON(
-										CryptoProvider.decrypt(s, secret, algorithm), Message.class));
-								logger.debug("Received content: " + envelope.getMessage().getContent());
+										CryptoProvider.decrypt(s, secret,
+												algorithm), Message.class));
+								logger.debug("Received content: "
+										+ envelope.getMessage().getContent());
 							} else {
-								logger.error("Received more mulitpart messages than expected, dismissing: " + s);
+								logger.error("Received more multipart messages than expected, dismissing: "
+										+ s);
 								envelopeFine = false;
 							}
 							more = socket.hasReceiveMore();
 						}
 					} catch (ZMQException e) {
 						logger.debug("Context was terminated, thread is dying.");
-						break;
+						return;
 					}
-				
-					if (envelope.getKeygroupID() == null || envelope.getMessage() == null) {
+
+					if (envelope.getKeygroupID() == null
+							|| envelope.getMessage() == null) {
 						logger.error("Envelope incomplete");
-					} else if (!envelopeFine){
+					} else if (!envelopeFine) {
 						logger.error("Envelope broken");
 					} else {
 						incrementNumberOfReceivedMessages();
-						logger.debug("Received complete message, keygroupID: " + envelope.getKeygroupID());
-						interpetReceivedEnvelope(envelope, socket);
+						logger.debug("Received complete message, keygroupID: "
+								+ envelope.getKeygroupID());
+						interpreteReceivedEnvelope(envelope, socket);
 					}
 				}
-			}	
+			}
 
 		});
-		try {
-			Thread.sleep(500); // so that reception started before returning
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		logger.info("Started reception of incoming envelopes.");
+
+		logger.info("Started receiving incoming envelopes.");
 		return runnableFuture;
+
 	}
 
 	/**
 	 * Stops the reception of envelopes immediately.
 	 */
 	public void stopReception() {
+		executor.shutdown();
 		if (runnableFuture != null) {
 			runnableFuture = null;
 			socket.close();
 			context.term();
-		}	
-		logger.info("Reception of incoming envelopes is stopped.");
+		}
+		executor.shutdownNow();
+		logger.info("Reception of incoming envelopes is stopped."
+				+ (executor.isTerminated() ? ""
+						: " Some tasks may still be running."));
 	}
 
 	/**
@@ -243,6 +269,7 @@ public abstract class AbstractReceiver {
 		return false;
 	}
 
-	protected abstract void interpetReceivedEnvelope(Envelope envelope, ZMQ.Socket responseSocket);
+	protected abstract void interpreteReceivedEnvelope(Envelope envelope,
+			ZMQ.Socket responseSocket);
 
 }

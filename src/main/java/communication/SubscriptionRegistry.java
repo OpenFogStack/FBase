@@ -50,7 +50,7 @@ public class SubscriptionRegistry {
 		try {
 			subscriber = new Subscriber(address, port, secret, algorithm,
 					fBase, keygroupIDFilter);
-			if (subscriber.startReception() == null) {
+			if (subscriber.startReceiving() == null) {
 				throw new RuntimeException("Could not start receiving.");
 			}
 		} catch (Exception e) {

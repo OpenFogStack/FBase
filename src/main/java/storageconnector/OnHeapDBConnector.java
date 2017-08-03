@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.javatuples.Pair;
 
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -39,7 +40,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	private final Map<ClientID, ClientConfig> clientConfigs = new HashMap<>();
 
 	/** stores keygroup subscriber info */
-	private final Map<KeygroupID, String> keygroupSubscribers = new HashMap<>();
+	private final Map<KeygroupID, Pair<String, Integer>> keygroupSubscribers = new HashMap<>();
 
 	/** stores liveness info per machine */
 	private final Map<String, Long> heartbeats = new HashMap<>();
@@ -223,9 +224,16 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * java.lang.String)
 	 */
 	@Override
-	public void keyGroupSubscriberMachines_put(KeygroupID keygroup, String machine)
+	public Integer keyGroupSubscriberMachines_put(KeygroupID keygroup, String machine)
 			throws FBaseStorageConnectorException {
-		keygroupSubscribers.put(keygroup, machine);
+		Pair<String, Integer> pair = keygroupSubscribers.get(keygroup);
+		if (pair == null	) {
+			pair = new Pair<String, Integer>(machine, 1);
+		} else {
+			pair = pair.setAt1(pair.getValue1() + 1);
+		}
+		keygroupSubscribers.put(keygroup, pair);
+		return pair.getValue1();
 	}
 
 	/*
@@ -234,7 +242,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#keyGroupSubscriberMachines_listAll()
 	 */
 	@Override
-	public Map<KeygroupID, String> keyGroupSubscriberMachines_listAll()
+	public Map<KeygroupID, Pair<String, Integer>> keyGroupSubscriberMachines_listAll()
 			throws FBaseStorageConnectorException {
 		return new HashMap<>(keygroupSubscribers);
 	}

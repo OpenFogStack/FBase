@@ -6,6 +6,8 @@ package storageconnector;
 import java.util.Map;
 import java.util.Set;
 
+import org.javatuples.Pair;
+
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -190,13 +192,16 @@ public abstract class AbstractDBConnector {
 	/**
 	 * SUBSCRIBER MANAGEMENT<br>
 	 * <br>
-	 * puts into the database which machine of the node subscribes to a given keygroup
+	 * Puts into the database which machine of the node subscribes to a given keygroup.
+	 * Each keygroup - machine tuple has a version (integer), which is incremented upon each put
+	 * operation
 	 * 
 	 * @param keygroup
 	 * @param machine
+	 * @return the new version of the keygroup - machine tuple
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract void keyGroupSubscriberMachines_put(KeygroupID keygroup, String machine)
+	public abstract Integer keyGroupSubscriberMachines_put(KeygroupID keygroup, String machine)
 			throws FBaseStorageConnectorException;
 
 	/**
@@ -207,7 +212,7 @@ public abstract class AbstractDBConnector {
 	 *         putKeyGroupSubscriberMachine()
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract Map<KeygroupID, String> keyGroupSubscriberMachines_listAll()
+	public abstract Map<KeygroupID, Pair<String, Integer>> keyGroupSubscriberMachines_listAll()
 			throws FBaseStorageConnectorException;
 
 	/**

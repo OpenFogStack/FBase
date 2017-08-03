@@ -24,7 +24,8 @@ public class TaskManager {
 	private FBase fBase;
 
 	public enum TaskName {
-		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, PUT_DATA_RECORD, DELETE_DATA_RECORD, STORE_DATA_RECORD, UPDATE_NODE_CONFIG
+		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, UPDATE_KEYGROUP_SUBSCRIPTIONS, PUT_DATA_RECORD,
+		DELETE_DATA_RECORD, STORE_DATA_RECORD, UPDATE_NODE_CONFIG
 	}
 
 	public TaskManager(FBase fBase) {
@@ -71,6 +72,11 @@ public class TaskManager {
 
 	public Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
 		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, fBase));
+		return future;
+	}
+	
+	public Future<Boolean> runUpdateKeygroupSubscriptionsTask(KeygroupConfig config) {
+		Future<Boolean> future = pool.submit(new UpdateKeygroupSubscriptionsTask(config, fBase));
 		return future;
 	}
 

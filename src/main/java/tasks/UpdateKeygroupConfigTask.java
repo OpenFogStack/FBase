@@ -1,14 +1,28 @@
 package tasks;
 
 import org.apache.log4j.Logger;
+import org.javatuples.Pair;
 
 import control.FBase;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
-import model.config.NodeConfig;
-import model.config.ReplicaNodeConfig;
 import tasks.TaskManager.TaskName;
 
+/**
+ * This task stores a keygroup config in the database. Before returning, the
+ * {@link UpdateKeygroupSubscriptionsTask} if one of the following to conditions is met:
+ * 
+ * 1. the machine is the reponsible machine for the keygroups
+ * 
+ * 2. no machine is responsible for the keygroup yet
+ * 
+ * Otherwise, the subscriptions will not be updated. However, the machine responsible for the
+ * subscriptions will identify the updated due to the {@link CheckKeygroupSubscriptionsTask}
+ * which runs as a background process on each machine. TODO 1: Implement Task
+ * 
+ * @author jonathanhasenburg
+ *
+ */
 class UpdateKeygroupConfigTask extends Task<Boolean> {
 
 	private static Logger logger = Logger.getLogger(UpdateKeygroupConfigTask.class.getName());
@@ -36,36 +50,18 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 			return false;
 		}
 
-		if (config.getReplicaNodes() != null) {
-			// TODO I: one should unsubscribe from outdated replica nodes (that no longer exist)
-			logger.debug("Subscribing to replica nodes (" + config.getReplicaNodes().size() + ") "
-					+ "of config " + config.getKeygroupID());
-			for (ReplicaNodeConfig rnConfig : config.getReplicaNodes()) {
-				logger.debug("Subscribing to machines of node " + rnConfig.getNodeID());
-				// get node configs
-				NodeConfig nodeConfig = null;
-				try {
-					nodeConfig = fBase.connector.nodeConfig_get(rnConfig.getNodeID());
-					// subscribe to all machines
-					// TODO I: we currently don't load balance the subscriptions, no failover (it is
-					// just done by the machine that runs this task)
-					// TODO I: if this task is used more than once for the same keygroup config by
-					// different machines, they all subscribe to all publishers
-					// TODO I: one should not subscribe to machines of the same node
-					int publisherPort = nodeConfig.getPublisherPort();
-					for (String machine : nodeConfig.getMachines()) {
-						fBase.subscriptionRegistry.subscribeTo(machine, publisherPort,
-								config.getEncryptionSecret(), config.getEncryptionAlgorithm(),
-								config.getKeygroupID());
-					}
-				} catch (FBaseStorageConnectorException e) {
-					logger.error("Could not get node configuration from node DB for "
-							+ rnConfig.getNodeID());
-				}
-
+		// check whether subscriptions need to be updated
+		try {
+			Pair<String, Integer> responsibleMachine = fBase.connector
+					.keyGroupSubscriberMachines_listAll().get(config.getKeygroupID());
+			if (responsibleMachine == null || fBase.configuration.getMachineName()
+					.equals(responsibleMachine.getValue0())) {
+				logger.debug("Subscriptions need to be updated, initializing task");
+				fBase.taskmanager.runUpdateKeygroupSubscriptionsTask(config);
 			}
-		} else {
-			logger.debug("No replica nodes exist config " + config.getKeygroupID());
+		} catch (FBaseStorageConnectorException e) {
+			logger.fatal("Could not check whether any subscriptions need to be updated. "
+					+ "However, the configuration was stored in the database.");
 		}
 
 		return true;

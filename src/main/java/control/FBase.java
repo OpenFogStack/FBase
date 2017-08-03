@@ -27,6 +27,7 @@ public class FBase {
 	public TaskManager taskmanager = null;
 	public Publisher publisher = null;
 	public SubscriptionRegistry subscriptionRegistry = null;
+	private WebServer server = null;
 
 	public FBase(String configName) throws FBaseStorageConnectorException {
 		configuration = new Configuration(configName);
@@ -34,7 +35,7 @@ public class FBase {
 		connector.dbConnection_initiate();
 		taskmanager = new TaskManager(this);
 		if (configuration.getRestPort() > 0) {
-			WebServer server = new WebServer(this);
+			server = new WebServer(this);
 			server.startServer();
 		}
 		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort(), null, null);
@@ -44,6 +45,7 @@ public class FBase {
 
 	public void tearDown() {
 		publisher.shutdown();
+		server.stopServer();
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {

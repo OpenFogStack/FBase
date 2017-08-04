@@ -44,21 +44,27 @@ class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 			logger.debug("Subscribing to replica nodes (" + config.getReplicaNodes().size() + ")"
 					+ " of config " + config.getKeygroupID());
 			for (ReplicaNodeConfig rnConfig : config.getReplicaNodes()) {
-				// don't subscribe to own machines
+				// don't subscribe to own machines or itself
 				if (!fBase.configuration.getNodeID().equals(rnConfig.getNodeID())) {
-					logger.debug("Subscribing to machines of node " + rnConfig.getNodeID());
+					logger.debug("Subscribing to machines of node " + rnConfig.getNodeID().getID());
 					// get node configs
 					NodeConfig nodeConfig = null;
 					try {
 						nodeConfig = fBase.connector.nodeConfig_get(rnConfig.getNodeID());
-						// subscribe to all machines
-						int publisherPort = nodeConfig.getPublisherPort();
-						for (String machine : nodeConfig.getMachines()) {
-							fBase.subscriptionRegistry.subscribeTo(machine, publisherPort,
-									config.getEncryptionSecret(), 
-									config.getEncryptionAlgorithm(),
-									config.getKeygroupID());
+						if (nodeConfig != null) {
+							// subscribe to all machines
+							int publisherPort = nodeConfig.getPublisherPort();
+							for (String machine : nodeConfig.getMachines()) {
+								fBase.subscriptionRegistry.subscribeTo(machine, publisherPort,
+										config.getEncryptionSecret(),
+										config.getEncryptionAlgorithm(), config.getKeygroupID());
+							}
+						} else {
+							logger.debug(
+									"No node config existed for " + rnConfig.getNodeID().getID());
+							// TODO NS: request config from naming service
 						}
+
 					} catch (FBaseStorageConnectorException e) {
 						logger.error("Could not get node configuration from node DB for "
 								+ rnConfig.getNodeID());

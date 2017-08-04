@@ -1,5 +1,9 @@
 package tasks;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
@@ -54,12 +58,25 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 		try {
 			Pair<String, Integer> responsibleMachine = fBase.connector
 					.keyGroupSubscriberMachines_listAll().get(config.getKeygroupID());
-			if (responsibleMachine == null || fBase.configuration.getMachineName()
+			boolean updateNeeded = false;
+			if (responsibleMachine == null) {
+				logger.debug("No responsible machine set yet, initiliazing "
+						+ TaskManager.TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS + " task");
+				updateNeeded = true;
+			} else if (fBase.configuration.getMachineName()
 					.equals(responsibleMachine.getValue0())) {
-				logger.debug("Subscriptions need to be updated, initializing task");
-				fBase.taskmanager.runUpdateKeygroupSubscriptionsTask(config);
+				logger.debug("We are the responsible machine, initiliazing "
+						+ TaskManager.TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS + " task");
+				updateNeeded = true;
 			}
-		} catch (FBaseStorageConnectorException e) {
+
+			if (updateNeeded) {
+				fBase.taskmanager.runUpdateKeygroupSubscriptionsTask(config).get(1,
+						TimeUnit.SECONDS);
+			}
+		} catch (FBaseStorageConnectorException | InterruptedException | ExecutionException
+				| TimeoutException e) {
+			e.printStackTrace();
 			logger.fatal("Could not check whether any subscriptions need to be updated. "
 					+ "However, the configuration was stored in the database.");
 		}

@@ -21,7 +21,7 @@ import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.KeygroupID;
-import model.messages.datarecords.Message;
+import model.messages.Message;
 
 /**
  * 

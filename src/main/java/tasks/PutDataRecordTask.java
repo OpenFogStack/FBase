@@ -7,8 +7,8 @@ import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataRecord;
-import model.messages.datarecords.Envelope;
-import model.messages.datarecords.Message;
+import model.messages.Envelope;
+import model.messages.Message;
 import tasks.TaskManager.TaskName;
 
 /**

@@ -17,8 +17,8 @@ import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.JSONable;
 import model.data.KeygroupID;
-import model.messages.datarecords.Envelope;
-import model.messages.datarecords.Message;
+import model.messages.Envelope;
+import model.messages.Message;
 
 public class PublisherTest {
 

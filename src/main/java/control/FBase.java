@@ -45,7 +45,9 @@ public class FBase {
 
 	public void tearDown() {
 		publisher.shutdown();
-		server.stopServer();
+		if (server != null) {
+			server.stopServer();
+		}
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {

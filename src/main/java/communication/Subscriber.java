@@ -9,8 +9,8 @@ import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.messages.datarecords.Envelope;
-import model.messages.datarecords.Message;
+import model.messages.Envelope;
+import model.messages.Message;
 
 /**
  * Subscribes to data streams of envelopes of different subscribers.
@@ -21,6 +21,8 @@ import model.messages.datarecords.Message;
 public class Subscriber extends AbstractReceiver {
 
 	private static Logger logger = Logger.getLogger(Subscriber.class.getName());
+	
+	private FBase fBase;
 
 	/**
 	 * Creates a subscriber, that does not filter any messages.
@@ -32,7 +34,8 @@ public class Subscriber extends AbstractReceiver {
 	 */
 	public Subscriber(String address, int port, String secret, EncryptionAlgorithm algorithm,
 			FBase fBase) {
-		super(address, port, secret, algorithm, ZMQ.SUB, fBase);
+		super(address, port, secret, algorithm, ZMQ.SUB);
+		this.fBase = fBase;
 	}
 
 	/**
@@ -46,8 +49,9 @@ public class Subscriber extends AbstractReceiver {
 	 */
 	public Subscriber(String address, int port, String secret, EncryptionAlgorithm algorithm,
 			FBase fBase, KeygroupID keygroupIDFilter) {
-		super(address, port, secret, algorithm, ZMQ.SUB, fBase);
-		this.keygroupIDFilter = keygroupIDFilter;
+		super(address, port, secret, algorithm, ZMQ.SUB);
+		this.fBase = fBase;
+		this.filterID = keygroupIDFilter;
 	}
 
 	@Override

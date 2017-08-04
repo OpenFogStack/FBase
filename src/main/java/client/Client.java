@@ -14,7 +14,7 @@ import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.messages.datarecords.Message;
+import model.messages.Message;
 
 /**
  * A client implemantation which allows the usage of the FBase rest interface
@@ -98,7 +98,7 @@ public class Client {
 			logger.info("Running put request targeting " + target);
 			HttpResponse<String> response = Unirest.put(target).header("accept", "application/json")
 					// insert decryption here if needed
-					.queryString("keygroupID", record.getKeygroupID()).body(JSONable.toJSON(record))
+					.queryString("keygroupID", record.getKeygroupID().getID()).body(JSONable.toJSON(record))
 					.asString();
 			if (response.getStatus() == 200) {
 				m = JSONable.fromJSON(response.getBody(), Message.class);
@@ -118,7 +118,7 @@ public class Client {
 			logger.info("Running delete request targeting " + target);
 			HttpResponse<String> response = Unirest.delete(target)
 					  .header("accept", "application/json")
-					  .queryString("keygroupID", identifier.getKeygroupID())
+					  .queryString("keygroupID", identifier.getKeygroupID().getID())
 					  .body(JSONable.toJSON(identifier)) // insert encryption here if needed
 					  .asString();
 			if (response.getStatus() == 200) {

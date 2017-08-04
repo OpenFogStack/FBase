@@ -21,7 +21,7 @@ import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
-import model.messages.datarecords.Message;
+import model.messages.Message;
 
 public class SubscriberTest {
 
@@ -83,12 +83,12 @@ public class SubscriberTest {
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase);
 		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
-		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
+		publisher.sendMore(update.getDataIdentifier().getKeygroupID().getID());
 		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		m.setContent(JSONable.toJSON(update2));
-		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().toString());
+		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().getID());
 		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(2, subscriber.getNumberOfReceivedMessages());
@@ -104,12 +104,12 @@ public class SubscriberTest {
 				update.getKeygroupID());
 		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
-		publisher.sendMore(update.getDataIdentifier().getKeygroupID().toString());
+		publisher.sendMore(update.getDataIdentifier().getKeygroupID().getID());
 		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		m.setContent(JSONable.toJSON(update2));
-		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().toString());
+		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().getID());
 		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());

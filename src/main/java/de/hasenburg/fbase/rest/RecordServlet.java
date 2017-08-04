@@ -22,7 +22,7 @@ import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.messages.datarecords.Message;
+import model.messages.Message;
 
 /**
  * 

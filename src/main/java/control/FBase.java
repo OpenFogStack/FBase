@@ -11,6 +11,7 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import storageconnector.AbstractDBConnector;
+import storageconnector.ConfigAccessHelper;
 import storageconnector.OnHeapDBConnector;
 import tasks.TaskManager;
 
@@ -24,6 +25,7 @@ public class FBase {
 
 	public Configuration configuration = null;
 	public AbstractDBConnector connector = null;
+	public ConfigAccessHelper configAccessHelper = null;
 	public TaskManager taskmanager = null;
 	public Publisher publisher = null;
 	public SubscriptionRegistry subscriptionRegistry = null;
@@ -32,6 +34,7 @@ public class FBase {
 	public FBase(String configName) throws FBaseStorageConnectorException {
 		configuration = new Configuration(configName);
 		connector = new OnHeapDBConnector();
+		configAccessHelper = new ConfigAccessHelper(this);
 		connector.dbConnection_initiate();
 		taskmanager = new TaskManager(this);
 		if (configuration.getRestPort() > 0) {

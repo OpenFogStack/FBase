@@ -83,13 +83,15 @@ public class SubscriberTest {
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase);
 		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
+		m.encryptFields(secret, algorithm);
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().getID());
-		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
+		publisher.send(JSONable.toJSON(m));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		m.setContent(JSONable.toJSON(update2));
+		m.encryptFields(secret, algorithm);
 		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().getID());
-		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
+		publisher.send(JSONable.toJSON(m));
 		Thread.sleep(500);
 		assertEquals(2, subscriber.getNumberOfReceivedMessages());
 		logger.debug("Finished testSubscribe.");
@@ -104,8 +106,9 @@ public class SubscriberTest {
 				update.getKeygroupID());
 		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
+		m.encryptFields(secret, algorithm);
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().getID());
-		publisher.send(CryptoProvider.encrypt(JSONable.toJSON(m), secret, algorithm));
+		publisher.send(JSONable.toJSON(m));
 		Thread.sleep(500);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		m.setContent(JSONable.toJSON(update2));

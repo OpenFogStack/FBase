@@ -122,10 +122,12 @@ public class TwoNodeScenario {
 
 		Thread.sleep(400);
 		client.runPutRecordRequest("http://localhost", 8081, record);
+		Thread.sleep(1000);
 
 		DataRecord recordAtNode1 = fbase1.connector.dataRecords_get(record.getDataIdentifier());
 		DataRecord recordAtNode2 = fbase2.connector.dataRecords_get(record.getDataIdentifier());
-		Thread.sleep(2000);
+		
+		logger.debug("CHECK:" + recordAtNode1.getDataID() + " - " + recordAtNode2.getDataID());
 		
 		assertEquals(record, recordAtNode1);
 		assertEquals(record, recordAtNode2);
@@ -133,9 +135,12 @@ public class TwoNodeScenario {
 		// delete data
 
 		client.runDeleteRecordRequest("http://localhost", 8081, record.getDataIdentifier());
+		Thread.sleep(1000);
 
 		assertNull(fbase1.connector.dataRecords_get(record.getDataIdentifier()));
 		assertNull(fbase2.connector.dataRecords_get(record.getDataIdentifier()));
+		
+		logger.debug("CHECK: " + fbase2.connector.dataRecords_get(record.getDataIdentifier()));
 
 		logger.debug("Finished testOnePublish.");
 	}

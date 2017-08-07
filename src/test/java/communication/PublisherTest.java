@@ -1,11 +1,11 @@
 package communication;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.zeromq.ZMQ;
 
-import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.JSONable;
 import model.data.KeygroupID;
@@ -30,7 +29,7 @@ public class PublisherTest {
 
 	@Before
 	public void setUp() throws Exception {
-		publisher = new Publisher("tcp://localhost", 6204, secret, algorithm);
+		publisher = new Publisher("tcp://localhost", 6204);
 	}
 
 	@After
@@ -56,12 +55,12 @@ public class PublisherTest {
 		Thread t = new Thread(new SubscribeHelper(e));
 		t.start();
 		Thread.sleep(400);
-		publisher.send(e);
+		publisher.send(e, secret, algorithm);
 		t.join();
 		logger.debug("Finished testPublishOne.");
 	}
 
-	@Test
+	 @Test
 	public void testPublishTwo() throws InterruptedException {
 		logger.debug("-------Starting testPublishTwo-------");
 		Message m = new Message();
@@ -72,7 +71,7 @@ public class PublisherTest {
 		t1.start();
 		t2.start();
 		Thread.sleep(400);
-		publisher.send(e);
+		publisher.send(e, secret, algorithm);
 		t1.join();
 		t2.join();
 		logger.debug("Finished testPublishTwo.");
@@ -81,20 +80,23 @@ public class PublisherTest {
 	@Test
 	public void testPublishMany() throws InterruptedException {
 		logger.debug("-------Starting testPublishMany-------");
-		Message m = new Message();
-		m.setContent("Test content");
-		Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
 		List<Thread> list = new ArrayList<Thread>();
-		for (int i = 0; i < 100; i++) {
+		List<Envelope> listE = new ArrayList<Envelope>();
+		int c = 20;
+		for (int i = 0; i < c; i++) {
+			Message m = new Message();
+			m.setContent("Test content");
+			Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
 			Thread t = new Thread(new SubscribeHelper(e));
 			list.add(t);
+			listE.add(e);
 			t.start();
 		}
-		Thread.sleep(400);
-		for (int i = 0; i < 100; i++) {
-			publisher.send(e);
+		Thread.sleep(1000);
+		for (int i = 0; i < c; i++) {
+			publisher.send(listE.get(i), secret, algorithm);
 		}
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < c; i++) {
 			list.get(i).join();
 		}
 		logger.debug("Finished testPublishMany.");
@@ -116,12 +118,13 @@ public class PublisherTest {
 			subscriber.subscribe(e.getKeygroupID().toString().getBytes());
 			String namespace = subscriber.recvStr(ZMQ.SNDMORE);
 			String received = subscriber.recvStr();
-			assertNotEquals(received, e.getMessage().getContent());
-			String content = CryptoProvider.decrypt(received, secret, algorithm);
+			Message m = JSONable.fromJSON(received, Message.class);
 			subscriber.close();
 			context.term();
 			assertEquals(namespace, e.getKeygroupID().toString());
-			assertEquals(content, JSONable.toJSON(e.getMessage()));
+			assertEquals(JSONable.toJSON(m), JSONable.toJSON(e.getMessage()));
+			m.decryptFields(secret, algorithm);
+			assertNotEquals(m, e.getMessage().getContent());
 		}
 
 	}

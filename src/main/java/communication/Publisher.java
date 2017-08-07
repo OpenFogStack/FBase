@@ -3,7 +3,6 @@ package communication;
 import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 
-import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.JSONable;
 import model.messages.Envelope;
@@ -21,38 +20,26 @@ public class Publisher extends AbstractSender {
 	/**
 	 * Initializes the Publisher, it then can be used without further modifications.
 	 */
-	public Publisher(String address, int port, String secret, EncryptionAlgorithm algorithm) {
-		super(address, port, secret, algorithm, ZMQ.PUB);
+	public Publisher(String address, int port) {
+		super(address, port, ZMQ.PUB);
 	}
 
 	/**
-	 * Publishes a new envelope to all subscribers
-	 * 
-	 * @param envelope - the published envelope
-	 * @return null
-	 */
-	@Override
-	public String send(Envelope envelope) {
-		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID().getID());
-		sender.sendMore(envelope.getKeygroupID().getID());
-		sender.send(
-				CryptoProvider.encrypt(JSONable.toJSON(envelope.getMessage()), secret, algorithm));
-		return null;
-	}
-
-	/**
-	 * Publishes a new envelope to all subscribers
+	 * Publishes a new envelope to all subscribers and encrypts the message with the given secret and
+	 * algorithm
 	 * 
 	 * @param envelope - the published envelope
 	 * @param secret - the secret used for encryption
 	 * @param algorithm - the algorithm used for encryption
+	 * @return null
 	 */
-	public void sendKeygroupIDData(Envelope envelope, String secret,
-			EncryptionAlgorithm algorithm) {
+	@Override
+	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm) {
 		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID().getID());
 		sender.sendMore(envelope.getKeygroupID().getID());
-		sender.send(
-				CryptoProvider.encrypt(JSONable.toJSON(envelope.getMessage()), secret, algorithm));
+		envelope.getMessage().encryptFields(secret, algorithm);
+		sender.send(JSONable.toJSON(envelope.getMessage()));
+		return null;
 	}
 
 }

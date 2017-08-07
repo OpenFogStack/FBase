@@ -7,6 +7,7 @@ import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataRecord;
+import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
 import tasks.TaskManager.TaskName;
@@ -48,12 +49,12 @@ class PutDataRecordTask extends Task<Boolean> {
 
 		// create envelope
 		Message m = new Message();
-		m.setTextualResponse("PUT");
+		m.setCommand(Command.PUT_DATA_RECORD);
 		m.setContent(JSONable.toJSON(record));
 		Envelope e = new Envelope(record.getKeygroupID(), m);
 
 		// publish data
-		fBase.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(),
+		fBase.publisher.send(e, config.getEncryptionSecret(),
 				config.getEncryptionAlgorithm());
 
 		return true;

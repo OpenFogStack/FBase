@@ -38,7 +38,7 @@ public class FBase {
 			server = new WebServer(this);
 			server.startServer();
 		}
-		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort(), null, null);
+		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort());
 		subscriptionRegistry = new SubscriptionRegistry(this);
 
 	}

@@ -79,7 +79,7 @@ public class RecordListServlet extends HttpServlet {
 
 			// 200 OK
 			resp.setStatus(200);
-			m.setTextualResponse("Success");
+			m.setTextualInfo("Success");
 			m.setContent(CryptoProvider.encrypt(IDJson, config.getEncryptionSecret(),
 					config.getEncryptionAlgorithm()));
 			m.setContent(IDJson); // Remove to encrypt

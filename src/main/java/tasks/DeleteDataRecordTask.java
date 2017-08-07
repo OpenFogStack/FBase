@@ -8,13 +8,14 @@ import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
+import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
 import tasks.TaskManager.TaskName;
 
 /**
  * This task deletes a {@link DataRecord} from the node database using the default database connector.
- * Furthermore, it instructs the publisher to forward the delete request.
+ * Furthermore, it instructs the publisher to forward the delete request if a flag has been set.
  * 
  * @author jonathanhasenburg
  */
@@ -23,10 +24,12 @@ class DeleteDataRecordTask extends Task<Boolean> {
 	private static Logger logger = Logger.getLogger(DeleteDataRecordTask.class.getName());
 	
 	private DataIdentifier identifier;
+	private boolean publish;
 
-	public DeleteDataRecordTask(DataIdentifier identifier, FBase fBase) {
+	public DeleteDataRecordTask(DataIdentifier identifier, FBase fBase, boolean publish) {
 		super(TaskName.DELETE_DATA_RECORD, fBase);
 		this.identifier = identifier;
+		this.publish = publish;
 	}
 	
 	/**
@@ -47,14 +50,16 @@ class DeleteDataRecordTask extends Task<Boolean> {
 			return false;
 		}
 		
-		// create envelope
-		Message m = new Message();
-		m.setTextualResponse("DELETE");
-		m.setContent(JSONable.toJSON(identifier));
-		Envelope e = new Envelope(identifier.getKeygroupID(), m);
-		
-		// publish data
-		fBase.publisher.sendKeygroupIDData(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+		if (publish) {
+			// create envelope
+			Message m = new Message();
+			m.setCommand(Command.DELETE_DATA_RECORD);
+			m.setContent(JSONable.toJSON(identifier));
+			Envelope e = new Envelope(identifier.getKeygroupID(), m);
+			
+			// publish data
+			fBase.publisher.send(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+		}
 		
 		return true;
 	}

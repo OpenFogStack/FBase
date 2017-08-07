@@ -9,6 +9,7 @@ import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
+import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
 
@@ -23,6 +24,9 @@ public class Subscriber extends AbstractReceiver {
 	private static Logger logger = Logger.getLogger(Subscriber.class.getName());
 	
 	private FBase fBase;
+	
+	private String secret;
+	private EncryptionAlgorithm algorithm;
 
 	/**
 	 * Creates a subscriber, that does not filter any messages.
@@ -34,8 +38,10 @@ public class Subscriber extends AbstractReceiver {
 	 */
 	public Subscriber(String address, int port, String secret, EncryptionAlgorithm algorithm,
 			FBase fBase) {
-		super(address, port, secret, algorithm, ZMQ.SUB);
+		super(address, port, ZMQ.SUB);
 		this.fBase = fBase;
+		this.secret = secret;
+		this.algorithm = algorithm;
 	}
 
 	/**
@@ -49,7 +55,9 @@ public class Subscriber extends AbstractReceiver {
 	 */
 	public Subscriber(String address, int port, String secret, EncryptionAlgorithm algorithm,
 			FBase fBase, KeygroupID keygroupIDFilter) {
-		super(address, port, secret, algorithm, ZMQ.SUB);
+		super(address, port, ZMQ.SUB);
+		this.secret = secret;
+		this.algorithm = algorithm;
 		this.fBase = fBase;
 		this.filterID = keygroupIDFilter;
 	}
@@ -59,23 +67,24 @@ public class Subscriber extends AbstractReceiver {
 		Message m = new Message();
 		try {
 			// Code to interpret message
-			fBase.taskmanager.runLogTask(envelope.getMessage().getTextualResponse() + " - "
+			envelope.getMessage().decryptFields(secret, algorithm);
+			fBase.taskmanager.runLogTask(envelope.getMessage().getCommand() + " - "
 					+ envelope.getMessage().getContent());
-			if ("PUT".equals(envelope.getMessage().getTextualResponse())) {
+			if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
 				DataRecord update = JSONable.fromJSON(envelope.getMessage().getContent(),
 						DataRecord.class);
 				fBase.taskmanager.runStoreDataRecordTask(update);
-			} else if ("DELETE".equals(envelope.getMessage().getTextualResponse())) {
+			} else if (Command.DELETE_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
 				DataIdentifier identifier = JSONable.fromJSON(envelope.getMessage().getContent(),
 						DataIdentifier.class);
-				fBase.taskmanager.runDeleteDataRecordTask(identifier);
+				fBase.taskmanager.runDeleteDataRecordTask(identifier, false);
 			}
-			m.setTextualResponse("Message processed");
+			m.setTextualInfo("Message processed");
 		} catch (IllegalArgumentException e) {
 			logger.warn(e.getMessage());
-			m.setTextualResponse(e.getMessage());
+			m.setTextualInfo(e.getMessage());
 		}
-		logger.debug(m.getTextualResponse());
+		logger.debug(m.getTextualInfo());
 		// Do not use the responseSocket, because a ZMQ.SUB cannot answer
 	}
 

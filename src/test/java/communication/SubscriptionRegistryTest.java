@@ -39,15 +39,14 @@ public class SubscriptionRegistryTest {
 		Subscriber s = subscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret",
 				EncryptionAlgorithm.AES, null);
 		assertEquals(1, subscriptionRegistry.getNumberOfActiveSubscriptions());
-		Publisher publisher = new Publisher("tcp://localhost", 8081, "secret",
-				EncryptionAlgorithm.AES);
+		Publisher publisher = new Publisher("tcp://localhost", 8081);
 		Thread.sleep(200);
 		Message m = new Message();
 		DataRecord record = new DataRecord();
 		record.setValueWithoutKey("Test Value");
 		m.setContent(JSONable.toJSON(record));
 		Envelope e = new Envelope(new KeygroupID("app", "tenant", "group"), m);
-		publisher.send(e);
+		publisher.send(e, "secret", EncryptionAlgorithm.AES);
 		Thread.sleep(200);
 		assertEquals(1, s.getNumberOfReceivedMessages());
 		logger.debug("Finished testSubscribe.");

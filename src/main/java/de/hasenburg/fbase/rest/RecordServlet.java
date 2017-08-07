@@ -76,7 +76,7 @@ public class RecordServlet extends HttpServlet {
 
 			// 200 OK
 			resp.setStatus(200);
-			m.setTextualResponse("Success");
+			m.setTextualInfo("Success");
 			m.setContent(CryptoProvider.encrypt(JSONable.toJSON(record),
 					config.getEncryptionSecret(), config.getEncryptionAlgorithm()));
 			m.setContent(JSONable.toJSON(record)); // remove to encrypt
@@ -143,7 +143,7 @@ public class RecordServlet extends HttpServlet {
 
 			// 200 OK
 			resp.setStatus(200);
-			m.setTextualResponse("Success");
+			m.setTextualInfo("Success");
 			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
@@ -197,7 +197,7 @@ public class RecordServlet extends HttpServlet {
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
 			}
 
-			Future<Boolean> future = fBase.taskmanager.runDeleteDataRecordTask(dataIdentifier);
+			Future<Boolean> future = fBase.taskmanager.runDeleteDataRecordTask(dataIdentifier, true);
 
 			// 404 Not Found
 			boolean success = future.get(5, TimeUnit.SECONDS);
@@ -206,7 +206,7 @@ public class RecordServlet extends HttpServlet {
 
 			// 200 OK
 			resp.setStatus(200);
-			m.setTextualResponse("Success");
+			m.setTextualInfo("Success");
 			w.write(JSONable.toJSON(m));
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());

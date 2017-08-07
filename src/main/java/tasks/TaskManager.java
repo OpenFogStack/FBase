@@ -90,8 +90,8 @@ public class TaskManager {
 		return future;
 	}
 
-	public Future<Boolean> runDeleteDataRecordTask(DataIdentifier identifier) {
-		Future<Boolean> future = pool.submit(new DeleteDataRecordTask(identifier, fBase));
+	public Future<Boolean> runDeleteDataRecordTask(DataIdentifier identifier, boolean publish) {
+		Future<Boolean> future = pool.submit(new DeleteDataRecordTask(identifier, fBase, publish));
 		return future;
 	}
 

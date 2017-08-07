@@ -5,6 +5,9 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -100,41 +103,40 @@ public class TwoNodeScenario {
 	}
 
 	@Test
-	public void testOnePublish() throws InterruptedException, FBaseStorageConnectorException {
+	public void testOnePublish() throws InterruptedException, FBaseStorageConnectorException,
+			ExecutionException, TimeoutException {
 		logger.debug("-------Starting testOnePublish-------");
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2);
-		Thread.sleep(2000);
-		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig);
-		Thread.sleep(2000);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");
 
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1);
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2);
-		Thread.sleep(2000);
-		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig);
-		Thread.sleep(2000);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase2 ready");
 
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "X35"));
 		record.setValueWithoutKey("Test value");
 
+		Thread.sleep(400);
 		client.runPutRecordRequest("http://localhost", 8081, record);
 
 		DataRecord recordAtNode1 = fbase1.connector.dataRecords_get(record.getDataIdentifier());
 		DataRecord recordAtNode2 = fbase2.connector.dataRecords_get(record.getDataIdentifier());
-
+		Thread.sleep(2000);
+		
 		assertEquals(record, recordAtNode1);
 		assertEquals(record, recordAtNode2);
-		
+
 		// delete data
-		
+
 		client.runDeleteRecordRequest("http://localhost", 8081, record.getDataIdentifier());
-		
+
 		assertNull(fbase1.connector.dataRecords_get(record.getDataIdentifier()));
 		assertNull(fbase2.connector.dataRecords_get(record.getDataIdentifier()));
-		
+
 		logger.debug("Finished testOnePublish.");
 	}
 

@@ -49,8 +49,8 @@ public class RecordServlet extends HttpServlet {
 		logger.debug("Received get request with query string " + req.getQueryString());
 
 		PrintWriter w = resp.getWriter();
-		DataIdentifier dataIdentifier = DataIdentifier
-				.createFromString((req.getParameter("dataIdentifier")));
+		DataIdentifier dataIdentifier =
+				DataIdentifier.createFromString((req.getParameter("dataIdentifier")));
 		Message m = new Message();
 
 		try {
@@ -62,7 +62,8 @@ public class RecordServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			DataRecord record = null;
 			try {
-				config = fBase.connector.keygroupConfig_get(dataIdentifier.getKeygroupID());
+				config = fBase.connector.keygroupConfig_get(dataIdentifier.getKeygroupID())
+						.getValue0();
 				record = fBase.connector.dataRecords_get(dataIdentifier);
 				if (config == null || record == null) {
 					// 404 Not Found
@@ -109,7 +110,7 @@ public class RecordServlet extends HttpServlet {
 
 			KeygroupConfig config = null;
 			try {
-				config = fBase.connector.keygroupConfig_get(keygroupID);
+				config = fBase.connector.keygroupConfig_get(keygroupID).getValue0();
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -120,9 +121,10 @@ public class RecordServlet extends HttpServlet {
 			}
 
 			// decrypt data record
-			String body = req.getReader().lines()
-					.collect(Collectors.joining(System.lineSeparator()));
-			// String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(),
+			String body =
+					req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+			// String decryptedRequest = CryptoProvider.decrypt(body,
+			// config.getEncryptionSecret(),
 			// config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
 			DataRecord record = JSONable.fromJSON(decryptedRequest, DataRecord.class);
@@ -171,7 +173,7 @@ public class RecordServlet extends HttpServlet {
 
 			KeygroupConfig config = null;
 			try {
-				config = fBase.connector.keygroupConfig_get(keygroupID);
+				config = fBase.connector.keygroupConfig_get(keygroupID).getValue0();
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -182,13 +184,14 @@ public class RecordServlet extends HttpServlet {
 			}
 
 			// decrypt data record
-			String body = req.getReader().lines()
-					.collect(Collectors.joining(System.lineSeparator()));
-			// String decryptedRequest = CryptoProvider.decrypt(body, config.getEncryptionSecret(),
+			String body =
+					req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+			// String decryptedRequest = CryptoProvider.decrypt(body,
+			// config.getEncryptionSecret(),
 			// config.getEncryptionAlgorithm());
 			String decryptedRequest = body; // Remove to decrypt
-			DataIdentifier dataIdentifier = JSONable.fromJSON(decryptedRequest,
-					DataIdentifier.class);
+			DataIdentifier dataIdentifier =
+					JSONable.fromJSON(decryptedRequest, DataIdentifier.class);
 			if (dataIdentifier == null) {
 				// 400 Bad Request
 				throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);

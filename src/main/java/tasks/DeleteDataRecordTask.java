@@ -40,7 +40,7 @@ class DeleteDataRecordTask extends Task<Boolean> {
 		// get keygroup config and delete from node database
 		KeygroupConfig config = null;	
 		try {
-			config = fBase.connector.keygroupConfig_get(identifier.getKeygroupID());
+			config = fBase.connector.keygroupConfig_get(identifier.getKeygroupID()).getValue0();
 			fBase.connector.dataRecords_delete(identifier);
 		} catch (FBaseStorageConnectorException e) {
 			logger.error(e.getMessage());

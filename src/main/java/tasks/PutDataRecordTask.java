@@ -39,7 +39,7 @@ class PutDataRecordTask extends Task<Boolean> {
 		// get keygroup config and put into database
 		KeygroupConfig config = null;
 		try {
-			config = fBase.connector.keygroupConfig_get(record.getKeygroupID());
+			config = fBase.connector.keygroupConfig_get(record.getKeygroupID()).getValue0();
 			fBase.connector.dataRecords_put(record);
 		} catch (FBaseStorageConnectorException e) {
 			logger.error(e.getMessage());

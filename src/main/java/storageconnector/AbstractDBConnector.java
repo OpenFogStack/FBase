@@ -22,8 +22,8 @@ import exceptions.FBaseStorageConnectorException;
  * This abstract defines the operations for connecting to storageconnector systems in FBase.
  * Subclasses define concrete behavior for actual storageconnector systems. <br>
  * <br>
- * <b>Please, note that subclasses must provide a no-arguments constructor which will be used to
- * instantiate them<b>
+ * <b>Please, note that subclasses must provide a no-arguments constructor which will be used
+ * to instantiate them<b>
  * 
  * @author Dave
  */
@@ -101,7 +101,8 @@ public abstract class AbstractDBConnector {
 	 * 
 	 * @param keygroupID identifier of the keygroup
 	 * @return true if the keygroup exists after the method call, false otherwise
-	 * @throws FBaseStorageConnectorException if an error occured or the keygroup already existed.
+	 * @throws FBaseStorageConnectorException if an error occured or the keygroup already
+	 *             existed.
 	 */
 	public abstract boolean keygroup_create(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
@@ -121,25 +122,28 @@ public abstract class AbstractDBConnector {
 	/**
 	 * KEYGROUP CONFIG<br>
 	 * <br>
-	 * stores configuration details of a keygroup
+	 * Stores configuration details of a keygroup Each keygroup - config tuple has a version
+	 * (integer), which is incremented upon each put operation
 	 * 
 	 * @param keygroupID identifier of the keygroup
 	 * @param config configuration data
+	 * @return the new version of the keygroup - config tuple
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract void keygroupConfig_put(KeygroupID keygroupID, KeygroupConfig config)
+	public abstract Integer keygroupConfig_put(KeygroupID keygroupID, KeygroupConfig config)
 			throws FBaseStorageConnectorException;
 
 	/**
 	 * KEYGROUP CONFIG<br>
 	 * <br>
-	 * retrieves configuration details of a keygroup
+	 * Retrieves configuration details of a keygroup as stored by keygroupConfig_put()
 	 * 
 	 * @param keygroupID identifier of the keygroup
-	 * @return the {@link KeygroupConfig} or null if none was found
+	 * @return the {@link KeygroupConfig} - version pair or a pair with two null values if
+	 *         nothing was found
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
+	public abstract Pair<KeygroupConfig, Integer> keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
 
 	/**
@@ -192,8 +196,8 @@ public abstract class AbstractDBConnector {
 	/**
 	 * SUBSCRIBER MANAGEMENT<br>
 	 * <br>
-	 * Puts into the database which machine of the node subscribes to a given keygroup.
-	 * Each keygroup - machine tuple has a version (integer), which is incremented upon each put
+	 * Puts into the database which machine of the node subscribes to a given keygroup. Each
+	 * keygroup - machine tuple has a version (integer), which is incremented upon each put
 	 * operation
 	 * 
 	 * @param keygroup
@@ -208,8 +212,8 @@ public abstract class AbstractDBConnector {
 	 * SUBSCRIBER MANAGEMENT<br>
 	 * <br>
 	 * 
-	 * @return all mappings for keygroup ids to their respective subscriber machines as stored by
-	 *         putKeyGroupSubscriberMachine()
+	 * @return all mappings for keygroup ids to their respective subscriber machines as stored
+	 *         by keyGroupSubscriberMachines_put()
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
 	public abstract Map<KeygroupID, Pair<String, Integer>> keyGroupSubscriberMachines_listAll()
@@ -240,8 +244,8 @@ public abstract class AbstractDBConnector {
 	 * HEARTBEATS<br>
 	 * <br>
 	 * 
-	 * @return a mapping of all machine IDs within this node and the last time they each reported to
-	 *         be alive.
+	 * @return a mapping of all machine IDs within this node and the last time they each
+	 *         reported to be alive.
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
 	public abstract Map<String, Long> heartbeats_getAll() throws FBaseStorageConnectorException;

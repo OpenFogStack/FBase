@@ -12,6 +12,7 @@ import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
+import model.JSONable;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
 import model.data.ClientID;
@@ -64,13 +65,31 @@ public class ServletHelperMethods {
 			String secret, EncryptionAlgorithm algorithm) throws IOException, FBaseRestException {
 		String body =
 				request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-		if (secret != null) {
+		if (secret != null && algorithm != null) {
 			body = CryptoProvider.decrypt(body, secret, algorithm);
 		}
 		ClientID actually = new ClientID(body);
 		if (!expected.equals(actually)) {
 			throw new FBaseRestException(FBaseRestException.NOT_AUTHORIZED, 401);
 		}
+	}
+
+	/*
+	 * Body Parsing
+	 */
+
+	public static KeygroupConfig parseBodyToConfig(HttpServletRequest req,
+			KeygroupConfig keygroupConfig, String secret, EncryptionAlgorithm algorithm)
+			throws IOException, FBaseRestException {
+		String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+		if (secret != null && algorithm != null) {
+			body = CryptoProvider.decrypt(body, secret, algorithm);
+		}
+		keygroupConfig = JSONable.fromJSON(body, KeygroupConfig.class);
+		if (keygroupConfig == null) {
+			throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
+		}
+		return keygroupConfig;
 	}
 
 	/*

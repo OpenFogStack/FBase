@@ -23,6 +23,8 @@ public class FBaseRestException extends FBaseException {
 	public static final String DELETION_FAILURE = "Data record could not be deleted";
 	public static final String NOT_AUTHORIZED =
 			"You miss authorization to access the requested data";
+	public static final String DATA_DOES_NOT_MATCH =
+			"The query parameter does not match the data fround in the body";
 
 	private static final long serialVersionUID = 1L;
 

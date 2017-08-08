@@ -162,6 +162,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 		if (pair == null	) {
 			pair = new Pair<KeygroupConfig, Integer>(config, 1);
 		} else {
+			pair = pair.setAt0(config);
 			pair = pair.setAt1(pair.getValue1() + 1);
 		}
 		keygroupConfigs.put(id, pair);

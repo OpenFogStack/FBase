@@ -39,15 +39,15 @@ public class KeygroupConfigServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-
+		// TODO I: Keygroup secrets should not be returned
+		// TODO I: If unauthorized, some fields are fine to return
 		try {
 			// prepare
 			ServletHelperMethods.logRequest(logger, req);
 			PrintWriter w = resp.getWriter();
 
 			// get query parameters (returns 400)
-			KeygroupID keygroupID =
-					ServletHelperMethods.parseParameter(req, new KeygroupID());
+			KeygroupID keygroupID = ServletHelperMethods.parseParameter(req, new KeygroupID());
 			ClientID clientID = ServletHelperMethods.parseParameter(req, new ClientID());
 
 			// authorize request (returns 404)
@@ -55,15 +55,14 @@ public class KeygroupConfigServlet extends HttpServlet {
 			ClientConfig clientConfig = ServletHelperMethods.getConfig(clientID, fBase);
 
 			// gather requested data (returns 401 and 404)
-			KeygroupConfig keygroupConfig =
-					ServletHelperMethods.getConfig(keygroupID, fBase);
+			KeygroupConfig keygroupConfig = ServletHelperMethods.getConfig(keygroupID, fBase);
 			if (!keygroupConfig.getClients().contains(clientID)) {
 				throw new FBaseRestException(FBaseRestException.NOT_AUTHORIZED, 401);
 			}
 
 			// answer (returns 200)
 			resp.setStatus(200);
-			w.write(JSONable.toJSON(keygroupConfig)); //encrypt using clientConfig data if required
+			w.write(JSONable.toJSON(keygroupConfig)); // encrypt using clientConfig data
 		} catch (FBaseRestException e) {
 			logger.error(e.getMessage());
 			resp.sendError(e.getHttpErrorCode(), e.getMessage());
@@ -73,6 +72,43 @@ public class KeygroupConfigServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		try {
+			// prepare
+			ServletHelperMethods.logRequest(logger, req);
+
+			// get query parameters (returns 400)
+			KeygroupID keygroupID = ServletHelperMethods.parseParameter(req, new KeygroupID());
+			ClientID clientID = ServletHelperMethods.parseParameter(req, new ClientID());
+
+			// authorize request (returns 404)
+			@SuppressWarnings("unused")
+			ClientConfig clientConfig = ServletHelperMethods.getConfig(clientID, fBase);
+
+			// read body (returns 400)
+			KeygroupConfig newConfig =
+					ServletHelperMethods.parseBodyToConfig(req, new KeygroupConfig(), null, null);
+			if (!keygroupID.equals(newConfig.getKeygroupID())) {
+				throw new FBaseRestException(FBaseRestException.DATA_DOES_NOT_MATCH, 400);
+			}
+			
+			// TODO NS send config to naming service 
+			throw new FBaseRestException("Not yet implemented", 500);
+			
+			// answer (returns 200)
+			// resp.setStatus(200);
+		} catch (FBaseRestException e) {
+			logger.error(e.getMessage());
+			resp.sendError(e.getHttpErrorCode(), e.getMessage());
+		} catch (Exception e) {
+			// 500 Internal Server Error
+			resp.sendError(500);
+			e.printStackTrace();
+		}
 	}
 
 }

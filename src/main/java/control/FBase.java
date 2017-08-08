@@ -5,8 +5,10 @@ import communication.SubscriptionRegistry;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import de.hasenburg.fbase.rest.WebServer;
 import exceptions.FBaseStorageConnectorException;
+import model.config.ClientConfig;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
+import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
@@ -58,10 +60,15 @@ public class FBase {
 		}
 	}
 
-	public void fillWithData() {
+	public void fillWithData() throws FBaseStorageConnectorException {
+		ClientConfig clientConfig = new ClientConfig();
+		clientConfig.setClientID(new ClientID("C-1"));
+		connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
+		
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
 		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"),
 				"secret", EncryptionAlgorithm.AES);
+		config.addClient(clientConfig.getClientID());
 		taskmanager.runUpdateKeygroupConfigTask(config);
 
 		NodeConfig nodeConfig = new NodeConfig();

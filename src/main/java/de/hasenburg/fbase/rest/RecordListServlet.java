@@ -54,7 +54,7 @@ public class RecordListServlet extends HttpServlet {
 		try {
 			if (keygroupID == null) {
 				// 400 Bad Request
-				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
+				throw new FBaseRestException(FBaseRestException.KEYGROUPID_MISSING, 400);
 			}
 
 			KeygroupConfig config = null;

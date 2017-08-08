@@ -20,7 +20,7 @@ class UpdateNodeConfigTask extends Task<Boolean> {
 
 	@Override
 	public Boolean executeFunctionality() {
-
+		
 		// store config in database
 		try {
 			fBase.connector.nodeConfig_put(config.getNodeID(), config);

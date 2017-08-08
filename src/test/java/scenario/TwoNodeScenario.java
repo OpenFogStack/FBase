@@ -90,7 +90,7 @@ public class TwoNodeScenario {
 		fbase1 = null;
 		fbase2 = null;
 		client = null;
-		Thread.sleep(2000);
+		Thread.sleep(500);
 		logger.debug("\n");
 	}
 
@@ -120,9 +120,7 @@ public class TwoNodeScenario {
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "X35"));
 		record.setValueWithoutKey("Test value");
 
-		Thread.sleep(400);
 		client.runPutRecordRequest("http://localhost", 8081, record);
-		Thread.sleep(1000);
 
 		DataRecord recordAtNode1 = fbase1.connector.dataRecords_get(record.getDataIdentifier());
 		DataRecord recordAtNode2 = fbase2.connector.dataRecords_get(record.getDataIdentifier());
@@ -135,7 +133,6 @@ public class TwoNodeScenario {
 		// delete data
 
 		client.runDeleteRecordRequest("http://localhost", 8081, record.getDataIdentifier());
-		Thread.sleep(1000);
 
 		assertNull(fbase1.connector.dataRecords_get(record.getDataIdentifier()));
 		assertNull(fbase2.connector.dataRecords_get(record.getDataIdentifier()));

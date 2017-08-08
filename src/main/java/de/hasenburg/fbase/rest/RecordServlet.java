@@ -62,7 +62,7 @@ public class RecordServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			DataRecord record = null;
 			try {
-				config = fBase.connector.keygroupConfig_get(dataIdentifier.getKeygroupID())
+				config = fBase.configAccessHelper.keygroupConfig_get(dataIdentifier.getKeygroupID())
 						.getValue0();
 				record = fBase.connector.dataRecords_get(dataIdentifier);
 				if (config == null || record == null) {
@@ -105,12 +105,12 @@ public class RecordServlet extends HttpServlet {
 		try {
 			if (keygroupID == null) {
 				// 400 Bad Request
-				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
+				throw new FBaseRestException(FBaseRestException.KEYGROUPID_MISSING, 400);
 			}
 
 			KeygroupConfig config = null;
 			try {
-				config = fBase.connector.keygroupConfig_get(keygroupID).getValue0();
+				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID).getValue0();
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -134,7 +134,7 @@ public class RecordServlet extends HttpServlet {
 			}
 
 			// store data record
-			Future<Boolean> future = fBase.taskmanager.runPutDataRecordTask(record);
+			Future<Boolean> future = fBase.taskmanager.runPutDataRecordTask(record, true);
 
 			// 404 Not Found
 			boolean success = future.get(5, TimeUnit.SECONDS);
@@ -168,12 +168,12 @@ public class RecordServlet extends HttpServlet {
 		try {
 			if (keygroupID == null) {
 				// 400 Bad Request
-				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
+				throw new FBaseRestException(FBaseRestException.KEYGROUPID_MISSING, 400);
 			}
 
 			KeygroupConfig config = null;
 			try {
-				config = fBase.connector.keygroupConfig_get(keygroupID).getValue0();
+				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID).getValue0();
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);

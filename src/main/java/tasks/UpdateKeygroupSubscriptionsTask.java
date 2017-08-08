@@ -50,7 +50,7 @@ class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 					// get node configs
 					NodeConfig nodeConfig = null;
 					try {
-						nodeConfig = fBase.connector.nodeConfig_get(rnConfig.getNodeID());
+						nodeConfig = fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
 						if (nodeConfig != null) {
 							// subscribe to all machines
 							int publisherPort = nodeConfig.getPublisherPort();
@@ -60,9 +60,8 @@ class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 										config.getEncryptionAlgorithm(), config.getKeygroupID());
 							}
 						} else {
-							logger.debug(
+							logger.error(
 									"No node config existed for " + rnConfig.getNodeID().getID());
-							// TODO NS: request config from naming service
 						}
 
 					} catch (FBaseStorageConnectorException e) {

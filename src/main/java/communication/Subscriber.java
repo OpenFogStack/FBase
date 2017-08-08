@@ -73,7 +73,7 @@ public class Subscriber extends AbstractReceiver {
 			if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
 				DataRecord update = JSONable.fromJSON(envelope.getMessage().getContent(),
 						DataRecord.class);
-				fBase.taskmanager.runStoreDataRecordTask(update);
+				fBase.taskmanager.runPutDataRecordTask(update, false);
 			} else if (Command.DELETE_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
 				DataIdentifier identifier = JSONable.fromJSON(envelope.getMessage().getContent(),
 						DataIdentifier.class);

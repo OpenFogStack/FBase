@@ -5,12 +5,15 @@ import communication.SubscriptionRegistry;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import de.hasenburg.fbase.rest.WebServer;
 import exceptions.FBaseStorageConnectorException;
+import model.config.ClientConfig;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
+import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import storageconnector.AbstractDBConnector;
+import storageconnector.ConfigAccessHelper;
 import storageconnector.OnHeapDBConnector;
 import tasks.TaskManager;
 
@@ -24,6 +27,7 @@ public class FBase {
 
 	public Configuration configuration = null;
 	public AbstractDBConnector connector = null;
+	public ConfigAccessHelper configAccessHelper = null;
 	public TaskManager taskmanager = null;
 	public Publisher publisher = null;
 	public SubscriptionRegistry subscriptionRegistry = null;
@@ -32,6 +36,7 @@ public class FBase {
 	public FBase(String configName) throws FBaseStorageConnectorException {
 		configuration = new Configuration(configName);
 		connector = new OnHeapDBConnector();
+		configAccessHelper = new ConfigAccessHelper(this);
 		connector.dbConnection_initiate();
 		taskmanager = new TaskManager(this);
 		if (configuration.getRestPort() > 0) {
@@ -55,10 +60,15 @@ public class FBase {
 		}
 	}
 
-	public void fillWithData() {
+	public void fillWithData() throws FBaseStorageConnectorException {
+		ClientConfig clientConfig = new ClientConfig();
+		clientConfig.setClientID(new ClientID("C-1"));
+		connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
+		
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
 		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"),
 				"secret", EncryptionAlgorithm.AES);
+		config.addClient(clientConfig.getClientID());
 		taskmanager.runUpdateKeygroupConfigTask(config);
 
 		NodeConfig nodeConfig = new NodeConfig();
@@ -70,7 +80,7 @@ public class FBase {
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "M-1"));
 		record.setValueWithoutKey("Test Value");
-		taskmanager.runPutDataRecordTask(record);
+		taskmanager.runPutDataRecordTask(record, false);
 	}
 
 }

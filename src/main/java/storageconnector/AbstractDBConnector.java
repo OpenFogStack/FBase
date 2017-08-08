@@ -143,7 +143,7 @@ public abstract class AbstractDBConnector {
 	 *         nothing was found
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract Pair<KeygroupConfig, Integer> keygroupConfig_get(KeygroupID keygroupID)
+	protected abstract Pair<KeygroupConfig, Integer> keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
 
 	/**
@@ -167,7 +167,7 @@ public abstract class AbstractDBConnector {
 	 * @return the {@link NodeConfig} or null if none was found
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException;
+	protected abstract NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException;
 
 	/**
 	 * CLIENT CONFIG<br>
@@ -190,7 +190,7 @@ public abstract class AbstractDBConnector {
 	 * @return the {@link NodeConfig} or null if none was found
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract ClientConfig clientConfig_get(ClientID clientID)
+	protected abstract ClientConfig clientConfig_get(ClientID clientID)
 			throws FBaseStorageConnectorException;
 
 	/**

@@ -25,7 +25,7 @@ public class TaskManager {
 
 	public enum TaskName {
 		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, UPDATE_KEYGROUP_SUBSCRIPTIONS, PUT_DATA_RECORD,
-		DELETE_DATA_RECORD, STORE_DATA_RECORD, UPDATE_NODE_CONFIG
+		DELETE_DATA_RECORD, UPDATE_NODE_CONFIG
 	}
 
 	public TaskManager(FBase fBase) {
@@ -85,18 +85,13 @@ public class TaskManager {
 		return future;
 	}
 
-	public Future<Boolean> runPutDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new PutDataRecordTask(record, fBase));
+	public Future<Boolean> runPutDataRecordTask(DataRecord record, boolean publish) {
+		Future<Boolean> future = pool.submit(new PutDataRecordTask(record, fBase, publish));
 		return future;
 	}
 
 	public Future<Boolean> runDeleteDataRecordTask(DataIdentifier identifier, boolean publish) {
 		Future<Boolean> future = pool.submit(new DeleteDataRecordTask(identifier, fBase, publish));
-		return future;
-	}
-
-	public Future<Boolean> runStoreDataRecordTask(DataRecord record) {
-		Future<Boolean> future = pool.submit(new StoreDataRecordTask(record, fBase));
 		return future;
 	}
 

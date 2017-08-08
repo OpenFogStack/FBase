@@ -24,11 +24,13 @@ public class WebServer {
 		server = new Server(port);
 
 		// servlet handlers
-		ServletContextHandler servletContext = new ServletContextHandler(
-				ServletContextHandler.SESSIONS);
+		ServletContextHandler servletContext =
+				new ServletContextHandler(ServletContextHandler.SESSIONS);
 		servletContext.setContextPath("/");
 		servletContext.addServlet(new ServletHolder(new RecordServlet(fBase)), "/record");
 		servletContext.addServlet(new ServletHolder(new RecordListServlet(fBase)), "/record/list");
+		servletContext.addServlet(new ServletHolder(new KeygroupConfigServlet(fBase)),
+				"/keygroupConfig");
 
 		// add handlers to HandlerList
 		HandlerList handlers = new HandlerList();

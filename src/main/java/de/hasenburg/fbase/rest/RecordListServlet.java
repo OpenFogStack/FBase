@@ -54,13 +54,13 @@ public class RecordListServlet extends HttpServlet {
 		try {
 			if (keygroupID == null) {
 				// 400 Bad Request
-				throw new FBaseRestException(FBaseRestException.KEYGROUP_MISSING, 400);
+				throw new FBaseRestException(FBaseRestException.KEYGROUPID_MISSING, 400);
 			}
 
 			KeygroupConfig config = null;
 			String IDJson = null;
 			try {
-				config = fBase.connector.keygroupConfig_get(keygroupID).getValue0();
+				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID).getValue0();
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);

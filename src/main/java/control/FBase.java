@@ -73,7 +73,7 @@ public class FBase {
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "M-1"));
 		record.setValueWithoutKey("Test Value");
-		taskmanager.runPutDataRecordTask(record);
+		taskmanager.runPutDataRecordTask(record, false);
 	}
 
 }

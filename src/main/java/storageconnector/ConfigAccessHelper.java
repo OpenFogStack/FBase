@@ -15,9 +15,7 @@ import model.data.NodeID;
  * This class should be used to access config files instead of using a DBConnector. The reason
  * for that is that this class will try to load the config from the NamingService if it cannot
  * be found in the database.
- * 
- * TODO I: Incorporate communication with NamingService
- * 
+ *  
  * @author jonathanhasenburg
  *
  */
@@ -32,6 +30,8 @@ public class ConfigAccessHelper {
 	/**
 	 * Extends the functionality of {@link AbstractDBConnector#keygroupConfig_get(KeygroupID)}
 	 * about naming service querying if not existent in node db.
+	 * 
+	 * TODO I: Incorporate communication with NamingService
 	 * 
 	 * @param keygroupID
 	 * @return see above
@@ -51,7 +51,11 @@ public class ConfigAccessHelper {
 	 * @throws FBaseStorageConnectorException
 	 */
 	public NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException {
-		return fBase.connector.nodeConfig_get(nodeID);
+		NodeConfig nodeConfig =  fBase.connector.nodeConfig_get(nodeID);
+		if (nodeConfig == null) {
+			nodeConfig = fBase.namingServiceSender.sendNodeConfigRead(nodeID);
+		}
+		return nodeConfig;
 	}
 
 	/**
@@ -64,7 +68,11 @@ public class ConfigAccessHelper {
 	 * @throws FBaseStorageConnectorException
 	 */
 	public ClientConfig clientConfig_get(ClientID clientID) throws FBaseStorageConnectorException {
-		return fBase.connector.clientConfig_get(clientID);
+		ClientConfig clientConfig = fBase.connector.clientConfig_get(clientID);
+		if (clientConfig == null) {
+			clientConfig = fBase.namingServiceSender.sendClientConfigRead(clientID);
+		}
+		return clientConfig;
 	}
 
 }

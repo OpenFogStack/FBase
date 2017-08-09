@@ -32,6 +32,11 @@ public class Configuration {
 	private String privateKey = null;
 	private EncryptionAlgorithm algorithm = null;
 
+	// Naming Service
+	private String namingServiceAddress = null;
+	private Integer namingServicePort = null;
+	private String namingServicePublicKey = null;
+
 	public Configuration(String configName) {
 		this.properties = new Properties();
 		if (configName == null) {
@@ -57,6 +62,11 @@ public class Configuration {
 			String alg = properties.getProperty("algorithm");
 			if (alg != null)
 				algorithm = EncryptionAlgorithm.valueOf(alg);
+
+			// Naming Service
+			namingServiceAddress = properties.getProperty("namingServiceAddress", "Unknown");
+			namingServicePort = Integer.parseInt(properties.getProperty("namingServicePort", "-1"));
+			namingServicePublicKey = properties.getProperty("namingServicePublicKey", "Unknown");
 
 			checkConsistency();
 		} catch (IOException | NumberFormatException e) {
@@ -122,6 +132,18 @@ public class Configuration {
 
 	public EncryptionAlgorithm getAlgorithm() {
 		return algorithm;
+	}
+	
+	public String getNamingServiceAddress() {
+		return namingServiceAddress;
+	}
+	
+	public Integer getNamingServicePort() {
+		return namingServicePort;
+	}
+
+	public String getNamingServicePublicKey() {
+		return namingServicePublicKey;
 	}
 
 }

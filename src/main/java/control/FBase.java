@@ -1,5 +1,6 @@
 package control;
 
+import communication.NamingServiceSender;
 import communication.Publisher;
 import communication.SubscriptionRegistry;
 import crypto.CryptoProvider.EncryptionAlgorithm;
@@ -30,6 +31,7 @@ public class FBase {
 	public ConfigAccessHelper configAccessHelper = null;
 	public TaskManager taskmanager = null;
 	public Publisher publisher = null;
+	public NamingServiceSender namingServiceSender = null;
 	public SubscriptionRegistry subscriptionRegistry = null;
 	private WebServer server = null;
 
@@ -44,8 +46,9 @@ public class FBase {
 			server.startServer();
 		}
 		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort());
+		namingServiceSender = new NamingServiceSender(configuration.getNamingServiceAddress(),
+				configuration.getNamingServicePort(), this);
 		subscriptionRegistry = new SubscriptionRegistry(this);
-
 	}
 
 	public void tearDown() {
@@ -64,7 +67,7 @@ public class FBase {
 		ClientConfig clientConfig = new ClientConfig();
 		clientConfig.setClientID(new ClientID("C-1"));
 		connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
-		
+
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
 		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"),
 				"secret", EncryptionAlgorithm.AES);

@@ -1,6 +1,9 @@
 package scenario;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,6 +26,7 @@ import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
+import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
@@ -103,17 +107,56 @@ public class TwoNodeScenario {
 	}
 
 	@Test
-	public void testOnePublish() throws InterruptedException, FBaseStorageConnectorException,
-			ExecutionException, TimeoutException {
-		logger.debug("-------Starting testOnePublish-------");
+	public void testUpdateKeygroupConfig() throws InterruptedException, ExecutionException,
+			TimeoutException, FBaseStorageConnectorException {
+		logger.debug("-------Starting testUpdateKeygroupConfig-------");
 		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");
 
 		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
 		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
+		logger.debug("FBase2 ready");
+
+		KeygroupConfig kConfig2 = new KeygroupConfig(kConfig.getKeygroupID(),
+				kConfig.getEncryptionSecret(), kConfig.getEncryptionAlgorithm());
+		kConfig2.addClient(new ClientID("Client 1"));
+		kConfig2.setReplicaNodes(kConfig.getReplicaNodes());
+		
+		assertNotEquals(kConfig, kConfig2);
+
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig2, true).get(2, TimeUnit.SECONDS);
+		
+		Thread.sleep(200);
+
+		logger.debug("Checking configs");
+		KeygroupConfig configAtNode1 =
+				fbase1.configAccessHelper.keygroupConfig_get(kConfig2.getKeygroupID()).getValue0();
+		KeygroupConfig configAtNode2 =
+				fbase2.configAccessHelper.keygroupConfig_get(kConfig2.getKeygroupID()).getValue0();
+
+		assertEquals(kConfig2, configAtNode1);
+		assertEquals(kConfig2, configAtNode2);
+
+		// TODO T: Include test of changed secret
+
+		logger.debug("Finished testUpdateKeygroupConfig.");
+	}
+
+	@Test
+	public void testUpdateDataRecord() throws InterruptedException, FBaseStorageConnectorException,
+			ExecutionException, TimeoutException {
+		logger.debug("-------Starting testOnePublish-------");
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
+		logger.debug("FBase1 ready");
+
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase2 ready");
 
 		DataRecord record = new DataRecord();
@@ -124,9 +167,9 @@ public class TwoNodeScenario {
 
 		DataRecord recordAtNode1 = fbase1.connector.dataRecords_get(record.getDataIdentifier());
 		DataRecord recordAtNode2 = fbase2.connector.dataRecords_get(record.getDataIdentifier());
-		
+
 		logger.debug("CHECK:" + recordAtNode1.getDataID() + " - " + recordAtNode2.getDataID());
-		
+
 		assertEquals(record, recordAtNode1);
 		assertEquals(record, recordAtNode2);
 
@@ -136,7 +179,7 @@ public class TwoNodeScenario {
 
 		assertNull(fbase1.connector.dataRecords_get(record.getDataIdentifier()));
 		assertNull(fbase2.connector.dataRecords_get(record.getDataIdentifier()));
-		
+
 		logger.debug("CHECK: " + fbase2.connector.dataRecords_get(record.getDataIdentifier()));
 
 		logger.debug("Finished testOnePublish.");

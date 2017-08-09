@@ -6,6 +6,7 @@ import org.zeromq.ZMQ;
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.JSONable;
+import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
@@ -22,9 +23,9 @@ import model.messages.Message;
 public class Subscriber extends AbstractReceiver {
 
 	private static Logger logger = Logger.getLogger(Subscriber.class.getName());
-	
+
 	private FBase fBase;
-	
+
 	private String secret;
 	private EncryptionAlgorithm algorithm;
 
@@ -71,13 +72,20 @@ public class Subscriber extends AbstractReceiver {
 			fBase.taskmanager.runLogTask(envelope.getMessage().getCommand() + " - "
 					+ envelope.getMessage().getContent());
 			if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-				DataRecord update = JSONable.fromJSON(envelope.getMessage().getContent(),
-						DataRecord.class);
+				DataRecord update =
+						JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
 				fBase.taskmanager.runPutDataRecordTask(update, false);
 			} else if (Command.DELETE_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-				DataIdentifier identifier = JSONable.fromJSON(envelope.getMessage().getContent(),
-						DataIdentifier.class);
+				DataIdentifier identifier =
+						JSONable.fromJSON(envelope.getMessage().getContent(), DataIdentifier.class);
 				fBase.taskmanager.runDeleteDataRecordTask(identifier, false);
+			} else if (Command.UPDATE_KEYGROUP_CONFIG.equals(envelope.getMessage().getCommand())) {
+				KeygroupConfig config =
+						JSONable.fromJSON(envelope.getMessage().getContent(), KeygroupConfig.class);
+				fBase.taskmanager.runUpdateKeygroupConfigTask(config, false);
+				// TODO 1: If the keygroup config cannot be interpreted, the secret was changed
+				// in this case, the naming service must be asked about the config and a new
+				// subscriber needs to be generated
 			}
 			m.setTextualInfo("Message processed");
 		} catch (IllegalArgumentException e) {

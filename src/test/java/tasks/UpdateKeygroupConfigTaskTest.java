@@ -120,7 +120,7 @@ public class UpdateKeygroupConfigTaskTest {
 	@Test
 	public void test1() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.debug("-------Starting test1-------");
-		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig).get(1, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(1, TimeUnit.SECONDS);
 		assertEquals(1, fbase1.subscriptionRegistry.getNumberOfActiveSubscriptions());
 		logger.debug("Finished test1.");
 	}
@@ -143,7 +143,7 @@ public class UpdateKeygroupConfigTaskTest {
 		logger.debug("-------Starting test2-------");
 		fbase1.connector.keyGroupSubscriberMachines_put(kConfig.getKeygroupID(),
 				fbase1.configuration.getMachineName());
-		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig).get(1, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(1, TimeUnit.SECONDS);
 		assertEquals(1, fbase1.subscriptionRegistry.getNumberOfActiveSubscriptions());
 		logger.debug("Finished test2.");
 	}
@@ -166,7 +166,7 @@ public class UpdateKeygroupConfigTaskTest {
 		logger.debug("-------Starting test2-------");
 		fbase1.connector.keyGroupSubscriberMachines_put(kConfig.getKeygroupID(),
 				"Machine X35");
-		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig).get(1, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(1, TimeUnit.SECONDS);
 		assertEquals(0, fbase1.subscriptionRegistry.getNumberOfActiveSubscriptions());
 		logger.debug("Finished test2.");
 	}

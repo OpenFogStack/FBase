@@ -9,12 +9,19 @@ import org.javatuples.Pair;
 
 import control.FBase;
 import exceptions.FBaseStorageConnectorException;
+import model.JSONable;
 import model.config.KeygroupConfig;
+import model.messages.Command;
+import model.messages.Envelope;
+import model.messages.Message;
 import tasks.TaskManager.TaskName;
 
 /**
- * This task stores a keygroup config in the database. Before returning, the
- * {@link UpdateKeygroupSubscriptionsTask} if one of the following to conditions is met:
+ * This task stores a keygroup config in the database. Furthermore, it instructs the publisher
+ * to publish the given data record if a specific flag has been set.
+ * 
+ * Before returning, the {@link UpdateKeygroupSubscriptionsTask} is started if one of the
+ * following to conditions is met:
  * 
  * 1. the machine is the reponsible machine for the keygroups
  * 
@@ -32,10 +39,12 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 	private static Logger logger = Logger.getLogger(UpdateKeygroupConfigTask.class.getName());
 
 	private KeygroupConfig config = null;
+	public boolean publish;
 
-	public UpdateKeygroupConfigTask(KeygroupConfig config, FBase fBase) {
+	public UpdateKeygroupConfigTask(KeygroupConfig config, FBase fBase, boolean publish) {
 		super(TaskName.UPDATE_KEYGROUP_CONFIG, fBase);
 		this.config = config;
+		this.publish = publish;
 	}
 
 	@Override
@@ -81,6 +90,17 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 					+ "However, the configuration was stored in the database.");
 		}
 
+		if (publish) {
+			// create envelope
+			Message m = new Message();
+			m.setCommand(Command.UPDATE_KEYGROUP_CONFIG);
+			m.setContent(JSONable.toJSON(config));
+			Envelope e = new Envelope(config.getKeygroupID(), m);
+
+			// publish data
+			fBase.publisher.send(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+		}
+		
 		return true;
 
 	}

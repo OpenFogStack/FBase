@@ -70,8 +70,8 @@ public class TaskManager {
 		return future;
 	}
 
-	public Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, fBase));
+	public Future<Boolean> runUpdateKeygroupConfigTask(KeygroupConfig config, boolean publish) {
+		Future<Boolean> future = pool.submit(new UpdateKeygroupConfigTask(config, fBase, publish));
 		return future;
 	}
 	

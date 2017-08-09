@@ -69,7 +69,7 @@ public class FBase {
 		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"),
 				"secret", EncryptionAlgorithm.AES);
 		config.addClient(clientConfig.getClientID());
-		taskmanager.runUpdateKeygroupConfigTask(config);
+		taskmanager.runUpdateKeygroupConfigTask(config, false);
 
 		NodeConfig nodeConfig = new NodeConfig();
 		nodeConfig.setNodeID(configuration.getNodeID());

@@ -23,7 +23,7 @@ import tasks.TaskManager.TaskName;
  * @author jonathanhasenburg
  *
  */
-class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
+public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 
 	private static Logger logger =
 			Logger.getLogger(UpdateKeygroupSubscriptionsTask.class.getName());

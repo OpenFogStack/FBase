@@ -14,6 +14,7 @@ import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
+import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
 
 public class TaskManager {
 
@@ -25,7 +26,7 @@ public class TaskManager {
 
 	public enum TaskName {
 		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, UPDATE_KEYGROUP_SUBSCRIPTIONS, PUT_DATA_RECORD,
-		DELETE_DATA_RECORD, UPDATE_NODE_CONFIG
+		DELETE_DATA_RECORD, UPDATE_NODE_CONFIG, CHECK_KEYGROUP_SUBSCRIPTIONS
 	}
 
 	public TaskManager(FBase fBase) {
@@ -77,6 +78,11 @@ public class TaskManager {
 	
 	public Future<Boolean> runUpdateKeygroupSubscriptionsTask(KeygroupConfig config) {
 		Future<Boolean> future = pool.submit(new UpdateKeygroupSubscriptionsTask(config, fBase));
+		return future;
+	}
+	
+	public Future<Boolean> runCheckKeygroupConfigurationsOnUpdatesTask(int interval) {
+		Future<Boolean> future = pool.submit(new CheckKeygroupConfigurationsOnUpdatesTask(fBase, interval));
 		return future;
 	}
 

@@ -15,6 +15,7 @@ import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
 import tasks.TaskManager.TaskName;
+import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
 
 /**
  * This task stores a keygroup config in the database. Furthermore, it instructs the publisher
@@ -28,8 +29,8 @@ import tasks.TaskManager.TaskName;
  * 2. no machine is responsible for the keygroup yet
  * 
  * Otherwise, the subscriptions will not be updated. However, the machine responsible for the
- * subscriptions will identify the updated due to the {@link CheckKeygroupSubscriptionsTask}
- * which runs as a background process on each machine. TODO 1: Implement Task
+ * subscriptions will identify the updated due to the {@link CheckKeygroupConfigurationsOnUpdatesTask}.
+ * which runs as a background process on each machine.
  * 
  * @author jonathanhasenburg
  *

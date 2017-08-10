@@ -7,8 +7,9 @@
 ## Publish/Subscribe
 
 ### Subscription Management
-- [ ] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupSubscriptionsTask) #11
+- [ ] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupConfigurationsOnUpdatesTask) #11
 - [ ] Add background task that checks whether any keygroups don't have a responsible machine yet #11
+- [ ] Add functionality to unsubscribe from machines if not responsible anymore or if keygroup has been deleted/node removed without the machine noticing
 
 ### Heartbeats
 - [ ] Add background task that stores own heartbeats in the node database #11
@@ -20,6 +21,7 @@
 - [ ] Add keygroup configuration control methods to sender
 - [ ] Add response processing to all methods
 - [ ] Add node management methods (e.g. to update a node configuration when a machine is added/removed)
+- [ ] Add a background task that periodically polls the naming service about the newest configurations
 
 ### Handling Missed Messages
 - [ ] Messaging data needs to be stored after each data related publish

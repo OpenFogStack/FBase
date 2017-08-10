@@ -43,6 +43,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 	private int checkInterval = 10000;
 
 	final List<KeygroupID> currentResponsibleKeygroups = new ArrayList<>();
+	// TODO 2: We don't need to store the version seperatly anymore
 	final Map<KeygroupConfig, Integer> currentKeygroupConfigurations = new HashMap<>();
 	final Map<KeygroupConfig, Integer> savedKeygroupConfigurations = new HashMap<>();
 
@@ -68,9 +69,9 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 				// get the keygroup configuration versions
 				currentResponsibleKeygroups.forEach(k -> {
 					try {
-						Pair<KeygroupConfig, Integer> configs =
+						KeygroupConfig config =
 								fBase.configAccessHelper.keygroupConfig_get(k);
-						currentKeygroupConfigurations.put(configs.getValue0(), configs.getValue1());
+						currentKeygroupConfigurations.put(config, config.getVersion());
 					} catch (FBaseStorageConnectorException e) {
 						handleFBaseStorageConnectorException(e);
 					}

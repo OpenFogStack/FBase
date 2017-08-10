@@ -122,15 +122,13 @@ public abstract class AbstractDBConnector {
 	/**
 	 * KEYGROUP CONFIG<br>
 	 * <br>
-	 * Stores configuration details of a keygroup Each keygroup - config tuple has a version
-	 * (integer), which is incremented upon each put operation
+	 * Stores configuration details of a keygroup
 	 * 
 	 * @param keygroupID identifier of the keygroup
 	 * @param config configuration data
-	 * @return the new version of the keygroup - config tuple
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract Integer keygroupConfig_put(KeygroupID keygroupID, KeygroupConfig config)
+	public abstract void keygroupConfig_put(KeygroupID keygroupID, KeygroupConfig config)
 			throws FBaseStorageConnectorException;
 
 	/**
@@ -139,11 +137,10 @@ public abstract class AbstractDBConnector {
 	 * Retrieves configuration details of a keygroup as stored by keygroupConfig_put()
 	 * 
 	 * @param keygroupID identifier of the keygroup
-	 * @return the {@link KeygroupConfig} - version pair or a pair with two null values if
-	 *         nothing was found
+	 * @return the {@link KeygroupConfig} 
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	protected abstract Pair<KeygroupConfig, Integer> keygroupConfig_get(KeygroupID keygroupID)
+	protected abstract KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
 
 	/**

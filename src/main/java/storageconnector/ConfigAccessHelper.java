@@ -1,7 +1,5 @@
 package storageconnector;
 
-import org.javatuples.Pair;
-
 import control.FBase;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
@@ -37,7 +35,7 @@ public class ConfigAccessHelper {
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
 	 */
-	public Pair<KeygroupConfig, Integer> keygroupConfig_get(KeygroupID keygroupID)
+	public KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException {
 		return fBase.connector.keygroupConfig_get(keygroupID);
 	}

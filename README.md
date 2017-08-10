@@ -3,13 +3,14 @@
 ## General Node Database
 - [ ] Make sure the HeapDBConnector only returns copies of objects rather than the actual objects
 - [ ] Add a connector that supports multi-machine nodes
+- [ ] Add versions to all configurations so that a node/machine can identify updates
 
 ## Publish/Subscribe
 
 ### Subscription Management
 - [ ] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupConfigurationsOnUpdatesTask) #11
+- [ ] Instead of unsubscribing/subscribing, each keygroup config update should lead to a complete reset of subscriptions
 - [ ] Add background task that checks whether any keygroups don't have a responsible machine yet #11
-- [ ] Add functionality to unsubscribe from machines if not responsible anymore or if keygroup has been deleted/node removed without the machine noticing
 
 ### Heartbeats
 - [ ] Add background task that stores own heartbeats in the node database #11

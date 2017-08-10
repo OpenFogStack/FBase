@@ -26,7 +26,8 @@ import tasks.UpdateKeygroupSubscriptionsTask;
  */
 public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 
-	private static Logger logger = Logger.getLogger(CheckKeygroupConfigurationsOnUpdatesTask.class.getName());
+	private static Logger logger =
+			Logger.getLogger(CheckKeygroupConfigurationsOnUpdatesTask.class.getName());
 
 	/**
 	 * Creates a new {@link CheckKeygroupConfigurationsOnUpdatesTask}.
@@ -38,7 +39,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 		super(TaskName.CHECK_KEYGROUP_SUBSCRIPTIONS, fBase);
 		this.checkInterval = checkInterval;
 	}
-	
+
 	private int checkInterval = 10000;
 
 	final List<KeygroupID> currentResponsibleKeygroups = new ArrayList<>();
@@ -60,6 +61,9 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 						currentResponsibleKeygroups.add(k);
 					}
 				});
+				logger.debug("Number of currently responsible keygroups / all keygroups: "
+						+ currentResponsibleKeygroups.size() + " / "
+						+ keygroupSubscriberMachines.size());
 
 				// get the keygroup configuration versions
 				currentResponsibleKeygroups.forEach(k -> {
@@ -100,8 +104,9 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 		Integer savedVersion = savedKeygroupConfigurations.get(config);
 		// check whether config exists in saved map or version differs
 		if (savedVersion == null || savedVersion.compareTo(version) != 0) {
+			logger.debug("Version of config " + config.getKeygroupID() + " changed.");
 			return true;
-		}		
+		}
 		return false;
 	}
 

@@ -64,6 +64,17 @@ public class SubscriptionRegistry {
 	public synchronized ArrayList<Subscriber> getSubscriberForKeygroup(KeygroupID keygroupID) {
 		return activeSubscriptions.get(keygroupID);
 	}
+	
+	/**
+	 * Removes all subscribers from active subscriptions for a specific keygroup.
+	 * NOTE: This method does not call {@link Subscriber#stopReception()}.
+	 * 
+	 * @param keygroupID
+	 * @return all subscribers removed from active subscriptions
+	 */
+	public synchronized ArrayList<Subscriber> removeSubscriberForKeygroup(KeygroupID keygroupID) {
+		return activeSubscriptions.remove(keygroupID);
+	}
 
 	/**
 	 * Unsubscribes from all machines that this machine subscribed to for a specific keygroup.

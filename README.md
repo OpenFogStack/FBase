@@ -9,7 +9,7 @@
 
 ### Subscription Management
 - [x] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupConfigurationsOnUpdatesTask) #11
-- [ ] Instead of unsubscribing/subscribing, each keygroup config update should lead to a complete reset of subscriptions
+- [x] Instead of unsubscribing/subscribing, each keygroup config update should lead to a complete reset of subscriptions
 - [ ] Add background task that checks whether any keygroups don't have a responsible machine yet #11
 
 ### Heartbeats

@@ -8,10 +8,16 @@ import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseNamingServiceException;
 import model.JSONable;
 import model.config.ClientConfig;
+import model.config.KeygroupConfig;
 import model.config.NodeConfig;
+import model.config.ReplicaNodeConfig;
+import model.config.TriggerNodeConfig;
 import model.data.ClientID;
+import model.data.KeygroupID;
 import model.data.NodeID;
 import model.messages.Command;
+import model.messages.ConfigToKeygroupWrapper;
+import model.messages.CryptoToKeygroupWrapper;
 import model.messages.Envelope;
 import model.messages.Message;
 
@@ -233,6 +239,174 @@ public class NamingServiceSender extends AbstractSender {
 		}
 	}
 
+	/**
+	 * Asks the naming service to create a {@link KeygroupConfig}.
+	 * 
+	 * @param config - the {@link KeygroupConfig}
+	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 */
+	public KeygroupConfig sendKeygroupConfigCreate(KeygroupConfig config) {
+		Message m = new Message();
+		m.setCommand(Command.KEYGROUP_CONFIG_CREATE);
+		m.setContent(JSONable.toJSON(config));
+		try {
+			String answer = send(createEncryptedEnvelope(m), null, null);
+			// TODO process response
+			return null;
+		} catch (FBaseNamingServiceException e1) {
+			logger.error(e1.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Asks the naming service to add a {@link ReplicaNodeConfig} to the
+	 * {@link KeygroupConfig} with the given id
+	 * 
+	 * @param rNConfig - the {@link ReplicaNodeConfig} to be added
+	 * @param keygroupID - the {@link KeygroupID}
+	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 */
+	public KeygroupConfig sendKeygroupConfigAddReplicaNode(ReplicaNodeConfig rNConfig,
+			KeygroupID keygroupID) {
+		Message m = new Message();
+		m.setCommand(Command.KEYGROUP_CONFIG_ADD_REPLICA_NODE);
+		ConfigToKeygroupWrapper wrapper = new ConfigToKeygroupWrapper(keygroupID, rNConfig);
+		m.setContent(JSONable.toJSON(wrapper));
+		try {
+			String answer = send(createEncryptedEnvelope(m), null, null);
+			// TODO process response
+			return null;
+		} catch (FBaseNamingServiceException e1) {
+			logger.error(e1.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Asks the naming service to add a {@link TriggerNodeConfig} to the
+	 * {@link KeygroupConfig} with the given id
+	 * 
+	 * @param rNConfig - the {@link ReplicaNodeConfig} to be added
+	 * @param keygroupID - the {@link KeygroupID}
+	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 */
+	public KeygroupConfig sendKeygroupConfigAddTriggerNode(TriggerNodeConfig tNConfig,
+			KeygroupID keygroupID) {
+		Message m = new Message();
+		m.setCommand(Command.KEYGROUP_CONFIG_ADD_TRIGGER_NODE);
+		ConfigToKeygroupWrapper wrapper = new ConfigToKeygroupWrapper(keygroupID, tNConfig);
+		m.setContent(JSONable.toJSON(wrapper));
+		try {
+			String answer = send(createEncryptedEnvelope(m), null, null);
+			// TODO process response
+			return null;
+		} catch (FBaseNamingServiceException e1) {
+			logger.error(e1.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Ask the naming service to return the {@link KeygroupConfig} with the given
+	 * {@link KeygroupID}.
+	 * 
+	 * @param id - the {@link KeygroupID}
+	 * @return the specified {@link KeygroupConfig} or null if not existent or service not
+	 *         reachable
+	 */
+	public NodeConfig sendKeygroupConfigRead(KeygroupID id) {
+		Message m = new Message();
+		m.setCommand(Command.KEYGROUP_CONFIG_READ);
+		m.setContent(JSONable.toJSON(id));
+		try {
+			String answer = send(createEncryptedEnvelope(m), null, null);
+			// TODO process response
+			return null;
+		} catch (FBaseNamingServiceException e1) {
+			logger.error(e1.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Asks the naming service to update the crypto information of the {@link KeygroupConfig}
+	 * with the given id
+	 * 
+	 * @param secret - the new encryption secret
+	 * @param algorithm - the new encryption algorithm
+	 * @param keygroupID - the {@link KeygroupID}
+	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 */
+	public KeygroupConfig sendKeygroupConfigUpdateCrypto(String encryptionSecret,
+			EncryptionAlgorithm encryptionAlgorithm, KeygroupID keygroupID) {
+		Message m = new Message();
+		m.setCommand(Command.KEYGROUP_CONFIG_UPDATE_CRYPTO);
+		CryptoToKeygroupWrapper wrapper =
+				new CryptoToKeygroupWrapper(keygroupID, encryptionSecret, encryptionAlgorithm);
+		m.setContent(JSONable.toJSON(wrapper));
+		try {
+			String answer = send(createEncryptedEnvelope(m), null, null);
+			// TODO process response
+			return null;
+		} catch (FBaseNamingServiceException e1) {
+			logger.error(e1.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Ask the naming service to delete the {@link KeygroupConfig} with the given
+	 * {@link KeygroupID}.
+	 * 
+	 * @param id - the {@link KeygroupID}
+	 * @return true, if successful
+	 */
+	public boolean sendKeygroupConfigDelete(KeygroupID id) {
+		Message m = new Message();
+		m.setCommand(Command.KEYGROUP_CONFIG_DELETE);
+		m.setContent(JSONable.toJSON(id));
+		try {
+			String answer = send(createEncryptedEnvelope(m), null, null);
+			// TODO process response
+			return true;
+		} catch (FBaseNamingServiceException e1) {
+			logger.error(e1.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Ask the naming service to delete a {@link ReplicaNodeConfig} or a
+	 * {@link TriggerNodeConfig} from the {@link KeygroupConfig} with the given
+	 * {@link KeygroupID}.
+	 * 
+	 * @param keygroupID - the {@link KeygroupID}
+	 * @return true, if successful
+	 */
+	public boolean sendKeygroupConfigDeleteNode(KeygroupID keygroupID, NodeConfig config) {
+		Message m = new Message();
+		m.setCommand(Command.KEYGROUP_CONFIG_DELETE_NODE);
+		ConfigToKeygroupWrapper wrapper = new ConfigToKeygroupWrapper(keygroupID, config);
+		m.setContent(JSONable.toJSON(wrapper));
+		try {
+			String answer = send(createEncryptedEnvelope(m), null, null);
+			// TODO process response
+			return true;
+		} catch (FBaseNamingServiceException e1) {
+			logger.error(e1.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Create an envelope that is encrypted with the private key of the node and the public
+	 * key of the naming service. Also sets {@link Envelope#setConfigID(model.data.ConfigID)}
+	 * to the {@link NodeID} of the node the machine participates with.
+	 * 
+	 * @param m - The message used for the envelope
+	 * @return the created envelope
+	 */
 	private Envelope createEncryptedEnvelope(Message m) {
 		m.encryptFields(fBase.configuration.getPrivateKey(),
 				EncryptionAlgorithm.RSA_PRIVATE_ENCRYPT);

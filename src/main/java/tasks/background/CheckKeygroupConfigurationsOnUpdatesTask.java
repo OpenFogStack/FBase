@@ -21,6 +21,10 @@ import tasks.UpdateKeygroupSubscriptionsTask;
  * responsible for have been updated without noticing. If so, it will start the
  * {@link UpdateKeygroupSubscriptionsTask} for them.
  * 
+ * An example case in which this functionality is required, is when a client updates a
+ * keygroup configuration via another machine but the responsible one. In this case, the not
+ * responsible machine will receive the updated configuration.
+ * 
  * @author jonathanhasenburg
  *
  */
@@ -69,8 +73,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 				// get the keygroup configuration versions
 				currentResponsibleKeygroups.forEach(k -> {
 					try {
-						KeygroupConfig config =
-								fBase.configAccessHelper.keygroupConfig_get(k);
+						KeygroupConfig config = fBase.configAccessHelper.keygroupConfig_get(k);
 						currentKeygroupConfigurations.put(config, config.getVersion());
 					} catch (FBaseStorageConnectorException e) {
 						handleFBaseStorageConnectorException(e);

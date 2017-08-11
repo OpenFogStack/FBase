@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import control.FBase;
 import tasks.TaskManager.TaskName;
 
-abstract class Task<V> implements Callable<V> {
+public abstract class Task<V> implements Callable<V> {
 
 	private static Logger logger = Logger.getLogger(Task.class.getName());
 

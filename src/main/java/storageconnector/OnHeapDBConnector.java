@@ -31,7 +31,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	private static final Logger log = Logger.getLogger(AbstractDBConnector.class);
 
 	/** stores keygroup config data */
-	private final Map<KeygroupID, Pair<KeygroupConfig, Integer>> keygroupConfigs = new HashMap<>();
+	private final Map<KeygroupID, KeygroupConfig> keygroupConfigs = new HashMap<>();
 
 	/** stores node config data */
 	private final Map<NodeID, NodeConfig> nodeConfigs = new HashMap<>();
@@ -156,17 +156,9 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * model.config.KeygroupConfig)
 	 */
 	@Override
-	public Integer keygroupConfig_put(KeygroupID id, KeygroupConfig config)
+	public void keygroupConfig_put(KeygroupID id, KeygroupConfig config)
 			throws FBaseStorageConnectorException {
-		Pair<KeygroupConfig, Integer> pair = keygroupConfigs.get(id);
-		if (pair == null	) {
-			pair = new Pair<KeygroupConfig, Integer>(config, 1);
-		} else {
-			pair = pair.setAt0(config);
-			pair = pair.setAt1(pair.getValue1() + 1);
-		}
-		keygroupConfigs.put(id, pair);
-		return pair.getValue1();
+		keygroupConfigs.put(id, config);
 	}
 
 	/*
@@ -175,14 +167,9 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#getKeygroupConfig(model.data.KeygroupID )
 	 */
 	@Override
-	protected Pair<KeygroupConfig, Integer> keygroupConfig_get(KeygroupID keygroupID)
+	protected KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException {
-		Pair<KeygroupConfig, Integer> pair = keygroupConfigs.get(keygroupID);
-		if (pair == null) {
-			return new Pair<KeygroupConfig, Integer>(null, null);
-		} else {
-			return pair;
-		}
+		return keygroupConfigs.get(keygroupID);
 	}
 
 	/*

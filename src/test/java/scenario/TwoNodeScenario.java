@@ -133,9 +133,9 @@ public class TwoNodeScenario {
 
 		logger.debug("Checking configs");
 		KeygroupConfig configAtNode1 =
-				fbase1.configAccessHelper.keygroupConfig_get(kConfig2.getKeygroupID()).getValue0();
+				fbase1.configAccessHelper.keygroupConfig_get(kConfig2.getKeygroupID());
 		KeygroupConfig configAtNode2 =
-				fbase2.configAccessHelper.keygroupConfig_get(kConfig2.getKeygroupID()).getValue0();
+				fbase2.configAccessHelper.keygroupConfig_get(kConfig2.getKeygroupID());
 
 		assertEquals(kConfig2, configAtNode1);
 		assertEquals(kConfig2, configAtNode2);

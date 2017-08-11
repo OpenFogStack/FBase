@@ -60,7 +60,7 @@ public class RecordListServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			String IDJson = null;
 			try {
-				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID).getValue0();
+				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);

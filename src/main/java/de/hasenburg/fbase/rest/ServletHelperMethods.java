@@ -108,7 +108,7 @@ public class ServletHelperMethods {
 	public static KeygroupConfig getConfig(KeygroupID keygroupID, FBase fBase)
 			throws FBaseStorageConnectorException, FBaseRestException {
 		KeygroupConfig keygroupConfig =
-				fBase.configAccessHelper.keygroupConfig_get(keygroupID).getValue0();
+				fBase.configAccessHelper.keygroupConfig_get(keygroupID);
 		if (keygroupConfig == null) {
 			throw new FBaseRestException(FBaseRestException.NOT_FOUND_CONFIG, 404);
 		}

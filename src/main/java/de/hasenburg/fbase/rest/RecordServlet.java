@@ -62,8 +62,7 @@ public class RecordServlet extends HttpServlet {
 			KeygroupConfig config = null;
 			DataRecord record = null;
 			try {
-				config = fBase.configAccessHelper.keygroupConfig_get(dataIdentifier.getKeygroupID())
-						.getValue0();
+				config = fBase.configAccessHelper.keygroupConfig_get(dataIdentifier.getKeygroupID());
 				record = fBase.connector.dataRecords_get(dataIdentifier);
 				if (config == null || record == null) {
 					// 404 Not Found
@@ -110,7 +109,7 @@ public class RecordServlet extends HttpServlet {
 
 			KeygroupConfig config = null;
 			try {
-				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID).getValue0();
+				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);
@@ -173,7 +172,7 @@ public class RecordServlet extends HttpServlet {
 
 			KeygroupConfig config = null;
 			try {
-				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID).getValue0();
+				config = fBase.configAccessHelper.keygroupConfig_get(keygroupID);
 				if (config == null) {
 					// 404 Not Found
 					throw new FBaseRestException(FBaseRestException.NOT_FOUND, 404);

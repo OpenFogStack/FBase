@@ -32,9 +32,6 @@ import storageconnector.AbstractDBConnector;
  * Note, this test does not set up only one additional fBase instance with one machine.
  * However, it is checked that the machine does not subscribe to itself.
  * 
- * TODO T: It is not tested whether the removal of subscriptions is performed if they are not
- * included in a new keygroup config
- * 
  * @author jonathanhasenburg
  *
  */
@@ -163,12 +160,12 @@ public class UpdateKeygroupConfigTaskTest {
 	@Test
 	public void test3() throws FBaseStorageConnectorException, InterruptedException,
 			ExecutionException, TimeoutException {
-		logger.debug("-------Starting test2-------");
+		logger.debug("-------Starting test3-------");
 		fbase1.connector.keyGroupSubscriberMachines_put(kConfig.getKeygroupID(),
 				"Machine X35");
 		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(1, TimeUnit.SECONDS);
 		assertEquals(0, fbase1.subscriptionRegistry.getNumberOfActiveSubscriptions());
-		logger.debug("Finished test2.");
+		logger.debug("Finished test3.");
 	}
 
 }

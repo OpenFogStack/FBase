@@ -3,11 +3,13 @@
 ## General Node Database
 - [ ] Make sure the HeapDBConnector only returns copies of objects rather than the actual objects
 - [ ] Add a connector that supports multi-machine nodes
+- [ ] Add versions to all configurations so that a node/machine can identify updates
 
 ## Publish/Subscribe
 
 ### Subscription Management
-- [ ] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupSubscriptionsTask) #11
+- [x] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupConfigurationsOnUpdatesTask) #11
+- [x] Instead of unsubscribing/subscribing, each keygroup config update should lead to a complete reset of subscriptions
 - [ ] Add background task that checks whether any keygroups don't have a responsible machine yet #11
 
 ### Heartbeats
@@ -20,6 +22,7 @@
 - [ ] Add keygroup configuration control methods to sender
 - [ ] Add response processing to all methods
 - [ ] Add node management methods (e.g. to update a node configuration when a machine is added/removed)
+- [ ] Add a background task that periodically polls the naming service about the newest configurations
 
 ### Handling Missed Messages
 - [ ] Messaging data needs to be stored after each data related publish

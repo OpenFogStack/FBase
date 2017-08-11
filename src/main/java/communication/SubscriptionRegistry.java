@@ -1,21 +1,21 @@
 package communication;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import model.data.KeygroupID;
 
 import org.apache.log4j.Logger;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.data.KeygroupID;
 
 public class SubscriptionRegistry {
 
 	private static Logger logger = Logger.getLogger(SubscriptionRegistry.class.getName());
 
-	private final Map<String, Map<Integer, Subscriber>> activeSubscriptions = new HashMap<>();
+	private final Map<KeygroupID, ArrayList<Subscriber>> activeSubscriptions = new HashMap<>();
+
 	private FBase fBase;
 
 	public SubscriptionRegistry(FBase fBase) {
@@ -23,26 +23,20 @@ public class SubscriptionRegistry {
 	}
 
 	/**
-	 * starts a new Subscriber
+	 * Starts a new Subscriber and adds it to the list of active subscribers for a KeygroupID
 	 * 
 	 * @param address - the address to subscribe to
 	 * @param port - the port to subscribe to
 	 * @param secret - the secret used to decrypt received data
 	 * @param algorithm - the algorithm used for decryption
+	 * @param keygroupID - the related {@link KeygroupID} which is also used for filtering
 	 * @return the new subscriber or null
 	 */
 	public synchronized Subscriber subscribeTo(String address, int port, String secret,
-			EncryptionAlgorithm algorithm, KeygroupID keygroupIDFilter) {
-		// Case 1: address port combination exists -> false
-		if (subscriptionExists(address, port)) {
-			logger.warn("Already subscribed to " + address + ":" + port);
-			return null;
-		}
-		// Case 2: subscription does not exist yet
-		// create subscriber
+			EncryptionAlgorithm algorithm, KeygroupID keygroupID) {
 		Subscriber subscriber = null;
 		try {
-			subscriber = new Subscriber(address, port, secret, algorithm, fBase, keygroupIDFilter);
+			subscriber = new Subscriber(address, port, secret, algorithm, fBase, keygroupID);
 			if (subscriber.startReceiving() == null) {
 				throw new RuntimeException("Could not start receiving.");
 			}
@@ -50,96 +44,75 @@ public class SubscriptionRegistry {
 			logger.error("Could not initialize Subscriber");
 			e.printStackTrace();
 		}
-		// add subscriber to map
-		Map<Integer, Subscriber> map = getOrCreateInnerMap(address);
 
-		map.put(port, subscriber);
+		ArrayList<Subscriber> list = activeSubscriptions.get(keygroupID);
+		if (list == null) {
+			list = new ArrayList<Subscriber>();
+			activeSubscriptions.put(keygroupID, list);
+		}
+		list.add(subscriber);
 
 		return subscriber;
 	}
 
 	/**
-	 * gets or create the inner map associated with the specified address
+	 * Returns the subscriber for a specific keygroup.
 	 * 
-	 * @param address
-	 * @return the inner map associated with the specified address
+	 * @param keygroupID
+	 * @return see above
 	 */
-	private synchronized Map<Integer, Subscriber> getOrCreateInnerMap(String address) {
-		Map<Integer, Subscriber> tmp = activeSubscriptions.get(address);
-		if (tmp == null) {
-			tmp = new ConcurrentHashMap<>();
-			activeSubscriptions.put(address, tmp);
-		}
-
-		return tmp;
+	public synchronized ArrayList<Subscriber> getSubscriberForKeygroup(KeygroupID keygroupID) {
+		return activeSubscriptions.get(keygroupID);
 	}
-
-	public synchronized boolean unsubscribeFrom(String address, int port) {
-		// needs to delete port tuple
-		// Case 1: was not subscribed -> false
-		if (!subscriptionExists(address, port)) {
-			return false;
-		}
-		Map<Integer, Subscriber> map = activeSubscriptions.get(address);
-
-		Subscriber s = map.remove(port);
-		s.stopReception();
-
-		// Case 2: more subscriptions for address exist -> do nothing more
-		if (!map.isEmpty()) {
-			return true;
-		}
-
-		// Case 3: no more subscriptions for address exist -> remove key
-		// address
-		activeSubscriptions.remove(address);
-		return true;
-
+	
+	/**
+	 * Removes all subscribers from active subscriptions for a specific keygroup.
+	 * NOTE: This method does not call {@link Subscriber#stopReception()}.
+	 * 
+	 * @param keygroupID
+	 * @return all subscribers removed from active subscriptions
+	 */
+	public synchronized ArrayList<Subscriber> removeSubscriberForKeygroup(KeygroupID keygroupID) {
+		return activeSubscriptions.remove(keygroupID);
 	}
 
 	/**
-	 * Subscriptions to the given address exist, a value for the given key is present.
+	 * Unsubscribes from all machines that this machine subscribed to for a specific keygroup.
+	 * Also deletes them from the activeSubscriptions map.
 	 * 
-	 * @param address
+	 * @param keygroupID
+	 */
+	public synchronized void unsubscribeFromKeygroup(KeygroupID keygroupID) {
+		for (Subscriber s : activeSubscriptions.remove(keygroupID)) {
+			s.stopReception();
+		}
+	}
+
+	/**
+	 * Subscriptions for the given keygroupID exist, a value for the given key is present.
+	 * 
+	 * @param keygroupID
 	 * @return true, if subscriptions exists
 	 */
-	public synchronized boolean subscribedToAddress(String address) {
-		return activeSubscriptions.containsKey(address);
+	public synchronized boolean subscribedToKeygroupID(KeygroupID keygroupID) {
+		return activeSubscriptions.containsKey(keygroupID);
 	}
 
 	/**
-	 * A subscription to the given address port combination exists, a value for this combination is
-	 * present.
+	 * Returns the number of active subscriptions for a given keygroupID.
 	 * 
-	 * @param address
-	 * @param port
-	 * @return true, if subscriptions exists
+	 * @param keygroupID
+	 * @return the number or 0 if none existetn
 	 */
-	public synchronized boolean subscriptionExists(String address, int port) {
-		if (subscribedToAddress(address)) {
-			if (activeSubscriptions.get(address).containsKey(port)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Returns the number of active subscriptions for a given address (over all ports).
-	 * 
-	 * @param address
-	 * @return the number or 0
-	 */
-	public synchronized int getNumberOfActiveSubscriptions(String address) {
-		if (subscribedToAddress(address)) {
-			return activeSubscriptions.get(address).size();
+	public synchronized int getNumberOfActiveSubscriptions(KeygroupID keygroupID) {
+		if (subscribedToKeygroupID(keygroupID)) {
+			return activeSubscriptions.get(keygroupID).size();
 		}
 		return 0;
 	}
 
 	/**
-	 * Returns the number of all active subscriptions for all addresses and ports.
+	 * Returns the number of all active subscriptions for all keygroupIDs.
 	 * 
 	 * @return the number or 0
 	 */
@@ -148,27 +121,17 @@ public class SubscriptionRegistry {
 			return 0;
 		}
 		int number = 0;
-		for (String address : activeSubscriptions.keySet()) {
-			number += getNumberOfActiveSubscriptions(address);
+		for (KeygroupID keygroupID : activeSubscriptions.keySet()) {
+			number += getNumberOfActiveSubscriptions(keygroupID);
 		}
 		return number;
 	}
 
 	/**
-	 * Returns the Subscriber at a given address + port.
-	 * 
-	 * @param address
-	 * @param port
-	 * @return the subscriber or null, if not exists
+	 * Stops all subscriptions and deletes all data
 	 */
-	public synchronized Subscriber getSubscriber(String address, int port) {
-		if (subscriptionExists(address, port)) {
-			return activeSubscriptions.get(address).get(port);
-		}
-		return null;
-	}
-
 	public synchronized void deleteAllData() {
+		activeSubscriptions.values().forEach(list -> list.forEach(subs -> subs.stopReception()));
 		activeSubscriptions.clear();
 	}
 

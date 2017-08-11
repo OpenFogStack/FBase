@@ -1,0 +1,70 @@
+package tasks.background;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import control.FBase;
+import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseStorageConnectorException;
+import model.config.KeygroupConfig;
+import model.data.KeygroupID;
+import tasks.TaskManager.TaskName;
+
+public class CheckKeygroupConfigurationsOnUpdatesTaskTest {
+
+	private static Logger logger =
+			Logger.getLogger(CheckKeygroupConfigurationsOnUpdatesTaskTest.class.getName());
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+	}
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@After
+	public void tearDown() throws Exception {
+	}
+
+	@Test
+	public void test() throws FBaseStorageConnectorException, InterruptedException,
+			ExecutionException, TimeoutException {
+		logger.debug("-------Starting test-------");
+		FBase fbase = new FBase(null);
+		fbase.taskmanager.storeHistory();
+		KeygroupID id = new KeygroupID("app", "tenant", "group");
+		KeygroupConfig config = new KeygroupConfig(id, null, null);
+		fbase.taskmanager.runUpdateKeygroupConfigTask(config, false).get(2, TimeUnit.SECONDS);
+		assertEquals(
+				TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS
+						+ " should not have been executed so often, ",
+				new Integer(1), fbase.taskmanager.getHistoricTaskNumbers()
+						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
+		fbase.taskmanager.runCheckKeygroupConfigurationsOnUpdatesTask(1000);
+		fbase.connector.keygroupConfig_put(id,
+				new KeygroupConfig(id, null, EncryptionAlgorithm.AES));
+		Thread.sleep(2000);
+		assertEquals(
+				TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS
+						+ " should not have been twice by now, ",
+				new Integer(2), fbase.taskmanager.getHistoricTaskNumbers()
+						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
+		logger.debug("Finished test.");
+	}
+
+}

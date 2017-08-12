@@ -24,7 +24,7 @@ import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
  * Before returning, the {@link UpdateKeygroupSubscriptionsTask} is started if one of the
  * following to conditions is met:
  * 
- * 1. the machine is the reponsible machine for the keygroups
+ * 1. the machine is the responsible machine for the keygroups
  * 
  * 2. no machine is responsible for the keygroup yet
  * 

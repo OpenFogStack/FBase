@@ -27,6 +27,7 @@ import model.messages.Message;
  * @author jonathanhasenburg
  *
  */
+@SuppressWarnings("unused")
 public class NamingServiceSender extends AbstractSender {
 
 	private static Logger logger = Logger.getLogger(NamingServiceSender.class.getName());
@@ -51,6 +52,11 @@ public class NamingServiceSender extends AbstractSender {
 	@Override
 	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm)
 			throws FBaseNamingServiceException {
+		
+		if (!ableToSend) {
+			return null;
+		}
+		
 		sender.sendMore(envelope.getKeygroupID().getID());
 		sender.send(JSONable.toJSON(envelope.getMessage()));
 
@@ -315,7 +321,7 @@ public class NamingServiceSender extends AbstractSender {
 	 * @return the specified {@link KeygroupConfig} or null if not existent or service not
 	 *         reachable
 	 */
-	public NodeConfig sendKeygroupConfigRead(KeygroupID id) {
+	public KeygroupConfig sendKeygroupConfigRead(KeygroupID id) {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_READ);
 		m.setContent(JSONable.toJSON(id));

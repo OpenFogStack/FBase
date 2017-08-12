@@ -68,26 +68,28 @@ public class Subscriber extends AbstractReceiver {
 		Message m = new Message();
 		try {
 			// Code to interpret message
-			envelope.getMessage().decryptFields(secret, algorithm);
-			fBase.taskmanager.runLogTask(envelope.getMessage().getCommand() + " - "
-					+ envelope.getMessage().getContent());
-			if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-				DataRecord update =
-						JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
-				fBase.taskmanager.runPutDataRecordTask(update, false);
-			} else if (Command.DELETE_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-				DataIdentifier identifier =
-						JSONable.fromJSON(envelope.getMessage().getContent(), DataIdentifier.class);
-				fBase.taskmanager.runDeleteDataRecordTask(identifier, false);
-			} else if (Command.UPDATE_KEYGROUP_CONFIG.equals(envelope.getMessage().getCommand())) {
-				KeygroupConfig config =
-						JSONable.fromJSON(envelope.getMessage().getContent(), KeygroupConfig.class);
-				fBase.taskmanager.runUpdateKeygroupConfigTask(config, false);
-				// TODO 1: If the keygroup config cannot be interpreted, the secret was changed
-				// in this case, the naming service must be asked about the config and a new
-				// subscriber needs to be generated
+			if (envelope.getMessage().decryptFields(secret, algorithm)) {
+				fBase.taskmanager.runLogTask(envelope.getMessage().getCommand() + " - "
+						+ envelope.getMessage().getContent());
+				if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
+					DataRecord update =
+							JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
+					fBase.taskmanager.runPutDataRecordTask(update, false);
+				} else if (Command.DELETE_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
+					DataIdentifier identifier =
+							JSONable.fromJSON(envelope.getMessage().getContent(), DataIdentifier.class);
+					fBase.taskmanager.runDeleteDataRecordTask(identifier, false);
+				} else if (Command.UPDATE_KEYGROUP_CONFIG.equals(envelope.getMessage().getCommand())) {
+					KeygroupConfig config =
+							JSONable.fromJSON(envelope.getMessage().getContent(), KeygroupConfig.class);
+					fBase.taskmanager.runUpdateKeygroupConfigTask(config, false);
+				}
+				m.setTextualInfo("Message processed");
+			} else {
+				m.setTextualInfo("Could not read message with stored decryption data");
+				fBase.taskmanager.runProcessMessageWithUnknownEncryptionTask(envelope);
 			}
-			m.setTextualInfo("Message processed");
+			
 		} catch (IllegalArgumentException e) {
 			logger.warn(e.getMessage());
 			m.setTextualInfo(e.getMessage());

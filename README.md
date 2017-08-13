@@ -18,6 +18,7 @@
 - [ ] Add background task that checks other machine's heartbeats and removes machines from a node if they did not respond to long #11
 
 ## One to One Communication
+- [ ] Rebuild asymmetric encryption so that it uses a symmetric approach for the actual data
 
 ### Naming Service based Management
 - [x] Add keygroup configuration control methods to sender

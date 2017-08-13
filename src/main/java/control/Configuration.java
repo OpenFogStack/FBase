@@ -8,7 +8,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import crypto.CryptoProvider.EncryptionAlgorithm;
 import model.data.NodeID;
 
 public class Configuration {
@@ -30,7 +29,7 @@ public class Configuration {
 
 	// Security
 	private String privateKey = null;
-	private EncryptionAlgorithm algorithm = null;
+	private String publicKey = null;
 
 	// Naming Service
 	private String namingServiceAddress = null;
@@ -59,9 +58,7 @@ public class Configuration {
 
 			// Security
 			privateKey = properties.getProperty("privateKey", "Unknown");
-			String alg = properties.getProperty("algorithm");
-			if (alg != null)
-				algorithm = EncryptionAlgorithm.valueOf(alg);
+			publicKey = properties.getProperty("publicKey", "Unknown");
 
 			// Naming Service
 			namingServiceAddress = properties.getProperty("namingServiceAddress", "Unknown");
@@ -129,9 +126,9 @@ public class Configuration {
 	public String getPrivateKey() {
 		return privateKey;
 	}
-
-	public EncryptionAlgorithm getAlgorithm() {
-		return algorithm;
+	
+	public String getPublicKey() {
+		return publicKey;
 	}
 	
 	public String getNamingServiceAddress() {

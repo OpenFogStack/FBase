@@ -3,6 +3,7 @@ package tasks;
 import org.apache.log4j.Logger;
 
 import control.FBase;
+import exceptions.FBaseEncryptionException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
@@ -59,7 +60,14 @@ class PutDataRecordTask extends Task<Boolean> {
 			Envelope e = new Envelope(record.getKeygroupID(), m);
 
 			// publish data
-			fBase.publisher.send(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+			try {
+				fBase.publisher.send(e, config.getEncryptionSecret(),
+						config.getEncryptionAlgorithm());
+			} catch (FBaseEncryptionException e1) {
+				logger.warn("Could not publish envelope to other nodes because encyption failed, "
+						+ e1.getMessage());
+				e1.printStackTrace();
+			}
 		}
 
 		return true;

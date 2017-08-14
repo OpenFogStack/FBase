@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseEncryptionException;
 import model.JSONable;
 import model.messages.Envelope;
 
@@ -32,9 +33,10 @@ public class Publisher extends AbstractSender {
 	 * @param secret - the secret used for encryption
 	 * @param algorithm - the algorithm used for encryption
 	 * @return null
+	 * @throws FBaseEncryptionException 
 	 */
 	@Override
-	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm) {
+	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm) throws FBaseEncryptionException {
 		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID().getID());
 		sender.sendMore(envelope.getKeygroupID().getID());
 		envelope.getMessage().encryptFields(secret, algorithm);

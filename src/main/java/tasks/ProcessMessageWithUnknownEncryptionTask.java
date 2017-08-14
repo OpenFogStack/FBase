@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import communication.SubscriptionRegistry;
 import control.FBase;
+import exceptions.FBaseEncryptionException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
@@ -41,7 +42,7 @@ class ProcessMessageWithUnknownEncryptionTask extends Task<Boolean> {
 	@Override
 	public Boolean executeFunctionality() {
 		logger.debug("Trying to process envelope with id " + envelope.getKeygroupID());
-		
+
 		KeygroupID keygroupID = envelope.getKeygroupID();
 		if (keygroupID == null) {
 			// Message is not parseable
@@ -66,8 +67,9 @@ class ProcessMessageWithUnknownEncryptionTask extends Task<Boolean> {
 		}
 
 		fBase.taskmanager.runUpdateKeygroupConfigTask(config, false);
-		if (envelope.getMessage().decryptFields(config.getEncryptionSecret(),
-				config.getEncryptionAlgorithm())) {
+		try {
+			envelope.getMessage().decryptFields(config.getEncryptionSecret(),
+					config.getEncryptionAlgorithm());
 			if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
 				DataRecord update =
 						JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
@@ -77,8 +79,9 @@ class ProcessMessageWithUnknownEncryptionTask extends Task<Boolean> {
 						JSONable.fromJSON(envelope.getMessage().getContent(), DataIdentifier.class);
 				fBase.taskmanager.runDeleteDataRecordTask(identifier, false);
 			}
-		} else {
-			logger.error("Could not decrypt fields with new naming service data.");
+		} catch (FBaseEncryptionException e) {
+			logger.error(
+					"Could not decrypt fields with new naming service data, " + e.getMessage());
 		}
 
 		return true;

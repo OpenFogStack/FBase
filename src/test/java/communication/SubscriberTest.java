@@ -18,6 +18,7 @@ import org.zeromq.ZMQ;
 import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseEncryptionException;
 import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
@@ -77,7 +78,7 @@ public class SubscriberTest {
 	}
 
 	@Test
-	public void testSubscribe() throws InterruptedException, ExecutionException, TimeoutException {
+	public void testSubscribe() throws InterruptedException, ExecutionException, TimeoutException, FBaseEncryptionException {
 		logger.debug("-------Starting testSubscribe-------");
 		Message m = new Message();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase);
@@ -87,6 +88,7 @@ public class SubscriberTest {
 		publisher.sendMore(update.getDataIdentifier().getKeygroupID().getID());
 		publisher.send(JSONable.toJSON(m));
 		Thread.sleep(500);
+		m.decryptFields(secret, algorithm);
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		m.setContent(JSONable.toJSON(update2));
 		m.encryptFields(secret, algorithm);
@@ -99,7 +101,8 @@ public class SubscriberTest {
 
 	@Test
 	public void testSubscribeWithFilter()
-			throws InterruptedException, ExecutionException, TimeoutException {
+			throws InterruptedException, ExecutionException, TimeoutException,
+			FBaseEncryptionException {
 		logger.debug("-------Starting testSubscribeWithFilter-------");
 		Message m = new Message();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase,

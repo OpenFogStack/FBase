@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.zeromq.ZMQ;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseEncryptionException;
 import model.JSONable;
 import model.data.KeygroupID;
 import model.messages.Envelope;
@@ -47,7 +48,7 @@ public class PublisherTest {
 	}
 
 	@Test
-	public void testPublishOne() throws InterruptedException {
+	public void testPublishOne() throws InterruptedException, FBaseEncryptionException {
 		logger.debug("-------Starting testPublishOne-------");
 		Message m = new Message();
 		m.setContent("Test content");
@@ -60,8 +61,8 @@ public class PublisherTest {
 		logger.debug("Finished testPublishOne.");
 	}
 
-	 @Test
-	public void testPublishTwo() throws InterruptedException {
+	@Test
+	public void testPublishTwo() throws InterruptedException, FBaseEncryptionException {
 		logger.debug("-------Starting testPublishTwo-------");
 		Message m = new Message();
 		m.setContent("Test content");
@@ -78,7 +79,7 @@ public class PublisherTest {
 	}
 
 	@Test
-	public void testPublishMany() throws InterruptedException {
+	public void testPublishMany() throws InterruptedException, FBaseEncryptionException {
 		logger.debug("-------Starting testPublishMany-------");
 		List<Thread> list = new ArrayList<Thread>();
 		List<Envelope> listE = new ArrayList<Envelope>();
@@ -123,7 +124,11 @@ public class PublisherTest {
 			context.term();
 			assertEquals(namespace, e.getKeygroupID().toString());
 			assertEquals(JSONable.toJSON(m), JSONable.toJSON(e.getMessage()));
-			m.decryptFields(secret, algorithm);
+			try {
+				m.decryptFields(secret, algorithm);
+			} catch (FBaseEncryptionException e1) {
+				e1.printStackTrace();
+			}
 			assertNotEquals(m, e.getMessage().getContent());
 		}
 

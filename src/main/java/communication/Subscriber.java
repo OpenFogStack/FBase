@@ -5,6 +5,7 @@ import org.zeromq.ZMQ;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseEncryptionException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
@@ -68,7 +69,8 @@ public class Subscriber extends AbstractReceiver {
 		Message m = new Message();
 		try {
 			// Code to interpret message
-			if (envelope.getMessage().decryptFields(secret, algorithm)) {
+			try {
+				envelope.getMessage().decryptFields(secret, algorithm);
 				fBase.taskmanager.runLogTask(envelope.getMessage().getCommand() + " - "
 						+ envelope.getMessage().getContent());
 				if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
@@ -76,20 +78,22 @@ public class Subscriber extends AbstractReceiver {
 							JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
 					fBase.taskmanager.runPutDataRecordTask(update, false);
 				} else if (Command.DELETE_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-					DataIdentifier identifier =
-							JSONable.fromJSON(envelope.getMessage().getContent(), DataIdentifier.class);
+					DataIdentifier identifier = JSONable
+							.fromJSON(envelope.getMessage().getContent(), DataIdentifier.class);
 					fBase.taskmanager.runDeleteDataRecordTask(identifier, false);
-				} else if (Command.UPDATE_KEYGROUP_CONFIG.equals(envelope.getMessage().getCommand())) {
-					KeygroupConfig config =
-							JSONable.fromJSON(envelope.getMessage().getContent(), KeygroupConfig.class);
+				} else if (Command.UPDATE_KEYGROUP_CONFIG
+						.equals(envelope.getMessage().getCommand())) {
+					KeygroupConfig config = JSONable.fromJSON(envelope.getMessage().getContent(),
+							KeygroupConfig.class);
 					fBase.taskmanager.runUpdateKeygroupConfigTask(config, false);
 				}
 				m.setTextualInfo("Message processed");
-			} else {
-				m.setTextualInfo("Could not read message with stored decryption data");
+			} catch (FBaseEncryptionException e) {
+				m.setTextualInfo(
+						"Could not read message with stored decryption data, " + e.getMessage());
 				fBase.taskmanager.runProcessMessageWithUnknownEncryptionTask(envelope);
 			}
-			
+
 		} catch (IllegalArgumentException e) {
 			logger.warn(e.getMessage());
 			m.setTextualInfo(e.getMessage());

@@ -5,6 +5,7 @@ import org.zeromq.ZMQ;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseEncryptionException;
 import exceptions.FBaseNamingServiceException;
 import model.JSONable;
 import model.config.ClientConfig;
@@ -95,7 +96,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return true;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -115,7 +116,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return true;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -136,7 +137,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return null;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -156,7 +157,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return true;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -176,7 +177,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return true;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -196,7 +197,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return true;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -218,7 +219,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return null;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -239,7 +240,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return true;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -259,7 +260,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return null;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -283,7 +284,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return null;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -307,7 +308,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return null;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -329,7 +330,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return null;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -355,7 +356,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return null;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -376,7 +377,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return true;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -399,7 +400,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			// TODO process response
 			return true;
-		} catch (FBaseNamingServiceException e1) {
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -412,8 +413,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param m - The message used for the envelope
 	 * @return the created envelope
+	 * @throws FBaseEncryptionException 
 	 */
-	private Envelope createEncryptedEnvelope(Message m) {
+	private Envelope createEncryptedEnvelope(Message m) throws FBaseEncryptionException {
 		m.encryptFields(fBase.configuration.getPrivateKey(),
 				EncryptionAlgorithm.RSA_PRIVATE_ENCRYPT);
 		m.encryptFields(fBase.configuration.getNamingServicePublicKey(),

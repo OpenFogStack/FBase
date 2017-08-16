@@ -53,11 +53,11 @@ public class NamingServiceSender extends AbstractSender {
 	@Override
 	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm)
 			throws FBaseNamingServiceException {
-		
+
 		if (!ableToSend) {
 			return null;
 		}
-		
+
 		sender.sendMore(envelope.getKeygroupID().getID());
 		sender.send(JSONable.toJSON(envelope.getMessage()));
 
@@ -407,19 +407,18 @@ public class NamingServiceSender extends AbstractSender {
 	}
 
 	/**
-	 * Create an envelope that is encrypted with the private key of the node and the public
-	 * key of the naming service. Also sets {@link Envelope#setConfigID(model.data.ConfigID)}
-	 * to the {@link NodeID} of the node the machine participates with.
+	 * Create an envelope that is signed with the private key of the node and encrypted with
+	 * the public key of the naming service. Also sets
+	 * {@link Envelope#setConfigID(model.data.ConfigID)} to the {@link NodeID} of the node the
+	 * machine participates with.
 	 * 
 	 * @param m - The message used for the envelope
 	 * @return the created envelope
-	 * @throws FBaseEncryptionException 
+	 * @throws FBaseEncryptionException
 	 */
 	private Envelope createEncryptedEnvelope(Message m) throws FBaseEncryptionException {
-		m.encryptFields(fBase.configuration.getPrivateKey(),
-				EncryptionAlgorithm.RSA_PRIVATE_ENCRYPT);
-		m.encryptFields(fBase.configuration.getNamingServicePublicKey(),
-				EncryptionAlgorithm.RSA_PUBLIC_ENCRYPT);
+		m.signMessage(fBase.configuration.getPrivateKey(), EncryptionAlgorithm.RSA);
+		m.encryptFields(fBase.configuration.getNamingServicePublicKey(), EncryptionAlgorithm.RSA);
 		Envelope e = new Envelope(fBase.configuration.getNodeID(), m);
 		return e;
 	}

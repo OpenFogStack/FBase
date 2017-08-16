@@ -38,8 +38,8 @@ public class Publisher extends AbstractSender {
 	@Override
 	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm) throws FBaseEncryptionException {
 		logger.debug("Publishing envelope with namespace " + envelope.getKeygroupID().getID());
-		sender.sendMore(envelope.getKeygroupID().getID());
 		envelope.getMessage().encryptFields(secret, algorithm);
+		sender.sendMore(envelope.getKeygroupID().getID());
 		sender.send(JSONable.toJSON(envelope.getMessage()));
 		return null;
 	}

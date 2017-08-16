@@ -78,7 +78,8 @@ public class SubscriberTest {
 	}
 
 	@Test
-	public void testSubscribe() throws InterruptedException, ExecutionException, TimeoutException, FBaseEncryptionException {
+	public void testSubscribe() throws InterruptedException, ExecutionException, TimeoutException,
+			FBaseEncryptionException {
 		logger.debug("-------Starting testSubscribe-------");
 		Message m = new Message();
 		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase);
@@ -100,13 +101,12 @@ public class SubscriberTest {
 	}
 
 	@Test
-	public void testSubscribeWithFilter()
-			throws InterruptedException, ExecutionException, TimeoutException,
-			FBaseEncryptionException {
+	public void testSubscribeWithFilter() throws InterruptedException, ExecutionException,
+			TimeoutException, FBaseEncryptionException {
 		logger.debug("-------Starting testSubscribeWithFilter-------");
 		Message m = new Message();
-		Subscriber subscriber = new Subscriber(address, port, secret, algorithm, fBase,
-				update.getKeygroupID());
+		Subscriber subscriber =
+				new Subscriber(address, port, secret, algorithm, fBase, update.getKeygroupID());
 		subscriber.startReceiving();
 		m.setContent(JSONable.toJSON(update));
 		m.encryptFields(secret, algorithm);

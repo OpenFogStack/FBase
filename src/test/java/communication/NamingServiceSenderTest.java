@@ -1,6 +1,7 @@
 package communication;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.util.concurrent.ExecutionException;
@@ -20,7 +21,7 @@ import org.zeromq.ZMQ;
 
 import exceptions.FBaseNamingServiceException;
 import model.JSONable;
-import model.data.KeygroupID;
+import model.data.NodeID;
 import model.messages.Envelope;
 import model.messages.Message;
 
@@ -49,7 +50,7 @@ public class NamingServiceSenderTest {
 		sender = new NamingServiceSender(address, port, null);
 		Message m = new Message();
 		m.setTextualInfo("TestText");
-		e = new Envelope(new KeygroupID("a", "b", "c"), m);
+		e = new Envelope(new NodeID("Node A"), m);
 	}
 
 	@After
@@ -100,6 +101,16 @@ public class NamingServiceSenderTest {
 		future.get(5, TimeUnit.SECONDS);
 		assertEquals("Success", reply);
 		logger.debug("Finished testPollingRecovery.");
+	}
+
+	@Test
+	public void testMalformattedURI() throws InterruptedException, FBaseNamingServiceException,
+			ExecutionException, TimeoutException {
+		logger.debug("-------Starting testMalformattedURI-------");
+		NamingServiceSender malSender = new NamingServiceSender("asdlkfasdfjk", -1, null);
+		String reply = malSender.send(e, null, null);
+		assertNull(reply);
+		logger.debug("Finished testMalformattedURI.");
 	}
 
 	class ReceiveHelper implements Runnable {

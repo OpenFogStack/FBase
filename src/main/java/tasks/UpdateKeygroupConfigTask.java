@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
 import control.FBase;
+import exceptions.FBaseEncryptionException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
@@ -24,13 +25,14 @@ import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
  * Before returning, the {@link UpdateKeygroupSubscriptionsTask} is started if one of the
  * following to conditions is met:
  * 
- * 1. the machine is the reponsible machine for the keygroups
+ * 1. the machine is the responsible machine for the keygroups
  * 
  * 2. no machine is responsible for the keygroup yet
  * 
  * Otherwise, the subscriptions will not be updated. However, the machine responsible for the
- * subscriptions will identify the updated due to the {@link CheckKeygroupConfigurationsOnUpdatesTask}.
- * which runs as a background process on each machine.
+ * subscriptions will identify the updated due to the
+ * {@link CheckKeygroupConfigurationsOnUpdatesTask}. which runs as a background process on
+ * each machine.
  * 
  * @author jonathanhasenburg
  *
@@ -99,9 +101,16 @@ class UpdateKeygroupConfigTask extends Task<Boolean> {
 			Envelope e = new Envelope(config.getKeygroupID(), m);
 
 			// publish data
-			fBase.publisher.send(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+			try {
+				fBase.publisher.send(e, config.getEncryptionSecret(),
+						config.getEncryptionAlgorithm());
+			} catch (FBaseEncryptionException e1) {
+				logger.warn("Could not publish envelope to other nodes because encyption failed, "
+						+ e1.getMessage());
+				e1.printStackTrace();
+			}
 		}
-		
+
 		return true;
 
 	}

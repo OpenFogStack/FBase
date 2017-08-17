@@ -46,10 +46,8 @@ public class FBase {
 			server.startServer();
 		}
 		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort());
-		if (configuration.getNamingServiceAddress() != "Unknown" && configuration.getNamingServicePort() != -1) {
-			namingServiceSender = new NamingServiceSender(configuration.getNamingServiceAddress(),
-					configuration.getNamingServicePort(), this);
-		}
+		namingServiceSender = new NamingServiceSender(configuration.getNamingServiceAddress(),
+				configuration.getNamingServicePort(), this);
 		subscriptionRegistry = new SubscriptionRegistry(this);
 		
 		// TODO Start Background Tasks

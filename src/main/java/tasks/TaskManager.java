@@ -14,6 +14,7 @@ import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
+import model.messages.Envelope;
 import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
 
 public class TaskManager {
@@ -22,7 +23,8 @@ public class TaskManager {
 	private ExecutorService pool = null;
 	private final AtomicInteger[] runningTasks = new AtomicInteger[TaskName.values().length];
 
-	// if set to true by enable storingHistory, the taskmanager will store how often it run each
+	// if set to true by enable storingHistory, the taskmanager will store how often it run
+	// each
 	// task
 	private boolean storingHistory = false;
 	private final AtomicInteger[] taskHistory = new AtomicInteger[TaskName.values().length];
@@ -31,7 +33,8 @@ public class TaskManager {
 
 	public enum TaskName {
 		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, UPDATE_KEYGROUP_SUBSCRIPTIONS, PUT_DATA_RECORD,
-		DELETE_DATA_RECORD, UPDATE_NODE_CONFIG, CHECK_KEYGROUP_SUBSCRIPTIONS
+		DELETE_DATA_RECORD, UPDATE_NODE_CONFIG, CHECK_KEYGROUP_SUBSCRIPTIONS,
+		PROCESS_MESSAGE_WITH_UNKNOWN_ENCRYPTION
 	}
 
 	public void storeHistory() {
@@ -126,6 +129,12 @@ public class TaskManager {
 
 	public Future<Boolean> runDeleteDataRecordTask(DataIdentifier identifier, boolean publish) {
 		Future<Boolean> future = pool.submit(new DeleteDataRecordTask(identifier, fBase, publish));
+		return future;
+	}
+
+	public Future<Boolean> runProcessMessageWithUnknownEncryptionTask(Envelope envelope) {
+		Future<Boolean> future =
+				pool.submit(new ProcessMessageWithUnknownEncryptionTask(fBase, envelope));
 		return future;
 	}
 

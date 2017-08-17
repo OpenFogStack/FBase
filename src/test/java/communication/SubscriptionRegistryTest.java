@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseEncryptionException;
 import model.JSONable;
 import model.data.DataRecord;
 import model.data.KeygroupID;
@@ -33,7 +34,7 @@ public class SubscriptionRegistryTest {
 	}
 
 	@Test
-	public void testSubscribe() throws InterruptedException {
+	public void testSubscribe() throws InterruptedException, FBaseEncryptionException {
 		logger.debug("-------Starting testSubscribe-------");
 		Subscriber s = subscriptionRegistry.subscribeTo("tcp://localhost", 8081, "secret",
 				EncryptionAlgorithm.AES, keygroupID1);
@@ -61,5 +62,5 @@ public class SubscriptionRegistryTest {
 		assertEquals(0, subscriptionRegistry.getNumberOfActiveSubscriptions());
 		logger.debug("Finished testUnSubscribe.");
 	}
-	
+
 }

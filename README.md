@@ -6,6 +6,7 @@
 - [ ] Add versions to all configurations so that a node/machine can identify updates
 
 ## Publish/Subscribe
+- [ ] Add capabilities to process messages that cannot be encrypted
 
 ### Subscription Management
 - [x] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupConfigurationsOnUpdatesTask) #11
@@ -17,9 +18,10 @@
 - [ ] Add background task that checks other machine's heartbeats and removes machines from a node if they did not respond to long #11
 
 ## One to One Communication
+- [ ] Rebuild asymmetric encryption so that it uses a symmetric approach for the actual data
 
 ### Naming Service based Management
-- [ ] Add keygroup configuration control methods to sender
+- [x] Add keygroup configuration control methods to sender
 - [ ] Add response processing to all methods
 - [ ] Add node management methods (e.g. to update a node configuration when a machine is added/removed)
 - [ ] Add a background task that periodically polls the naming service about the newest configurations

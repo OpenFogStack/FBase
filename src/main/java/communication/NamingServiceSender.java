@@ -53,12 +53,18 @@ public class NamingServiceSender extends AbstractSender {
 	@Override
 	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm)
 			throws FBaseNamingServiceException {
-
+		
 		if (!ableToSend) {
 			return null;
 		}
 
-		sender.sendMore(envelope.getKeygroupID().getID());
+		String nodeID = envelope.getNodeID().getID();
+		if (nodeID == null) {
+			logger.error("The envelope should contain a nodeID, but does not.");
+			return null;
+		}
+		
+		sender.sendMore(nodeID);
 		sender.send(JSONable.toJSON(envelope.getMessage()));
 
 		ZMQ.Poller poller = context.poller();
@@ -328,6 +334,7 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(id));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
+			logger.debug("Received answer.");
 			// TODO process response
 			return null;
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {

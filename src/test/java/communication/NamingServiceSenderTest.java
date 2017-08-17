@@ -21,7 +21,7 @@ import org.zeromq.ZMQ;
 
 import exceptions.FBaseNamingServiceException;
 import model.JSONable;
-import model.data.KeygroupID;
+import model.data.NodeID;
 import model.messages.Envelope;
 import model.messages.Message;
 
@@ -50,7 +50,7 @@ public class NamingServiceSenderTest {
 		sender = new NamingServiceSender(address, port, null);
 		Message m = new Message();
 		m.setTextualInfo("TestText");
-		e = new Envelope(new KeygroupID("a", "b", "c"), m);
+		e = new Envelope(new NodeID("Node A"), m);
 	}
 
 	@After

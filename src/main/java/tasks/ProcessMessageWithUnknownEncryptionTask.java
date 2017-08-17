@@ -54,6 +54,7 @@ class ProcessMessageWithUnknownEncryptionTask extends Task<Boolean> {
 
 		if (config == null) {
 			// cannot connect to naming service
+			logger.error("Cannot connect to naming service");
 			return false;
 		}
 

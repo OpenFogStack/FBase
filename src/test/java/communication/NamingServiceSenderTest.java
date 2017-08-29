@@ -4,6 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,8 +25,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.zeromq.ZMQ;
 
+import control.FBase;
+import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseNamingServiceException;
 import model.JSONable;
+import model.config.ClientConfig;
+import model.config.NodeConfig;
+import model.data.ClientID;
 import model.data.NodeID;
 import model.messages.Envelope;
 import model.messages.Message;
@@ -30,24 +41,38 @@ public class NamingServiceSenderTest {
 	private static Logger logger = Logger.getLogger(NamingServiceSenderTest.class.getName());
 
 	private static ExecutorService executor;
-	NamingServiceSender sender = null;
-	String address = "tcp://localhost";
-	int port = 1234;
+	private static FBase fbase;
+	private static final String configName = "NamingServiceSenderTest_Config.properties";
+	private static final String ownNodeConfigJSONPath =
+			"src/test/resources/NamingServiceSenderTest_NodeConfig.json";
+
+	private static NamingServiceSender localSender = null;
+	private static  NamingServiceSender nsSender = null;
+
+	private static String localAddress = "tcp://localhost";
+	private static int localPort = 1234;
+
 	Envelope e = null;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		executor = Executors.newCachedThreadPool();
+		fbase = new FBase(configName);
+		localSender = new NamingServiceSender(localAddress, localPort, null);
+		nsSender = new NamingServiceSender(fbase.configuration.getNamingServiceAddress(),
+				fbase.configuration.getNamingServicePort(), fbase);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+		localSender.shutdown();
+		nsSender.shutdown();
 		executor.shutdownNow();
+		fbase.tearDown();
 	}
 
 	@Before
 	public void setUp() throws Exception {
-		sender = new NamingServiceSender(address, port, null);
 		Message m = new Message();
 		m.setTextualInfo("TestText");
 		e = new Envelope(new NodeID("Node A"), m);
@@ -55,7 +80,7 @@ public class NamingServiceSenderTest {
 
 	@After
 	public void tearDown() throws Exception {
-		sender.shutdown();
+		// TODO reset namingservice
 		logger.debug("\n");
 	}
 
@@ -65,7 +90,7 @@ public class NamingServiceSenderTest {
 		logger.debug("-------Starting testPollingSuccess-------");
 		Future<?> future = executor.submit(new ReceiveHelper());
 		Thread.sleep(200);
-		String reply = sender.send(e, null, null);
+		String reply = localSender.send(e, null, null);
 		future.get(5, TimeUnit.SECONDS);
 		assertEquals("Success", reply);
 		logger.debug("Finished testPollingSuccess.");
@@ -76,7 +101,7 @@ public class NamingServiceSenderTest {
 		logger.debug("-------Starting testPollingNoResponse-------");
 		try {
 			@SuppressWarnings("unused")
-			String reply = sender.send(e, null, null);
+			String reply = localSender.send(e, null, null);
 		} catch (FBaseNamingServiceException e) {
 			logger.debug(e.getMessage());
 			return;
@@ -91,13 +116,13 @@ public class NamingServiceSenderTest {
 		logger.debug("-------Starting testPollingRecovery-------");
 		try {
 			@SuppressWarnings("unused")
-			String reply = sender.send(e, null, null);
+			String reply = localSender.send(e, null, null);
 		} catch (FBaseNamingServiceException e) {
 			logger.debug(e.getMessage());
 		}
 		Future<?> future = executor.submit(new ReceiveHelper());
 		Thread.sleep(200);
-		String reply = sender.send(e, null, null);
+		String reply = localSender.send(e, null, null);
 		future.get(5, TimeUnit.SECONDS);
 		assertEquals("Success", reply);
 		logger.debug("Finished testPollingRecovery.");
@@ -119,7 +144,7 @@ public class NamingServiceSenderTest {
 		public void run() {
 			ZMQ.Context context = ZMQ.context(1);
 			ZMQ.Socket receiver = context.socket(ZMQ.REP);
-			receiver.bind(sender.getAddress() + ":" + sender.getPort());
+			receiver.bind(localSender.getAddress() + ":" + localSender.getPort());
 			String keygroupID = receiver.recvStr();
 			logger.debug("Keygroup: " + keygroupID);
 			String content = receiver.recvStr();
@@ -131,6 +156,184 @@ public class NamingServiceSenderTest {
 			context.term();
 		}
 
+	}
+
+	/*
+	 * The following tests need to communicate with an actual naming service that accepts
+	 * requests from this node (see config1.properties)
+	 */
+
+	/*
+	 * NODE CONFIG Tests
+	 */
+
+	/**
+	 * Creates a node config, either with default values or based on the values found at
+	 * jsonFilePath (if not null).
+	 * 
+	 * @param jsonFilePath
+	 * @return the config
+	 */
+	private NodeConfig makeNodeConfig(String jsonFilePath) {
+		if (jsonFilePath == null) {
+			// Set up original version of node
+			NodeID id = new NodeID("test_node");
+			String key1 = "my_public_key";
+			EncryptionAlgorithm alg1 = EncryptionAlgorithm.AES;
+			List<String> machines1 = new ArrayList<String>();
+			machines1.add("m1");
+			machines1.add("m2");
+			machines1.add("m3");
+			Integer pPort1 = 1001;
+			Integer mPort1 = 2001;
+			Integer rPort1 = 3001;
+			String loc1 = "my_location";
+			String desc1 = "my_description";
+
+			return new NodeConfig(id, key1, alg1, machines1, pPort1, mPort1, rPort1, loc1, desc1);
+		} else {
+			File initialNodeFile = new File(jsonFilePath);
+			String initialNodeJSON = null;
+
+			try {
+				FileReader reader = new FileReader(initialNodeFile);
+				char[] chars = new char[(int) initialNodeFile.length()];
+				reader.read(chars);
+				initialNodeJSON = new String(chars);
+				reader.close();
+			} catch (FileNotFoundException e) {
+				throw new IllegalArgumentException("Path " + jsonFilePath + " does not exist");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			return JSONable.fromJSON(initialNodeJSON, NodeConfig.class);
+		}
+
+	}
+
+	private void createNodeConfig(NodeConfig config, boolean expected) {
+		boolean actual = nsSender.sendNodeConfigCreate(config);
+		assertEquals("Could not create node config.", expected, actual);
+	}
+
+	private void updateNodeConfig(NodeConfig config, boolean expected) {
+		boolean actual = nsSender.sendNodeConfigUpdate(config);
+		assertEquals("Could not update node config.", expected, actual);
+	}
+
+	private void readNodeConfig(NodeID nodeID, NodeConfig expectedConfig) {
+		NodeConfig actualConfig = nsSender.sendNodeConfigRead(nodeID);
+		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
+	}
+
+	private void deleteNodeConfig(NodeID nodeID, boolean expected) {
+		boolean actual = nsSender.sendNodeConfigDelete(nodeID);
+		assertEquals("Could not delete node config", expected, actual);
+	}
+
+	@Test
+	public void testSendNodeConfigCreate() throws FBaseNamingServiceException {
+		logger.debug("-------Starting testSendNodeConfigCreate-------");
+		NodeConfig newConfig = makeNodeConfig(ownNodeConfigJSONPath);
+		newConfig.setNodeID(new NodeID("B2"));
+		createNodeConfig(newConfig, true);
+		readNodeConfig(newConfig.getNodeID(), newConfig);
+		logger.debug("Finished testSendNodeConfigCreate.");
+	}
+
+	@Test
+	public void testSendNodeConfigUpdate() throws FBaseNamingServiceException {
+		logger.debug("-------Starting testSendNodeConfigUpdate-------");
+		NodeConfig configUpdate = makeNodeConfig(ownNodeConfigJSONPath);
+		configUpdate.setDescription("This is a changed description");
+		updateNodeConfig(configUpdate, true);
+		readNodeConfig(configUpdate.getNodeID(), configUpdate);
+		logger.debug("Finished testSendNodeConfigUpdate.");
+	}
+
+	@Test
+	public void testSendNodeConfigRead() throws FBaseNamingServiceException {
+		logger.debug("-------Starting testSendNodeConfigRead-------");
+		readNodeConfig(fbase.configuration.getNodeID(), makeNodeConfig(ownNodeConfigJSONPath));
+		logger.debug("Finished testSendNodeConfigRead.");
+	}
+	
+	@Test
+	public void testSendNodeConfigDelete() throws FBaseNamingServiceException {
+		logger.debug("-------Starting testSendNodeConfigDelete-------");
+		deleteNodeConfig(fbase.configuration.getNodeID(), true);
+		deleteNodeConfig(fbase.configuration.getNodeID(), false);
+		logger.debug("Finished testSendNodeConfigDelete.");
+	}
+	
+	/*
+	 * Client CONFIG Tests
+	 */
+
+	/**
+	 * Creates a client config with default values
+	 * 
+	 * @return the config
+	 */
+	private ClientConfig makeClientConfig() {
+		ClientConfig config = new ClientConfig();
+		config.setClientID(new ClientID("test-client"));
+		config.setEncryptionAlgorithm(EncryptionAlgorithm.RSA);
+		config.setVersion(1);
+		config.setPublicKey("<Put your public key here>");
+		return config;
+	}
+
+	private void createClientConfig(ClientConfig config, boolean expected) {
+		boolean actual = nsSender.sendClientConfigCreate(config);
+		assertEquals("Could not create node config.", expected, actual);
+	}
+
+	private void updateClientConfig(ClientConfig config, boolean expected) {
+		boolean actual = nsSender.sendClientConfigUpdate(config);
+		assertEquals("Could not update node config.", expected, actual);
+	}
+
+	private void readClientConfig(ClientID clientID, ClientConfig expectedConfig) {
+		ClientConfig actualConfig = nsSender.sendClientConfigRead(clientID);
+		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
+	}
+
+	private void deleteClientConfig(ClientID clientID, boolean expected) {
+		boolean actual = nsSender.sendClientConfigDelete(clientID);
+		assertEquals("Could not delete node config", expected, actual);
+	}
+
+	@Test
+	public void testSendClientConfigCreateAndRead() throws FBaseNamingServiceException {
+		logger.debug("-------Starting testSendClientConfigCreate-------");
+		ClientConfig newConfig = makeClientConfig();
+		createClientConfig(newConfig, true);
+		readClientConfig(newConfig.getClientID(), newConfig);
+		logger.debug("Finished testSendClientConfigCreate.");
+	}
+
+	@Test
+	public void testSendClientConfigUpdate() throws FBaseNamingServiceException {
+		logger.debug("-------Starting testSendClientConfigUpdate-------");
+		ClientConfig newConfig = makeClientConfig();
+		createClientConfig(newConfig, true);
+		ClientConfig configUpdate = makeClientConfig();
+		configUpdate.setVersion(2);
+		updateClientConfig(configUpdate, true);
+		readClientConfig(configUpdate.getClientID(), configUpdate);
+		logger.debug("Finished testSendClientConfigUpdate.");
+	}
+	
+	@Test
+	public void testSendClientConfigDelete() throws FBaseNamingServiceException {
+		logger.debug("-------Starting testSendClientConfigDelete-------");
+		ClientConfig newConfig = makeClientConfig();
+		createClientConfig(newConfig, true);
+		deleteClientConfig(newConfig.getClientID(), true);
+		deleteClientConfig(newConfig.getClientID(), false);
+		logger.debug("Finished testSendClientConfigDelete.");
 	}
 
 }

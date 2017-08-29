@@ -53,7 +53,7 @@ public class NamingServiceSender extends AbstractSender {
 	@Override
 	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm)
 			throws FBaseNamingServiceException {
-		
+
 		if (!ableToSend) {
 			return null;
 		}
@@ -63,7 +63,7 @@ public class NamingServiceSender extends AbstractSender {
 			logger.error("The envelope should contain a nodeID, but does not.");
 			return null;
 		}
-		
+
 		sender.sendMore(nodeID);
 		sender.send(JSONable.toJSON(envelope.getMessage()));
 
@@ -100,8 +100,8 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(nodeConfig));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
-			// TODO process response
-			return true;
+			Message response = createDecryptedMessage(answer);
+			return Boolean.parseBoolean(response.getContent());
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
@@ -120,8 +120,8 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(nodeConfig));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
-			// TODO process response
-			return true;
+			Message response = createDecryptedMessage(answer);
+			return Boolean.parseBoolean(response.getContent());
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
@@ -141,8 +141,9 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(id));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
-			// TODO process response
-			return null;
+			Message response = createDecryptedMessage(answer);
+			NodeConfig config = JSONable.fromJSON(response.getContent(), NodeConfig.class);
+			return config;
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
@@ -161,8 +162,8 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(id));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
-			// TODO process response
-			return true;
+			Message response = createDecryptedMessage(answer);
+			return Boolean.parseBoolean(response.getContent());
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
@@ -181,8 +182,8 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(clientConfig));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
-			// TODO process response
-			return true;
+			Message response = createDecryptedMessage(answer);
+			return Boolean.parseBoolean(response.getContent());
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
@@ -201,8 +202,8 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(clientConfig));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
-			// TODO process response
-			return true;
+			Message response = createDecryptedMessage(answer);
+			return Boolean.parseBoolean(response.getContent());
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
@@ -223,8 +224,9 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(id));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
-			// TODO process response
-			return null;
+			Message response = createDecryptedMessage(answer);
+			ClientConfig config = JSONable.fromJSON(response.getContent(), ClientConfig.class);
+			return config;
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
@@ -244,13 +246,16 @@ public class NamingServiceSender extends AbstractSender {
 		m.setContent(JSONable.toJSON(id));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
-			// TODO process response
-			return true;
+			Message response = createDecryptedMessage(answer);
+			return Boolean.parseBoolean(response.getContent());
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
 	}
+
+	// TODO 1: Add usage of ConfigIDtoKeygroupWrapper
+	// TODO 1: Put KeygroupConfig client methods
 
 	/**
 	 * Asks the naming service to create a {@link KeygroupConfig}.
@@ -284,7 +289,8 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupID keygroupID) {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_ADD_REPLICA_NODE);
-		ConfigToKeygroupWrapper wrapper = new ConfigToKeygroupWrapper(keygroupID, rNConfig);
+		ConfigToKeygroupWrapper<ReplicaNodeConfig> wrapper =
+				new ConfigToKeygroupWrapper<ReplicaNodeConfig>(keygroupID, rNConfig);
 		m.setContent(JSONable.toJSON(wrapper));
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
@@ -428,6 +434,28 @@ public class NamingServiceSender extends AbstractSender {
 		m.encryptFields(fBase.configuration.getNamingServicePublicKey(), EncryptionAlgorithm.RSA);
 		Envelope e = new Envelope(fBase.configuration.getNodeID(), m);
 		return e;
+	}
+
+	/**
+	 * Creates a {@link Message} based on a given json String. Also decrypts all fields with
+	 * the own private key. TODO 1: Verify signature of naming service
+	 * 
+	 * @param s - json of the message
+	 * @return
+	 * @throws FBaseEncryptionException
+	 * @throws FBaseNamingServiceException
+	 */
+	private Message createDecryptedMessage(String s)
+			throws FBaseEncryptionException, FBaseNamingServiceException {
+		if (s == null) {
+			throw new FBaseNamingServiceException(FBaseNamingServiceException.NOT_REACHABLE);
+		}
+		Message m = JSONable.fromJSON(s, Message.class);
+		m.decryptFields(fBase.configuration.getPrivateKey(), EncryptionAlgorithm.RSA);
+		logger.debug("Reply of naming service received");
+		logger.debug("Message content: " + m.getContent());
+		logger.debug("Message textual info: " + m.getTextualInfo());
+		return m;
 	}
 
 }

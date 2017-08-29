@@ -26,7 +26,6 @@ import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
 import model.data.KeygroupID;
-import model.data.NodeID;
 import model.messages.Envelope;
 import model.messages.Message;
 

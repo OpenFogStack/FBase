@@ -57,7 +57,9 @@ public class TwoNodeScenario {
 	@Before
 	public void setUp() throws Exception {
 		fbase1 = new FBase("config1.properties");
+		fbase1.startup();
 		fbase2 = new FBase("config2.properties");
+		fbase2.startup();
 
 		nConfig1 = createNodeConfig(fbase1);
 		nConfig2 = createNodeConfig(fbase2);

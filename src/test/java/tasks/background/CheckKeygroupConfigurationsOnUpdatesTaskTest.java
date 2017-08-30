@@ -46,6 +46,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTaskTest {
 			ExecutionException, TimeoutException {
 		logger.debug("-------Starting test-------");
 		FBase fbase = new FBase(null);
+		fbase.startup();
 		fbase.taskmanager.storeHistory();
 		KeygroupID id = new KeygroupID("app", "tenant", "group");
 		KeygroupConfig config = new KeygroupConfig(id, null, null);

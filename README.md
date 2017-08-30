@@ -18,15 +18,17 @@
 - [ ] Add background task that checks other machine's heartbeats and removes machines from a node if they did not respond to long #11
 
 ## One to One Communication
-- [ ] Rebuild asymmetric encryption so that it uses a symmetric approach for the actual data
+- [x] Rebuild asymmetric encryption so that it uses a symmetric approach for the actual data
+- [ ] Add get requests
 
 ### Naming Service based Management
 - [x] Add keygroup configuration control methods to sender
-- [ ] Add response processing to all methods
+- [x] Add response processing to all methods
 - [ ] Add node management methods (e.g. to update a node configuration when a machine is added/removed)
 - [ ] Add a background task that periodically polls the naming service about the newest configurations
 
 ### Handling Missed Messages
+- [ ] Add message history size to machine config
 - [ ] Messaging data needs to be stored after each data related publish
 - [ ] Add sender/receiver capabilities
 - [ ] Write logic that uses functionality

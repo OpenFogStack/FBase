@@ -26,7 +26,6 @@ import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
 import model.data.KeygroupID;
-import model.data.NodeID;
 import model.messages.Envelope;
 import model.messages.Message;
 
@@ -65,6 +64,7 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 	@Before
 	public void setUp() throws Exception {
 		fbase1 = new FBase("config1.properties");
+		fbase1.startup();
 		nConfig1 = createNodeConfig(fbase1);
 		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");

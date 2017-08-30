@@ -479,9 +479,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * {@link KeygroupConfig} with the given {@link KeygroupID}.
 	 * 
 	 * @param keygroupID - the {@link KeygroupID}
-	 * @return true, if successful
+	 * @return the {@link KeygroupConfig} version approved by the naming service
 	 */
-	public boolean sendKeygroupConfigDeleteNode(KeygroupID keygroupID, NodeID nId) {
+	public KeygroupConfig sendKeygroupConfigDeleteNode(KeygroupID keygroupID, NodeID nId) {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_DELETE_NODE);
 		ConfigIDToKeygroupWrapper<NodeID> wrapper =
@@ -490,10 +490,12 @@ public class NamingServiceSender extends AbstractSender {
 		try {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
-			return Boolean.parseBoolean(response.getContent());
+			KeygroupConfig newConfig =
+					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
+			return newConfig;
 		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
-			return false;
+			return null;
 		}
 	}
 

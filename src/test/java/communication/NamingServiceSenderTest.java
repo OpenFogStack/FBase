@@ -82,7 +82,7 @@ public class NamingServiceSenderTest {
 
 	@After
 	public void tearDown() throws Exception {
-		assertTrue(nsSender.sendNamingServiceReset());
+		logger.debug("Naming Sender reset: " + nsSender.sendNamingServiceReset());
 		logger.debug("\n");
 	}
 
@@ -394,7 +394,7 @@ public class NamingServiceSenderTest {
 		createClientConfig(cConfig, true);
 		nsSender.sendKeygroupConfigAddClient(cConfig.getClientID(), kConfig.getKeygroupID());
 		// update keygroup config data for tests
-		kConfig.setVersion(1);
+		kConfig.setVersion(2);
 		kConfig.addReplicaNode(new ReplicaNodeConfig(fbase.configuration.getNodeID()));
 		kConfig.addClient(cConfig.getClientID());
 		// check data
@@ -403,7 +403,7 @@ public class NamingServiceSenderTest {
 		// delete
 		nsSender.sendKeygroupConfigDeleteClient(cConfig.getClientID(), kConfig.getKeygroupID());
 		// update keygroup config data for tests
-		kConfig.setVersion(2);
+		kConfig.setVersion(3);
 		kConfig.removeClient(cConfig.getClientID());
 		// check data
 		readKeygroupConfig(kConfig.getKeygroupID(), kConfig);
@@ -427,7 +427,7 @@ public class NamingServiceSenderTest {
 		nsSender.sendKeygroupConfigAddTriggerNode(tnConfig, kConfig.getKeygroupID());
 
 		// update keygroup config data for tests
-		kConfig.setVersion(1);
+		kConfig.setVersion(2);
 		kConfig.addReplicaNode(new ReplicaNodeConfig(fbase.configuration.getNodeID()));
 		kConfig.addTriggerNode(tnConfig);
 		// check data
@@ -436,7 +436,7 @@ public class NamingServiceSenderTest {
 		// delete
 		nsSender.sendKeygroupConfigDeleteNode(kConfig.getKeygroupID(), triggerNode.getNodeID());
 		// update keygroup config data for tests
-		kConfig.setVersion(2);
+		kConfig.setVersion(3);
 		kConfig.removeTriggerNode(triggerNode.getNodeID());
 		// check data
 		readKeygroupConfig(kConfig.getKeygroupID(), kConfig);
@@ -446,7 +446,7 @@ public class NamingServiceSenderTest {
 	@Test
 	public void testSendKeygroupConfigAddReplicaNode() throws FBaseNamingServiceException {
 		logger.debug("-------Starting testSendKeygroupConfigAddReplicaNode-------");
-		// create trigger node and trigger node config
+		// create replica node and replica node config
 		NodeConfig replicaNode = makeNodeConfig(null);
 		replicaNode.setNodeID(new NodeID("replicaNode"));
 		createNodeConfig(replicaNode, true);
@@ -460,7 +460,7 @@ public class NamingServiceSenderTest {
 		nsSender.sendKeygroupConfigAddReplicaNode(rnConfig, kConfig.getKeygroupID());
 
 		// update keygroup config data for tests
-		kConfig.setVersion(1);
+		kConfig.setVersion(2);
 		kConfig.addReplicaNode(new ReplicaNodeConfig(fbase.configuration.getNodeID()));
 		kConfig.addReplicaNode(rnConfig);
 		// check data
@@ -469,7 +469,8 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendKeygroupConfigUpdateCrypto() throws FBaseNamingServiceException {
+	public void testSendKeygroupConfigUpdateCrypto()
+			throws FBaseNamingServiceException, InterruptedException {
 		logger.debug("-------Starting testSendKeygroupConfigUpdateCrypto-------");
 		// create keygroup
 		KeygroupConfig kConfig = makeKeygroupConfig();
@@ -478,25 +479,51 @@ public class NamingServiceSenderTest {
 		nsSender.sendKeygroupConfigUpdateCrypto("theNewMasterKey", EncryptionAlgorithm.AES,
 				kConfig.getKeygroupID());
 		// update keygroup config data for tests
-		kConfig.setVersion(1);
+		kConfig.setVersion(2);
 		kConfig.addReplicaNode(new ReplicaNodeConfig(fbase.configuration.getNodeID()));
 		kConfig.setEncryptionSecret("theNewMasterKey");
+		kConfig.setEncryptionAlgorithm(EncryptionAlgorithm.AES);
 		// check data
 		readKeygroupConfig(kConfig.getKeygroupID(), kConfig);
 		logger.debug("Finished testSendKeygroupConfigUpdateCrypto.");
 	}
 
 	@Test
-	public void testSendKeygroupConfigDeleteNodeAndDelete() throws FBaseNamingServiceException {
+	public void testSendKeygroupConfigDeleteNode() throws FBaseNamingServiceException {
+		logger.debug("-------Starting testSendKeygroupConfigDeleteNode-------");
+		// create keygroup
+		KeygroupConfig kConfig = makeKeygroupConfig();
+		createKeygroupConfig(kConfig, 1);
+
+		// create replica node and replica node config
+		NodeConfig replicaNode = makeNodeConfig(null);
+		replicaNode.setNodeID(new NodeID("replicaNode"));
+		createNodeConfig(replicaNode, true);
+		ReplicaNodeConfig rnConfig = new ReplicaNodeConfig(replicaNode.getNodeID(), 20000);
+
+		// update keygroup
+		nsSender.sendKeygroupConfigAddReplicaNode(rnConfig, kConfig.getKeygroupID());
+
+		// update keygroup config data for tests
+		kConfig.setVersion(3);
+		kConfig.addReplicaNode(rnConfig);
+		
+		// delete myself
+		assertEquals(kConfig, nsSender.sendKeygroupConfigDeleteNode(kConfig.getKeygroupID(),
+				fbase.configuration.getNodeID()));
+		
+		// check data
+		readKeygroupConfig(kConfig.getKeygroupID(), kConfig);
+
+		logger.debug("Finished testSendKeygroupConfigDeleteNode.");
+	}
+
+	@Test
+	public void testSendKeygroupConfigDelete() throws FBaseNamingServiceException {
 		logger.debug("-------Starting testSendKeygroupConfigDeleteNodeAndDelete-------");
 		// create keygroup
 		KeygroupConfig kConfig = makeKeygroupConfig();
 		createKeygroupConfig(kConfig, 1);
-		deleteKeygroupConfig(kConfig.getKeygroupID(), false); // can't delete because not empty
-		// delete myself
-		assertTrue(nsSender.sendKeygroupConfigDeleteNode(kConfig.getKeygroupID(),
-				fbase.configuration.getNodeID()));
-		// delete keygroup
 		deleteKeygroupConfig(kConfig.getKeygroupID(), true);
 		deleteKeygroupConfig(kConfig.getKeygroupID(), false);
 		logger.debug("Finished testSendKeygroupConfigDeleteNodeAndDelete.");

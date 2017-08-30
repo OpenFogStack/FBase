@@ -363,6 +363,8 @@ public class NamingServiceSenderTest {
 
 	private void readKeygroupConfig(KeygroupID keygroupID, KeygroupConfig expectedConfig) {
 		KeygroupConfig actualConfig = nsSender.sendKeygroupConfigRead(keygroupID);
+		logger.debug("Expected: " + JSONable.toJSON(expectedConfig));
+		logger.debug("Actual: " + JSONable.toJSON(actualConfig));
 		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
 	}
 

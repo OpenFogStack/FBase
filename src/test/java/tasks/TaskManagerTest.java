@@ -31,6 +31,7 @@ public class TaskManagerTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		fBase = new FBase("config_no_webserver.properties");
+		fBase.startup();
 		taskmanager = fBase.taskmanager;
 	}
 

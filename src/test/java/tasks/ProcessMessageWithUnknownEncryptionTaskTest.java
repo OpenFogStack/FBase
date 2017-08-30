@@ -64,6 +64,7 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 	@Before
 	public void setUp() throws Exception {
 		fbase1 = new FBase("config1.properties");
+		fbase1.startup();
 		nConfig1 = createNodeConfig(fbase1);
 		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");

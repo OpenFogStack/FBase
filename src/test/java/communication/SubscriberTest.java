@@ -48,6 +48,7 @@ public class SubscriberTest {
 		publisher = contextPub.socket(ZMQ.PUB);
 		publisher.bind(address + ":" + port);
 		fBase = new FBase("config_no_webserver.properties");
+		fBase.startup();
 	}
 
 	@Before
@@ -93,6 +94,7 @@ public class SubscriberTest {
 		assertEquals(1, subscriber.getNumberOfReceivedMessages());
 		m.setContent(JSONable.toJSON(update2));
 		m.encryptFields(secret, algorithm);
+		logger.debug("Sending second message");
 		publisher.sendMore(update2.getDataIdentifier().getKeygroupID().getID());
 		publisher.send(JSONable.toJSON(m));
 		Thread.sleep(500);

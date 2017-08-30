@@ -23,7 +23,7 @@
 
 ### Naming Service based Management
 - [x] Add keygroup configuration control methods to sender
-- [ ] Add response processing to all methods
+- [x] Add response processing to all methods
 - [ ] Add node management methods (e.g. to update a node configuration when a machine is added/removed)
 - [ ] Add a background task that periodically polls the naming service about the newest configurations
 

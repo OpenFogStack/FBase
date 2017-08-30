@@ -89,6 +89,25 @@ public class NamingServiceSender extends AbstractSender {
 	}
 
 	/**
+	 * Asks the naming service to reset. Only works, if naming service is started in debug mode
+	 * 
+	 * @return true, if successful
+	 */
+	public boolean sendNamingServiceReset() {
+		Message m = new Message();
+		m.setCommand(Command.RESET_NAMING_SERVICE);
+		m.setContent("");
+		try {
+			String answer = send(createEncryptedEnvelope(m), null, null);
+			Message response = createDecryptedMessage(answer);
+			return Boolean.parseBoolean(response.getContent());
+		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+			logger.error(e1.getMessage());
+			return false;
+		}
+	}
+	
+	/**
 	 * Asks the naming service to create a {@link NodeConfig}.
 	 * 
 	 * @param nodeConfig - the {@link NodeConfig}

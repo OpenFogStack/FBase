@@ -82,7 +82,7 @@ public class NamingServiceSenderTest {
 
 	@After
 	public void tearDown() throws Exception {
-		// TODO reset namingservice
+		assertTrue(nsSender.sendNamingServiceReset());
 		logger.debug("\n");
 	}
 
@@ -250,6 +250,7 @@ public class NamingServiceSenderTest {
 		NodeConfig configUpdate = makeNodeConfig(ownNodeConfigJSONPath);
 		configUpdate.setDescription("This is a changed description");
 		updateNodeConfig(configUpdate, true);
+		configUpdate.setVersion(2);
 		readNodeConfig(configUpdate.getNodeID(), configUpdate);
 		logger.debug("Finished testSendNodeConfigUpdate.");
 	}

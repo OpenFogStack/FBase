@@ -36,6 +36,7 @@ public class FBase {
 	private WebServer server = null;
 
 	public FBase(String configName) throws FBaseStorageConnectorException {
+		// TODO don't pass this here
 		configuration = new Configuration(configName);
 		connector = new OnHeapDBConnector();
 		configAccessHelper = new ConfigAccessHelper(this);

@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
@@ -98,7 +99,12 @@ public class ServletHelperMethods {
 
 	public static ClientConfig getConfig(ClientID clientID, FBase fBase)
 			throws FBaseStorageConnectorException, FBaseRestException {
-		ClientConfig clientConfig = fBase.configAccessHelper.clientConfig_get(clientID);
+		ClientConfig clientConfig;
+		try {
+			clientConfig = fBase.configAccessHelper.clientConfig_get(clientID);
+		} catch (FBaseNamingServiceException e) {
+			throw new FBaseRestException(FBaseRestException.NOT_FOUND_CONFIG, 404);
+		}
 		if (clientConfig == null) {
 			throw new FBaseRestException(FBaseRestException.NOT_FOUND_CONFIG, 404);
 		}
@@ -107,8 +113,7 @@ public class ServletHelperMethods {
 
 	public static KeygroupConfig getConfig(KeygroupID keygroupID, FBase fBase)
 			throws FBaseStorageConnectorException, FBaseRestException {
-		KeygroupConfig keygroupConfig =
-				fBase.configAccessHelper.keygroupConfig_get(keygroupID);
+		KeygroupConfig keygroupConfig = fBase.configAccessHelper.keygroupConfig_get(keygroupID);
 		if (keygroupConfig == null) {
 			throw new FBaseRestException(FBaseRestException.NOT_FOUND_CONFIG, 404);
 		}

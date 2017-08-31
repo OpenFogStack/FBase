@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import communication.Subscriber;
 import communication.SubscriptionRegistry;
 import control.FBase;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -65,7 +66,12 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 					// get node configs
 					NodeConfig nodeConfig = null;
 					try {
-						nodeConfig = fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
+						try {
+							nodeConfig = fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
+						} catch (FBaseNamingServiceException e) {
+							logger.error("No config locally, but could not connect to naming "
+									+ "service, but a config might exist there");
+						}
 						if (nodeConfig != null) {
 							// subscribe to all machines
 							int publisherPort = nodeConfig.getPublisherPort();

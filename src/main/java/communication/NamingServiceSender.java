@@ -92,8 +92,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * Asks the naming service to reset. Only works, if naming service is started in debug mode
 	 * 
 	 * @return true, if successful
+	 * @throws FBaseNamingServiceException 
 	 */
-	public boolean sendNamingServiceReset() {
+	public boolean sendNamingServiceReset() throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.RESET_NAMING_SERVICE);
 		m.setContent("");
@@ -101,7 +102,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
 			return Boolean.parseBoolean(response.getContent());
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -112,8 +113,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param nodeConfig - the {@link NodeConfig}
 	 * @return true, if successful
+	 * @throws FBaseNamingServiceException 
 	 */
-	public boolean sendNodeConfigCreate(NodeConfig nodeConfig) {
+	public boolean sendNodeConfigCreate(NodeConfig nodeConfig) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.NODE_CONFIG_CREATE);
 		m.setContent(JSONable.toJSON(nodeConfig));
@@ -121,7 +123,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
 			return Boolean.parseBoolean(response.getContent());
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -132,8 +134,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param nodeConfig - the {@link NodeConfig}
 	 * @return true, if successful
+	 * @throws FBaseNamingServiceException 
 	 */
-	public boolean sendNodeConfigUpdate(NodeConfig nodeConfig) {
+	public boolean sendNodeConfigUpdate(NodeConfig nodeConfig) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.NODE_CONFIG_UPDATE);
 		m.setContent(JSONable.toJSON(nodeConfig));
@@ -141,7 +144,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
 			return Boolean.parseBoolean(response.getContent());
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -153,8 +156,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param id - the {@link NodeID}
 	 * @return the specified {@link NodeConfig} or null if not existent or service not
 	 *         reachable
+	 * @throws FBaseNamingServiceException 
 	 */
-	public NodeConfig sendNodeConfigRead(NodeID id) {
+	public NodeConfig sendNodeConfigRead(NodeID id) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.NODE_CONFIG_READ);
 		m.setContent(JSONable.toJSON(id));
@@ -163,7 +167,7 @@ public class NamingServiceSender extends AbstractSender {
 			Message response = createDecryptedMessage(answer);
 			NodeConfig config = JSONable.fromJSON(response.getContent(), NodeConfig.class);
 			return config;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -174,8 +178,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param id - the {@link NodeID}
 	 * @return true, if successful
+	 * @throws FBaseNamingServiceException 
 	 */
-	public boolean sendNodeConfigDelete(NodeID id) {
+	public boolean sendNodeConfigDelete(NodeID id) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.NODE_CONFIG_DELETE);
 		m.setContent(JSONable.toJSON(id));
@@ -183,7 +188,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
 			return Boolean.parseBoolean(response.getContent());
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -194,8 +199,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param clientConfig - the {@link ClientConfig}
 	 * @return true, if successful
+	 * @throws FBaseNamingServiceException 
 	 */
-	public boolean sendClientConfigCreate(ClientConfig clientConfig) {
+	public boolean sendClientConfigCreate(ClientConfig clientConfig) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.CLIENT_CONFIG_CREATE);
 		m.setContent(JSONable.toJSON(clientConfig));
@@ -203,7 +209,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
 			return Boolean.parseBoolean(response.getContent());
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -214,8 +220,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param clientConfig - the {@link ClientConfig}
 	 * @return true, if successful
+	 * @throws FBaseNamingServiceException 
 	 */
-	public boolean sendClientConfigUpdate(ClientConfig clientConfig) {
+	public boolean sendClientConfigUpdate(ClientConfig clientConfig) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.CLIENT_CONFIG_UPDATE);
 		m.setContent(JSONable.toJSON(clientConfig));
@@ -223,7 +230,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
 			return Boolean.parseBoolean(response.getContent());
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -236,8 +243,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param id - the {@link ClientID}
 	 * @return the specified {@link ClientConfig} or null if not existent or service not
 	 *         reachable
+	 * @throws FBaseNamingServiceException 
 	 */
-	public ClientConfig sendClientConfigRead(ClientID id) {
+	public ClientConfig sendClientConfigRead(ClientID id) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.CLIENT_CONFIG_READ);
 		m.setContent(JSONable.toJSON(id));
@@ -246,7 +254,7 @@ public class NamingServiceSender extends AbstractSender {
 			Message response = createDecryptedMessage(answer);
 			ClientConfig config = JSONable.fromJSON(response.getContent(), ClientConfig.class);
 			return config;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -258,8 +266,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param id - the {@link ClientID}
 	 * @return true, if successful
+	 * @throws FBaseNamingServiceException 
 	 */
-	public boolean sendClientConfigDelete(ClientID id) {
+	public boolean sendClientConfigDelete(ClientID id) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.CLIENT_CONFIG_DELETE);
 		m.setContent(JSONable.toJSON(id));
@@ -267,7 +276,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
 			return Boolean.parseBoolean(response.getContent());
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -278,8 +287,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param config - the {@link KeygroupConfig}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 * @throws FBaseNamingServiceException 
 	 */
-	public KeygroupConfig sendKeygroupConfigCreate(KeygroupConfig config) {
+	public KeygroupConfig sendKeygroupConfigCreate(KeygroupConfig config) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_CREATE);
 		m.setContent(JSONable.toJSON(config));
@@ -289,7 +299,7 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupConfig newConfig =
 					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
 			return newConfig;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -302,8 +312,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param cID - the {@link ClientID} to be added
 	 * @param keygroupID - the {@link KeygroupID}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 * @throws FBaseNamingServiceException 
 	 */
-	public KeygroupConfig sendKeygroupConfigAddClient(ClientID cID, KeygroupID keygroupID) {
+	public KeygroupConfig sendKeygroupConfigAddClient(ClientID cID, KeygroupID keygroupID) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_ADD_CLIENT);
 		ConfigIDToKeygroupWrapper<ClientID> wrapper =
@@ -315,7 +326,7 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupConfig newConfig =
 					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
 			return newConfig;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -328,8 +339,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param cId - the {@link ClientID} of the to be removed config
 	 * @param keygroupID - the {@link KeygroupID}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 * @throws FBaseNamingServiceException 
 	 */
-	public KeygroupConfig sendKeygroupConfigDeleteClient(ClientID cId, KeygroupID keygroupID) {
+	public KeygroupConfig sendKeygroupConfigDeleteClient(ClientID cId, KeygroupID keygroupID) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_DELETE_CLIENT);
 		ConfigIDToKeygroupWrapper<ClientID> wrapper =
@@ -341,7 +353,7 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupConfig newConfig =
 					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
 			return newConfig;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -354,9 +366,10 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param rNConfig - the {@link ReplicaNodeConfig} to be added
 	 * @param keygroupID - the {@link KeygroupID}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 * @throws FBaseNamingServiceException 
 	 */
 	public KeygroupConfig sendKeygroupConfigAddReplicaNode(ReplicaNodeConfig rNConfig,
-			KeygroupID keygroupID) {
+			KeygroupID keygroupID) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_ADD_REPLICA_NODE);
 		ConfigToKeygroupWrapper<ReplicaNodeConfig> wrapper =
@@ -368,7 +381,7 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupConfig newConfig =
 					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
 			return newConfig;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -381,9 +394,10 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param rNConfig - the {@link ReplicaNodeConfig} to be added
 	 * @param keygroupID - the {@link KeygroupID}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 * @throws FBaseNamingServiceException 
 	 */
 	public KeygroupConfig sendKeygroupConfigAddTriggerNode(TriggerNodeConfig tNConfig,
-			KeygroupID keygroupID) {
+			KeygroupID keygroupID) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_ADD_TRIGGER_NODE);
 		ConfigToKeygroupWrapper<TriggerNodeConfig> wrapper =
@@ -395,7 +409,7 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupConfig newConfig =
 					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
 			return newConfig;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -408,8 +422,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param id - the {@link KeygroupID}
 	 * @return the specified {@link KeygroupConfig} or null if not existent or service not
 	 *         reachable
+	 * @throws FBaseNamingServiceException 
 	 */
-	public KeygroupConfig sendKeygroupConfigRead(KeygroupID id) {
+	public KeygroupConfig sendKeygroupConfigRead(KeygroupID id) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_READ);
 		m.setContent(JSONable.toJSON(id));
@@ -419,7 +434,7 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupConfig newConfig =
 					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
 			return newConfig;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -433,9 +448,10 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param algorithm - the new encryption algorithm
 	 * @param keygroupID - the {@link KeygroupID}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 * @throws FBaseNamingServiceException 
 	 */
 	public KeygroupConfig sendKeygroupConfigUpdateCrypto(String encryptionSecret,
-			EncryptionAlgorithm encryptionAlgorithm, KeygroupID keygroupID) {
+			EncryptionAlgorithm encryptionAlgorithm, KeygroupID keygroupID) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_UPDATE_CRYPTO);
 		CryptoToKeygroupWrapper wrapper =
@@ -447,7 +463,7 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupConfig newConfig =
 					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
 			return newConfig;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}
@@ -459,8 +475,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param id - the {@link KeygroupID}
 	 * @return true, if successful
+	 * @throws FBaseNamingServiceException 
 	 */
-	public boolean sendKeygroupConfigDelete(KeygroupID id) {
+	public boolean sendKeygroupConfigDelete(KeygroupID id) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_DELETE);
 		m.setContent(JSONable.toJSON(id));
@@ -468,7 +485,7 @@ public class NamingServiceSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m), null, null);
 			Message response = createDecryptedMessage(answer);
 			return Boolean.parseBoolean(response.getContent());
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return false;
 		}
@@ -480,8 +497,9 @@ public class NamingServiceSender extends AbstractSender {
 	 * 
 	 * @param keygroupID - the {@link KeygroupID}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
+	 * @throws FBaseNamingServiceException 
 	 */
-	public KeygroupConfig sendKeygroupConfigDeleteNode(KeygroupID keygroupID, NodeID nId) {
+	public KeygroupConfig sendKeygroupConfigDeleteNode(KeygroupID keygroupID, NodeID nId) throws FBaseNamingServiceException {
 		Message m = new Message();
 		m.setCommand(Command.KEYGROUP_CONFIG_DELETE_NODE);
 		ConfigIDToKeygroupWrapper<NodeID> wrapper =
@@ -493,7 +511,7 @@ public class NamingServiceSender extends AbstractSender {
 			KeygroupConfig newConfig =
 					JSONable.fromJSON(response.getContent(), KeygroupConfig.class);
 			return newConfig;
-		} catch (FBaseNamingServiceException | FBaseEncryptionException e1) {
+		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage());
 			return null;
 		}

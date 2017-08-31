@@ -2,7 +2,8 @@ package tasks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,10 +17,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import communication.NamingServiceSender;
 import communication.Publisher;
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseEncryptionException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
@@ -30,7 +33,6 @@ import model.messages.Envelope;
 import model.messages.Message;
 
 /**
- * TODO NS: Add test that communicate
  * 
  * @author jonathanhasenburg
  *
@@ -47,9 +49,6 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 	private static KeygroupID keygroupID = new KeygroupID("app", "tenant", "group");
 	private static KeygroupConfig kConfigOld = null;
 	private static KeygroupConfig kConfigNew = null;
-
-	private static String namingServicePublicKey = "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANV8ihImY7MqlsKjWw2Te9gQaH7KunKif+LmuzzLDMy1BaECom58B1V9g1NtiH9OeZVHDHiYzGYWmFM1x4KlxrECAwEAAQ==";
-	private static String namingServicePrivateKey = "MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEA1XyKEiZjsyqWwqNbDZN72BBofsq6cqJ/4ua7PMsMzLUFoQKibnwHVX2DU22If055lUcMeJjMZhaYUzXHgqXGsQIDAQABAkEAraQLRXH2G89jKlLmB2fTDk1iQOaxufXUIQDcgDkDYyfJWCGMQew50IA2GEWRfVurz9WkjkxeP05BD4EujdhlcQIhAO6xO1X04VE2JuSlD0BDE0IxUl7F5HZI7dZ9hXW4WKj9AiEA5PdrfcVcvZUD4O4Uny0cszx4yQPoBgweCnl21Sn1bMUCIBq2DrPR0Z0q+DNCHXDNkMwphNRCRQzPoH4OUe8YkCNpAiB3c/mZaTEEG00luS/7B18Ux3TAcpBHL2Uw08PCXByVfQIhAK7E5Q13a2uu4pyTrSykjMlbQfiGgEJKju8fATIiuiCT";
 
 	Publisher otherNodePublisher = null;
 
@@ -71,6 +70,7 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 
 		kConfigOld = new KeygroupConfig(keygroupID, "secret", EncryptionAlgorithm.AES);
 		kConfigNew = new KeygroupConfig(keygroupID, "secretNew", EncryptionAlgorithm.AES);
+		kConfigNew.setVersion(1);
 
 		ReplicaNodeConfig repConfig1 = new ReplicaNodeConfig();
 		repConfig1.setNodeID(nConfig1.getNodeID());
@@ -107,10 +107,14 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 		return nConfig;
 	}
 
-	@Test
-	public void testCannotConnectToNamingService()
-			throws InterruptedException, FBaseEncryptionException, FBaseStorageConnectorException {
-		logger.debug("-------Starting testCannotConnectToNamingService-------");
+	/**
+	 * The node I subscribed to publishes an envelope encrypted with the new data
+	 * 
+	 * @throws InterruptedException
+	 * @throws FBaseEncryptionException
+	 */
+	private void otherNodePublishesEnvelope()
+			throws InterruptedException, FBaseEncryptionException {
 		Message m = new Message();
 		m.setContent(JSONable.toJSON(kConfigNew));
 		logger.debug(JSONable.toJSON(m));
@@ -118,19 +122,69 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 		otherNodePublisher.send(e, kConfigNew.getEncryptionSecret(),
 				kConfigNew.getEncryptionAlgorithm());
 		Thread.sleep(3500);
+	}
+
+	@Test
+	// This test only makes sense, if the naming service is not running
+	public void testCannotConnectToNamingService()
+			throws InterruptedException, FBaseEncryptionException, FBaseStorageConnectorException {
+		logger.debug("-------Starting testCannotConnectToNamingService-------");
+		fbase1.namingServiceSender.shutdown();
+		fbase1.namingServiceSender = new NamingServiceSender("tcp://1.2.3.4", 1234, fbase1);
+		otherNodePublishesEnvelope();
+		Thread.sleep(5000);
 		KeygroupConfig storedConfig = fbase1.configAccessHelper.keygroupConfig_get(keygroupID);
+		logger.debug("Local config equals: " + JSONable.toJSON(storedConfig));
 		assertEquals(kConfigOld, storedConfig);
 		assertNotEquals(kConfigNew, storedConfig);
 		logger.debug("Finished testCannotConnectToNamingService.");
 	}
 
-	@Test
-	public void testRemovedFromKeygroup() {
-		fail("Not yet implemented");
+	//@Test
+	public void testRemovedFromKeygroup() throws FBaseEncryptionException, InterruptedException,
+			FBaseStorageConnectorException, FBaseNamingServiceException {
+		logger.debug("-------Starting testRemovedFromKeygroup-------");
+		assertNotNull(fbase1.namingServiceSender.sendKeygroupConfigCreate(kConfigNew));
+		// TODO T: Before we can test that, we need to add another replica node
+		assertNotNull(fbase1.namingServiceSender.sendKeygroupConfigDeleteNode(
+				kConfigNew.getKeygroupID(), fbase1.configuration.getNodeID()));
+		otherNodePublishesEnvelope();
+		KeygroupConfig storedConfig = fbase1.configAccessHelper.keygroupConfig_get(keygroupID);
+		logger.debug("Local config equals: " + JSONable.toJSON(storedConfig));
+		assertEquals(kConfigOld, storedConfig);
+		kConfigNew.setVersion(2);
+		assertNotEquals(kConfigNew, storedConfig);
+		// cleanup
+		assertTrue(fbase1.namingServiceSender.sendNamingServiceReset());
+		logger.debug("Finished testRemovedFromKeygroup.");
 	}
 
 	@Test
-	public void testSuccess() {
-		fail("Not yet implemented");
+	// This test requires a running naming service
+	public void testSuccess() throws FBaseEncryptionException, InterruptedException,
+			FBaseStorageConnectorException, FBaseNamingServiceException {
+		logger.debug("-------Starting testCannotConnectToNamingService-------");
+		assertNotNull(fbase1.namingServiceSender.sendKeygroupConfigCreate(kConfigNew));
+		otherNodePublishesEnvelope();
+		KeygroupConfig storedConfig = fbase1.configAccessHelper.keygroupConfig_get(keygroupID);
+		logger.debug("Local config equals: " + JSONable.toJSON(storedConfig));
+		assertEquals(kConfigNew, storedConfig);
+		assertNotEquals(kConfigOld, storedConfig);
+		// cleanup
+		assertTrue(fbase1.namingServiceSender.sendNamingServiceReset());
+		logger.debug("Finished testCannotConnectToNamingService.");
 	}
+
+	@Test
+	public void testConfigNotExistentAnymore()
+			throws FBaseEncryptionException, InterruptedException, FBaseStorageConnectorException {
+		logger.debug("-------Starting testConfigNotExistentAnymore-------");
+		otherNodePublishesEnvelope();
+		KeygroupConfig storedConfig = fbase1.configAccessHelper.keygroupConfig_get(keygroupID);
+		logger.debug("Local config equals: " + JSONable.toJSON(storedConfig));
+		assertEquals(kConfigOld, storedConfig);
+		assertNotEquals(kConfigNew, storedConfig);
+		logger.debug("Finished testConfigNotExistentAnymore.");
+	}
+
 }

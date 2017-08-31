@@ -1,6 +1,7 @@
 package storageconnector;
 
 import control.FBase;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -13,14 +14,14 @@ import model.data.NodeID;
  * This class should be used to access config files instead of using a DBConnector. The reason
  * for that is that this class will try to load the config from the NamingService if it cannot
  * be found in the database.
- *  
+ * 
  * @author jonathanhasenburg
  *
  */
 public class ConfigAccessHelper {
-	
+
 	private final FBase fBase;
-	
+
 	public ConfigAccessHelper(FBase fBase) {
 		this.fBase = fBase;
 	}
@@ -29,7 +30,7 @@ public class ConfigAccessHelper {
 	 * Extends the functionality of {@link AbstractDBConnector#keygroupConfig_get(KeygroupID)}
 	 * about naming service querying if not existent in node db.
 	 * 
-	 * TODO I: Incorporate communication with NamingService
+	 * TODO NS: Incorporate communication with NamingService
 	 * 
 	 * @param keygroupID
 	 * @return see above
@@ -47,9 +48,11 @@ public class ConfigAccessHelper {
 	 * @param nodeID
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
+	 * @throws FBaseNamingServiceException
 	 */
-	public NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException {
-		NodeConfig nodeConfig =  fBase.connector.nodeConfig_get(nodeID);
+	public NodeConfig nodeConfig_get(NodeID nodeID)
+			throws FBaseStorageConnectorException, FBaseNamingServiceException {
+		NodeConfig nodeConfig = fBase.connector.nodeConfig_get(nodeID);
 		if (nodeConfig == null) {
 			nodeConfig = fBase.namingServiceSender.sendNodeConfigRead(nodeID);
 		}
@@ -64,8 +67,10 @@ public class ConfigAccessHelper {
 	 * @param clientID
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
+	 * @throws FBaseNamingServiceException
 	 */
-	public ClientConfig clientConfig_get(ClientID clientID) throws FBaseStorageConnectorException {
+	public ClientConfig clientConfig_get(ClientID clientID)
+			throws FBaseStorageConnectorException, FBaseNamingServiceException {
 		ClientConfig clientConfig = fBase.connector.clientConfig_get(clientID);
 		if (clientConfig == null) {
 			clientConfig = fBase.namingServiceSender.sendClientConfigRead(clientID);

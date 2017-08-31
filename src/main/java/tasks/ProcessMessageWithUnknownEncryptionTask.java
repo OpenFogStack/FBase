@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import communication.SubscriptionRegistry;
 import control.FBase;
 import exceptions.FBaseEncryptionException;
+import exceptions.FBaseNamingServiceException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
@@ -49,16 +50,21 @@ class ProcessMessageWithUnknownEncryptionTask extends Task<Boolean> {
 			return false;
 		}
 
-		KeygroupConfig config =
-				fBase.namingServiceSender.sendKeygroupConfigRead(envelope.getKeygroupID());
-
-		if (config == null) {
+		KeygroupConfig config;
+		try {
+			config = fBase.namingServiceSender.sendKeygroupConfigRead(envelope.getKeygroupID());
+		} catch (FBaseNamingServiceException e1) {
 			// cannot connect to naming service
 			logger.error("Cannot connect to naming service");
 			return false;
 		}
 
-		// TODO NS: process config was deleted (don't know how NS anwser looks like yet)
+		if (config == null) {
+			// config was deleted
+			logger.debug("The configuration was deleted");
+			fBase.subscriptionRegistry.unsubscribeFromKeygroup(envelope.getKeygroupID());
+			return true;
+		}
 
 		// I am removed from config
 		if (config.getEncryptionSecret() == null) {

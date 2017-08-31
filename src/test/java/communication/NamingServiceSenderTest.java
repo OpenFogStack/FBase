@@ -214,22 +214,26 @@ public class NamingServiceSenderTest {
 
 	}
 
-	private void createNodeConfig(NodeConfig config, boolean expected) {
+	private void createNodeConfig(NodeConfig config, boolean expected)
+			throws FBaseNamingServiceException {
 		boolean actual = nsSender.sendNodeConfigCreate(config);
 		assertEquals("Could not create node config.", expected, actual);
 	}
 
-	private void updateNodeConfig(NodeConfig config, boolean expected) {
+	private void updateNodeConfig(NodeConfig config, boolean expected)
+			throws FBaseNamingServiceException {
 		boolean actual = nsSender.sendNodeConfigUpdate(config);
 		assertEquals("Could not update node config.", expected, actual);
 	}
 
-	private void readNodeConfig(NodeID nodeID, NodeConfig expectedConfig) {
+	private void readNodeConfig(NodeID nodeID, NodeConfig expectedConfig)
+			throws FBaseNamingServiceException {
 		NodeConfig actualConfig = nsSender.sendNodeConfigRead(nodeID);
 		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
 	}
 
-	private void deleteNodeConfig(NodeID nodeID, boolean expected) {
+	private void deleteNodeConfig(NodeID nodeID, boolean expected)
+			throws FBaseNamingServiceException {
 		boolean actual = nsSender.sendNodeConfigDelete(nodeID);
 		assertEquals("Could not delete node config", expected, actual);
 	}
@@ -288,22 +292,26 @@ public class NamingServiceSenderTest {
 		return config;
 	}
 
-	private void createClientConfig(ClientConfig config, boolean expected) {
+	private void createClientConfig(ClientConfig config, boolean expected)
+			throws FBaseNamingServiceException {
 		boolean actual = nsSender.sendClientConfigCreate(config);
 		assertEquals("Could not create node config.", expected, actual);
 	}
 
-	private void updateClientConfig(ClientConfig config, boolean expected) {
+	private void updateClientConfig(ClientConfig config, boolean expected)
+			throws FBaseNamingServiceException {
 		boolean actual = nsSender.sendClientConfigUpdate(config);
 		assertEquals("Could not update node config.", expected, actual);
 	}
 
-	private void readClientConfig(ClientID clientID, ClientConfig expectedConfig) {
+	private void readClientConfig(ClientID clientID, ClientConfig expectedConfig)
+			throws FBaseNamingServiceException {
 		ClientConfig actualConfig = nsSender.sendClientConfigRead(clientID);
 		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
 	}
 
-	private void deleteClientConfig(ClientID clientID, boolean expected) {
+	private void deleteClientConfig(ClientID clientID, boolean expected)
+			throws FBaseNamingServiceException {
 		boolean actual = nsSender.sendClientConfigDelete(clientID);
 		assertEquals("Could not delete node config", expected, actual);
 	}
@@ -355,20 +363,23 @@ public class NamingServiceSenderTest {
 		return config;
 	}
 
-	private KeygroupConfig createKeygroupConfig(KeygroupConfig config, int expectedVersion) {
+	private KeygroupConfig createKeygroupConfig(KeygroupConfig config, int expectedVersion)
+			throws FBaseNamingServiceException {
 		KeygroupConfig actual = nsSender.sendKeygroupConfigCreate(config);
 		assertEquals("Could not create keygroup config.", expectedVersion, actual.getVersion());
 		return actual;
 	}
 
-	private void readKeygroupConfig(KeygroupID keygroupID, KeygroupConfig expectedConfig) {
+	private void readKeygroupConfig(KeygroupID keygroupID, KeygroupConfig expectedConfig)
+			throws FBaseNamingServiceException {
 		KeygroupConfig actualConfig = nsSender.sendKeygroupConfigRead(keygroupID);
 		logger.debug("Expected: " + JSONable.toJSON(expectedConfig));
 		logger.debug("Actual: " + JSONable.toJSON(actualConfig));
 		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
 	}
 
-	private void deleteKeygroupConfig(KeygroupID keygroupID, boolean expected) {
+	private void deleteKeygroupConfig(KeygroupID keygroupID, boolean expected)
+			throws FBaseNamingServiceException {
 		boolean actual = nsSender.sendKeygroupConfigDelete(keygroupID);
 		assertEquals("Could not delete keygroup config", expected, actual);
 	}
@@ -507,11 +518,11 @@ public class NamingServiceSenderTest {
 		// update keygroup config data for tests
 		kConfig.setVersion(3);
 		kConfig.addReplicaNode(rnConfig);
-		
+
 		// delete myself
 		assertEquals(kConfig, nsSender.sendKeygroupConfigDeleteNode(kConfig.getKeygroupID(),
 				fbase.configuration.getNodeID()));
-		
+
 		// check data
 		readKeygroupConfig(kConfig.getKeygroupID(), kConfig);
 

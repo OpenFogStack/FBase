@@ -83,7 +83,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 				});
 
 				// run update if current version and stored version differ
-				// TODO I: we could add more stuff here, like unsubscribe from not existent
+				// TODO 2: we could add more stuff here, like unsubscribe from not existent
 				// keygroup configurations, etc.
 				currentKeygroupConfigurations.forEach((config, version) -> {
 					if (checkIfKeygroupConfigVersionDiffers(config, version)) {

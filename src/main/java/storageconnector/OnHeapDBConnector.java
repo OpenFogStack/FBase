@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
+import model.JSONable;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -24,7 +25,11 @@ import exceptions.FBaseStorageConnectorException;
  * This class stores all data on heap in a number of maps; it should only be used for testing
  * purposes.
  * 
+ * WARNING: the operations do not create copies, instead they return and set references
+ * SO USE WITH CAUTION
+ * 
  * @author Dave
+ * @author jonathanhasenburg
  */
 public class OnHeapDBConnector extends AbstractDBConnector {
 

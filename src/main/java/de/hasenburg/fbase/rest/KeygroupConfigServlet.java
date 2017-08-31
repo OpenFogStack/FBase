@@ -39,8 +39,8 @@ public class KeygroupConfigServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		// TODO I: Keygroup secrets should not be returned
-		// TODO I: If unauthorized, some fields are fine to return
+		// TODO C: Keygroup secrets should not be returned
+		// TODO C: If unauthorized, some fields are fine to return
 		try {
 			// prepare
 			ServletHelperMethods.logRequest(logger, req);
@@ -96,7 +96,7 @@ public class KeygroupConfigServlet extends HttpServlet {
 				throw new FBaseRestException(FBaseRestException.DATA_DOES_NOT_MATCH, 400);
 			}
 			
-			// TODO NS send config to naming service 
+			// TODO C: send config to naming service 
 			throw new FBaseRestException("Not yet implemented", 500);
 			
 			// answer (returns 200)

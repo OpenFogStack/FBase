@@ -36,13 +36,12 @@ public class FBase {
 	private WebServer server = null;
 
 	public FBase(String configName) throws FBaseStorageConnectorException {
-		// TODO don't pass this here
 		configuration = new Configuration(configName);
 		connector = new OnHeapDBConnector();
 		connector.dbConnection_initiate();
 		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort());
 		
-		// TODO Start Background Tasks
+		// TODO 2: Start Background Tasks
 	}
 	
 	public void startup() {

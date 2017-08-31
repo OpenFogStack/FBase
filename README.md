@@ -1,12 +1,11 @@
 # Current ToDos / Missing Functionality
 
 ## General Node Database
-- [ ] Make sure the HeapDBConnector only returns copies of objects rather than the actual objects
 - [ ] Add a connector that supports multi-machine nodes
 - [ ] Add versions to all configurations so that a node/machine can identify updates
 
 ## Publish/Subscribe
-- [ ] Add capabilities to process messages that cannot be encrypted
+- [x] Add capabilities to process messages that cannot be encrypted
 
 ### Subscription Management
 - [x] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupConfigurationsOnUpdatesTask) #11

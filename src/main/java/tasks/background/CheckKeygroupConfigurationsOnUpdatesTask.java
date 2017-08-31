@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
 import control.FBase;
+import exceptions.FBaseException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.data.KeygroupID;
@@ -75,7 +77,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 					try {
 						KeygroupConfig config = fBase.configAccessHelper.keygroupConfig_get(k);
 						currentKeygroupConfigurations.put(config, config.getVersion());
-					} catch (FBaseStorageConnectorException e) {
+					} catch (FBaseStorageConnectorException | FBaseNamingServiceException e) {
 						handleFBaseStorageConnectorException(e);
 					}
 				});
@@ -114,7 +116,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 		return false;
 	}
 
-	private void handleFBaseStorageConnectorException(FBaseStorageConnectorException e) {
+	private void handleFBaseStorageConnectorException(FBaseException e) {
 		// show must go on
 		logger.error(e.getMessage());
 		e.printStackTrace();

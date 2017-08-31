@@ -22,6 +22,7 @@ import org.junit.Test;
 import client.Client;
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -110,7 +111,7 @@ public class TwoNodeScenario {
 
 	@Test
 	public void testUpdateKeygroupConfig() throws InterruptedException, ExecutionException,
-			TimeoutException, FBaseStorageConnectorException {
+			TimeoutException, FBaseStorageConnectorException, FBaseNamingServiceException {
 		logger.debug("-------Starting testUpdateKeygroupConfig-------");
 		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);

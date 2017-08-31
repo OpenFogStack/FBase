@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import control.FBase;
 import exceptions.FBaseEncryptionException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
@@ -47,7 +48,7 @@ class PutDataRecordTask extends Task<Boolean> {
 		try {
 			config = fBase.configAccessHelper.keygroupConfig_get(record.getKeygroupID());
 			fBase.connector.dataRecords_put(record);
-		} catch (FBaseStorageConnectorException e) {
+		} catch (FBaseStorageConnectorException | FBaseNamingServiceException e) {
 			logger.error(e.getMessage());
 			return false;
 		}

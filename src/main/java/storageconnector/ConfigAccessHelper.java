@@ -30,15 +30,18 @@ public class ConfigAccessHelper {
 	 * Extends the functionality of {@link AbstractDBConnector#keygroupConfig_get(KeygroupID)}
 	 * about naming service querying if not existent in node db.
 	 * 
-	 * TODO NS: Incorporate communication with NamingService
-	 * 
 	 * @param keygroupID
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
+	 * @throws FBaseNamingServiceException 
 	 */
 	public KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
-			throws FBaseStorageConnectorException {
-		return fBase.connector.keygroupConfig_get(keygroupID);
+			throws FBaseStorageConnectorException, FBaseNamingServiceException {
+		KeygroupConfig config = fBase.connector.keygroupConfig_get(keygroupID);
+		if (config == null) {
+			config = fBase.namingServiceSender.sendKeygroupConfigRead(keygroupID);
+		}
+		return config;
 	}
 
 	/**

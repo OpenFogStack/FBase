@@ -126,8 +126,8 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 
 	@Test
 	// This test only makes sense, if the naming service is not running
-	public void testCannotConnectToNamingService()
-			throws InterruptedException, FBaseEncryptionException, FBaseStorageConnectorException {
+	public void testCannotConnectToNamingService() throws InterruptedException,
+			FBaseEncryptionException, FBaseStorageConnectorException, FBaseNamingServiceException {
 		logger.debug("-------Starting testCannotConnectToNamingService-------");
 		fbase1.namingServiceSender.shutdown();
 		fbase1.namingServiceSender = new NamingServiceSender("tcp://1.2.3.4", 1234, fbase1);
@@ -140,7 +140,7 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 		logger.debug("Finished testCannotConnectToNamingService.");
 	}
 
-	//@Test
+	// @Test
 	public void testRemovedFromKeygroup() throws FBaseEncryptionException, InterruptedException,
 			FBaseStorageConnectorException, FBaseNamingServiceException {
 		logger.debug("-------Starting testRemovedFromKeygroup-------");
@@ -176,8 +176,8 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 	}
 
 	@Test
-	public void testConfigNotExistentAnymore()
-			throws FBaseEncryptionException, InterruptedException, FBaseStorageConnectorException {
+	public void testConfigNotExistentAnymore() throws FBaseEncryptionException,
+			InterruptedException, FBaseStorageConnectorException, FBaseNamingServiceException {
 		logger.debug("-------Starting testConfigNotExistentAnymore-------");
 		otherNodePublishesEnvelope();
 		KeygroupConfig storedConfig = fbase1.configAccessHelper.keygroupConfig_get(keygroupID);

@@ -1,5 +1,9 @@
 package storageconnector;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +19,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import exceptions.FBaseStorageConnectorException;
@@ -32,8 +38,16 @@ public class S3DBConnector extends AbstractDBConnector {
 
 	private static final Logger logger = Logger.getLogger(S3DBConnector.class);
 
-	private final String bucketName = "de.hasenburg.fbase.s3dbconnector-bucket";
+	private String bucketName = "de.hasenburg.fbase.s3dbconnector-bucket";
 	private AmazonS3 s3;
+
+	public S3DBConnector() {
+
+	}
+
+	public S3DBConnector(String bucketName) {
+		this.bucketName = bucketName;
+	}
 
 	@Override
 	public void dbConnection_initiate() throws FBaseStorageConnectorException {
@@ -72,6 +86,7 @@ public class S3DBConnector extends AbstractDBConnector {
 					break;
 				}
 			}
+			s3.deleteBucket(bucketName);
 		} catch (AmazonServiceException e) {
 			throw new FBaseStorageConnectorException(e);
 		}
@@ -161,66 +176,192 @@ public class S3DBConnector extends AbstractDBConnector {
 		}
 	}
 
+	private String getKeygroupConfigPath(KeygroupID keygroupID) {
+		return "KeygroupConfigs/" + keygroupID.toString();
+	}
+
 	@Override
 	public void keygroupConfig_put(KeygroupID keygroupID, KeygroupConfig config)
 			throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-
+		try {
+			s3.putObject(bucketName, getKeygroupConfigPath(keygroupID), JSONable.toJSON(config));
+		} catch (AmazonServiceException e) {
+			throw new FBaseStorageConnectorException(e);
+		}
 	}
 
 	@Override
 	protected KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			KeygroupConfig config = JSONable.fromJSON(
+					s3.getObject(bucketName, getKeygroupConfigPath(keygroupID)).getObjectContent(),
+					KeygroupConfig.class);
+			return config;
+		} catch (AmazonServiceException e) {
+			if (404 == e.getStatusCode()) {
+				return null;
+			}
+			throw new FBaseStorageConnectorException(e);
+		}
+	}
+
+	private String getNodeConfigPath(NodeID nodeID) {
+		return "NodeConfigs/" + nodeID.toString();
 	}
 
 	@Override
 	public void nodeConfig_put(NodeID nodeID, NodeConfig config)
 			throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-
+		try {
+			s3.putObject(bucketName, getNodeConfigPath(nodeID), JSONable.toJSON(config));
+		} catch (AmazonServiceException e) {
+			throw new FBaseStorageConnectorException(e);
+		}
 	}
 
 	@Override
 	protected NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			NodeConfig config = JSONable.fromJSON(
+					s3.getObject(bucketName, getNodeConfigPath(nodeID)).getObjectContent(),
+					NodeConfig.class);
+			return config;
+		} catch (AmazonServiceException e) {
+			if (404 == e.getStatusCode()) {
+				return null;
+			}
+			throw new FBaseStorageConnectorException(e);
+		}
+	}
+
+	private String getClientConfigPath(ClientID clientID) {
+		return "ClientConfigs/" + clientID.toString();
 	}
 
 	@Override
 	public void clientConfig_put(ClientID clientID, ClientConfig config)
 			throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-
+		try {
+			s3.putObject(bucketName, getClientConfigPath(clientID), JSONable.toJSON(config));
+		} catch (AmazonServiceException e) {
+			throw new FBaseStorageConnectorException(e);
+		}
 	}
 
 	@Override
 	protected ClientConfig clientConfig_get(ClientID clientID)
 			throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			ClientConfig config = JSONable.fromJSON(
+					s3.getObject(bucketName, getClientConfigPath(clientID)).getObjectContent(),
+					ClientConfig.class);
+			return config;
+		} catch (AmazonServiceException e) {
+			if (404 == e.getStatusCode()) {
+				return null;
+			}
+			throw new FBaseStorageConnectorException(e);
+		}
+	}
+
+	private String getSubscriberMachinesPath(KeygroupID keygroupID, String machine) {
+		return "SubscriberMachines/" + keygroupID.toString() + "/" + machine;
+	}
+
+	private int getVersionForSubscriberMachinePath(String path)
+			throws FBaseStorageConnectorException {
+		int version = 0;
+		try {
+			Map<String, String> metaDataMap =
+					s3.getObjectMetadata(bucketName, path).getUserMetadata();
+			String versionString = metaDataMap.get("version");
+			try {
+				version = Integer.parseInt(versionString);
+			} catch (NumberFormatException | NullPointerException e) {
+				logger.error("Version stored on S3 can't be parsed: " + versionString, e);
+			}
+		} catch (AmazonServiceException e) {
+			if (404 != e.getStatusCode()) {
+				throw new FBaseStorageConnectorException(e);
+			}
+			// if we get here, there simply was not a version set, so everything is ok
+		}
+		return version;
 	}
 
 	@Override
-	public Integer keyGroupSubscriberMachines_put(KeygroupID keygroup, String machine)
+	public Integer keyGroupSubscriberMachines_put(KeygroupID keygroupID, String machine)
 			throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-		return null;
+		int version =
+				getVersionForSubscriberMachinePath(getSubscriberMachinesPath(keygroupID, machine));
+
+		version++;
+		try {
+			// create hashmap with version
+			HashMap<String, String> metadataMap = new HashMap<>();
+			metadataMap.put("version", "" + version);
+
+			// create metadata
+			byte[] contentBytes = "".getBytes(StandardCharsets.UTF_8);
+			InputStream contentStream = new ByteArrayInputStream(contentBytes);
+			ObjectMetadata metadata = new ObjectMetadata();
+			metadata.setUserMetadata(metadataMap);
+
+			// put object
+			PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName,
+					getSubscriberMachinesPath(keygroupID, machine), contentStream, metadata);
+			s3.putObject(putObjectRequest);
+		} catch (AmazonServiceException e) {
+			throw new FBaseStorageConnectorException(e);
+		}
+		return version;
 	}
 
 	@Override
 	public Map<KeygroupID, Pair<String, Integer>> keyGroupSubscriberMachines_listAll()
 			throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Map<KeygroupID, Pair<String, Integer>> map = new HashMap<>();
+			ObjectListing ol = s3.listObjects(bucketName);
+			List<S3ObjectSummary> objects = ol.getObjectSummaries();
+			for (S3ObjectSummary os : objects) {
+				if (os.getKey().startsWith("SubscriberMachines/")) {
+					String data = os.getKey().replaceFirst("SubscriberMachines/", "");
+					String[] dataA = data.split("/");
+					if (dataA.length == 4) {
+						// put object in map
+						KeygroupID keygroupID = new KeygroupID(dataA[0], dataA[1], dataA[2]);
+						String machine = dataA[3];
+						Integer version = getVersionForSubscriberMachinePath(os.getKey());
+						map.put(keygroupID, new Pair<String, Integer>(machine, version));
+					} else {
+						logger.warn("Could not read " + data);
+					}
+				}
+			}
+			return map;
+		} catch (AmazonServiceException e) {
+			throw new FBaseStorageConnectorException(e);
+		}
 	}
 
 	@Override
-	public void keyGroupSubscriberMachines_remove(KeygroupID keygroupid)
+	public void keyGroupSubscriberMachines_remove(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-
+		// we need to find the object based on the keygroupID
+		ObjectListing ol = s3.listObjects(bucketName);
+		List<S3ObjectSummary> objects = ol.getObjectSummaries();
+		for (S3ObjectSummary os : objects) {
+			if (os.getKey().startsWith(getSubscriberMachinesPath(keygroupID, ""))) {
+				// here we have our object, now delete
+				try {
+					s3.deleteObject(bucketName, os.getKey());
+				} catch (AmazonServiceException e) {
+					throw new FBaseStorageConnectorException(e);
+				}
+			}
+		}
 	}
 
 	@Override

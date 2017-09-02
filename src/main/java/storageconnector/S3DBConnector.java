@@ -1,7 +1,10 @@
 package storageconnector;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -364,16 +367,42 @@ public class S3DBConnector extends AbstractDBConnector {
 		}
 	}
 
+	private String getHeartbeatsPath(String machine) {
+		return "SubscriberMachines/" + machine;
+	}
+
 	@Override
 	public void heartbeats_update(String machine) throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-
+		try {
+			s3.putObject(bucketName, getHeartbeatsPath(machine),
+					Long.toString(System.currentTimeMillis()));
+		} catch (AmazonServiceException e) {
+			throw new FBaseStorageConnectorException(e);
+		}
 	}
 
 	@Override
 	public Map<String, Long> heartbeats_getAll() throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Map<String, Long> heartbeats = new HashMap<>();
+			ObjectListing ol = s3.listObjects(bucketName);
+			List<S3ObjectSummary> objects = ol.getObjectSummaries();
+			for (S3ObjectSummary os : objects) {
+				if (os.getKey().startsWith("SubscriberMachines/")) {
+					BufferedReader reader = new BufferedReader(new InputStreamReader(
+							s3.getObject(bucketName, os.getKey()).getObjectContent()));
+					try {
+						Long time = Long.parseLong(reader.readLine());
+						heartbeats.put(os.getKey().replaceFirst("SubscriberMachines/", ""), time);
+					} catch (NumberFormatException | IOException e) {
+						logger.error("Cannot parse time from " + os.getKey(), e);
+					}
+				}
+			}
+			return heartbeats;
+		} catch (AmazonServiceException e) {
+			throw new FBaseStorageConnectorException(e);
+		}
 	}
 
 }

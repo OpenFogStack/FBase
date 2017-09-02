@@ -208,6 +208,27 @@ public class S3DBConnectorTest {
 		logger.debug("Finished testKeygroupSubscriberMachines.");
 	}
 
-	// TODO T: Add tests for hearbeats
+	@Test
+	public void testHeartbeats() throws FBaseStorageConnectorException, InterruptedException {
+		logger.debug("-------Starting testHeartbeats-------");
+
+		// store data
+		Long time = System.currentTimeMillis();
+		connector.heartbeats_update("M1");
+		connector.heartbeats_update("M2");
+
+		// check map
+		Map<String, Long> heartbeats = connector.heartbeats_getAll();
+		assertEquals(2, heartbeats.keySet().size());
+		assertTrue(heartbeats.get("M1") >= time && heartbeats.get("M1") < (time + 1000));
+		assertTrue(heartbeats.get("M2") >= time && heartbeats.get("M2") < (time + 1000));
+		
+		Thread.sleep(1000);
+		connector.heartbeats_update("M1");
+		heartbeats = connector.heartbeats_getAll();
+		assertTrue(heartbeats.get("M1") >= time + 1000 && heartbeats.get("M1") < (time + 2000));
+		
+		logger.debug("Finished testHeartbeats.");
+	}
 
 }

@@ -1,8 +1,8 @@
 # Current ToDos / Missing Functionality
 
 ## General Node Database
-- [ ] Add a connector that supports multi-machine nodes
-- [ ] Add versions to all configurations so that a node/machine can identify updates
+- [x] Add a connector that supports multi-machine nodes
+- [x] Add versions to all configurations so that a node/machine can identify updates
 
 ## Publish/Subscribe
 - [x] Add capabilities to process messages that cannot be encrypted
@@ -18,7 +18,6 @@
 
 ## One to One Communication
 - [x] Rebuild asymmetric encryption so that it uses a symmetric approach for the actual data
-- [ ] Add get requests
 
 ### Naming Service based Management
 - [x] Add keygroup configuration control methods to sender
@@ -29,7 +28,7 @@
 ### Handling Missed Messages
 - [ ] Add message history size to machine config
 - [ ] Messaging data needs to be stored after each data related publish
-- [ ] Add sender/receiver capabilities
+- [ ] Add sender/receiver capabilities (get requests)
 - [ ] Write logic that uses functionality
 
 ## Controlling FBase with Clients

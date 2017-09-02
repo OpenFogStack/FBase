@@ -56,7 +56,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 	@Override
 	public Boolean executeFunctionality() {
 
-		while (true) {
+		while (!Thread.currentThread().isInterrupted()) {
 			currentResponsibleKeygroups.clear();
 			currentKeygroupConfigurations.clear();
 			try {
@@ -100,10 +100,12 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 			try {
 				Thread.sleep(checkInterval);
 			} catch (InterruptedException e) {
-				logger.error("Background task has been interrupted!");
-				e.printStackTrace();
+				Thread.currentThread().interrupt();
+				logger.error("Background task has been interrupted");
 			}
 		}
+		logger.info("Stopping task, because Thread was interrupted");
+		return true;
 	}
 
 	private boolean checkIfKeygroupConfigVersionDiffers(KeygroupConfig config, Integer version) {

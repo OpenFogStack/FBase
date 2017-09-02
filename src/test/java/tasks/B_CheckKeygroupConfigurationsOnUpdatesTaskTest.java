@@ -1,8 +1,9 @@
-package tasks.background;
+package tasks;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -20,10 +21,10 @@ import model.config.KeygroupConfig;
 import model.data.KeygroupID;
 import tasks.TaskManager.TaskName;
 
-public class CheckKeygroupConfigurationsOnUpdatesTaskTest {
+public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 
 	private static Logger logger =
-			Logger.getLogger(CheckKeygroupConfigurationsOnUpdatesTaskTest.class.getName());
+			Logger.getLogger(B_CheckKeygroupConfigurationsOnUpdatesTaskTest.class.getName());
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -56,7 +57,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTaskTest {
 						+ " should not have been executed so often, ",
 				new Integer(1), fbase.taskmanager.getHistoricTaskNumbers()
 						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
-		fbase.taskmanager.runCheckKeygroupConfigurationsOnUpdatesTask(1000);
+		Future<Boolean> task = fbase.taskmanager.runCheckKeygroupConfigurationsOnUpdatesTask(1000);
 		fbase.connector.keygroupConfig_put(id,
 				new KeygroupConfig(id, null, EncryptionAlgorithm.AES));
 		Thread.sleep(2000);
@@ -65,6 +66,8 @@ public class CheckKeygroupConfigurationsOnUpdatesTaskTest {
 						+ " should not have been twice by now, ",
 				new Integer(2), fbase.taskmanager.getHistoricTaskNumbers()
 						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
+		task.cancel(true);
+		fbase.tearDown();
 		logger.debug("Finished test.");
 	}
 

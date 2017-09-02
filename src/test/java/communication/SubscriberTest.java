@@ -47,7 +47,7 @@ public class SubscriberTest {
 		contextPub = ZMQ.context(1);
 		publisher = contextPub.socket(ZMQ.PUB);
 		publisher.bind(address + ":" + port);
-		fBase = new FBase("config_no_webserver.properties");
+		fBase = new FBase("SubscriberTest.properties");
 		fBase.startup();
 	}
 

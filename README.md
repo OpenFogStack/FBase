@@ -1,3 +1,7 @@
+# How to run the tests
+
+For some of the tests, a running naming service is required. The naming service has to be started in debug mode and must add an initial node that equals us as configured in the FBase configuration files. The naming service address must configured in the different configuration files for each test individually.
+
 # Current ToDos / Missing Functionality
 
 ## General Node Database

@@ -10,7 +10,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
-import model.JSONable;
+import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -19,7 +19,6 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.data.NodeID;
-import exceptions.FBaseStorageConnectorException;
 
 /**
  * This class stores all data on heap in a number of maps; it should only be used for testing

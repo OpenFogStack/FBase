@@ -25,9 +25,7 @@ import model.messages.Message;
 
 /**
  * Sends requests to designated receivers.
- * 
- * TODO 2: Check javadoc, is null really an option? Is not an exception thrown?
- * 
+ *  
  * @author jonathanhasenburg
  *
  */

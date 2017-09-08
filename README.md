@@ -18,7 +18,7 @@ For some of the tests, a running naming service is required. The naming service 
 ### Subscription Management
 - [x] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupConfigurationsOnUpdatesTask) #11
 - [x] Instead of unsubscribing/subscribing, each keygroup config update should lead to a complete reset of subscriptions
-- [ ] Add background task that checks whether any keygroups don't have a responsible machine yet #11
+- [x] Add background task that checks whether any keygroups don't have a responsible machine yet #11
 
 ### Heartbeats
 - [ ] Add background task that stores own heartbeats in the node database #11

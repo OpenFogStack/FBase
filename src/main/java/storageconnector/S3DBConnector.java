@@ -208,6 +208,13 @@ public class S3DBConnector extends AbstractDBConnector {
 			throw new FBaseStorageConnectorException(e);
 		}
 	}
+	
+
+	@Override
+	public List<KeygroupID> keygroupConfig_list() throws FBaseStorageConnectorException {
+		// TODO 1: IMPLEMENT
+		throw new RuntimeException("NOT YET IMPLEMENTED!");
+	}
 
 	private String getNodeConfigPath(NodeID nodeID) {
 		return "NodeConfigs/" + nodeID.toString();
@@ -238,6 +245,13 @@ public class S3DBConnector extends AbstractDBConnector {
 		}
 	}
 
+
+	@Override
+	public List<NodeID> nodeConfig_list() throws FBaseStorageConnectorException {
+		// TODO 1: IMPLEMENT
+		throw new RuntimeException("NOT YET IMPLEMENTED!");
+	}
+	
 	private String getClientConfigPath(ClientID clientID) {
 		return "ClientConfigs/" + clientID.toString();
 	}
@@ -266,6 +280,12 @@ public class S3DBConnector extends AbstractDBConnector {
 			}
 			throw new FBaseStorageConnectorException(e);
 		}
+	}
+	
+	@Override
+	public List<ClientID> clientConfig_list() throws FBaseStorageConnectorException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private String getSubscriberMachinesPath(KeygroupID keygroupID, String machine) {

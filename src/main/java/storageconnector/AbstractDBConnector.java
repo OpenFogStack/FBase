@@ -3,6 +3,7 @@
  */
 package storageconnector;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -148,6 +149,18 @@ public abstract class AbstractDBConnector {
 			throws FBaseStorageConnectorException;
 
 	/**
+	 * 
+	 * KEYGROUP CONFIG<br>
+	 * <br>
+	 * 
+	 * Retrieves the {@link KeygroupID}s for all stored {@link KeygroupConfig}s.
+	 * 
+	 * @return a list of {@link KeygroupID}s
+	 * @throws FBaseStorageConnectorException
+	 */
+	public abstract List<KeygroupID> keygroupConfig_list() throws FBaseStorageConnectorException;
+	
+	/**
 	 * NODE CONFIG<br>
 	 * <br>
 	 * stores configuration details of a node
@@ -170,6 +183,18 @@ public abstract class AbstractDBConnector {
 	 */
 	public abstract NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException;
 
+	/**
+	 * 
+	 * NODE CONFIG<br>
+	 * <br>
+	 * 
+	 * Retrieves the {@link NodeID}s for all stored {@link NodeConfig}s.
+	 * 
+	 * @return a list of {@link NodeID}s
+	 * @throws FBaseStorageConnectorException
+	 */
+	public abstract List<NodeID> nodeConfig_list() throws FBaseStorageConnectorException;
+	
 	/**
 	 * CLIENT CONFIG<br>
 	 * <br>
@@ -194,6 +219,18 @@ public abstract class AbstractDBConnector {
 	public abstract ClientConfig clientConfig_get(ClientID clientID)
 			throws FBaseStorageConnectorException;
 
+	/**
+	 * 
+	 * CLIENT CONFIG<br>
+	 * <br>
+	 * 
+	 * Retrieves the {@link ClientID}s for all stored {@link ClientConfigs}s.
+	 * 
+	 * @return a list of {@link ClientID}s
+	 * @throws FBaseStorageConnectorException
+	 */
+	public abstract List<ClientID> clientConfig_list() throws FBaseStorageConnectorException;
+	
 	/**
 	 * SUBSCRIBER MANAGEMENT<br>
 	 * <br>

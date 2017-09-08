@@ -37,7 +37,7 @@ import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
  * @author jonathanhasenburg
  *
  */
-class UpdateKeygroupConfigTask extends Task<Boolean> {
+public class UpdateKeygroupConfigTask extends Task<Boolean> {
 
 	private static Logger logger = Logger.getLogger(UpdateKeygroupConfigTask.class.getName());
 

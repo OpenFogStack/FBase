@@ -263,6 +263,9 @@ public class NamingServiceSenderTest {
 	public void testSendNodeConfigRead() throws FBaseNamingServiceException {
 		logger.debug("-------Starting testSendNodeConfigRead-------");
 		readNodeConfig(fbase.configuration.getNodeID(), makeNodeConfig(ownNodeConfigJSONPath));
+		// not existent config
+		NodeConfig actualConfig = nsSender.sendNodeConfigRead(new NodeID("asdlkfj"));
+		assertNull(actualConfig);
 		logger.debug("Finished testSendNodeConfigRead.");
 	}
 

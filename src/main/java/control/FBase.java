@@ -67,9 +67,9 @@ public class FBase {
 		taskmanager.runUpdateNodeConfigTask(null, Flag.INITIAL, registerAtNamingService).get(20,
 				TimeUnit.SECONDS);
 
-		// TODO 2: Start Background Tasks, should check own node configuration regulary to
-		// figure if
-		// removed
+		// TODO 2: Start Background Tasks, 
+		
+		// TODO 2: should check own node configuration regulary to figure if removed
 	}
 
 	public void tearDown() {

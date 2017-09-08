@@ -43,6 +43,8 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 
 	@Override
 	public Boolean executeFunctionality() {
+		// TODO 1: handle config is tombstoned
+		
 		logger.debug("Updating subscriptions for config " + config.getKeygroupID());
 
 		if (config.getReplicaNodes() != null) {

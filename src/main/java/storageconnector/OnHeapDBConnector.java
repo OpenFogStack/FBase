@@ -3,7 +3,9 @@
  */
 package storageconnector;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -176,6 +178,11 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 		return keygroupConfigs.get(keygroupID);
 	}
 
+	@Override
+	public List<KeygroupID> keygroupConfig_list() throws FBaseStorageConnectorException {
+		return new ArrayList<KeygroupID>(keygroupConfigs.keySet());
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -198,6 +205,11 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 		return nodeConfigs.get(nodeID);
 	}
 
+	@Override
+	public List<NodeID> nodeConfig_list() throws FBaseStorageConnectorException {
+		return new ArrayList<NodeID>(nodeConfigs.keySet());
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -220,6 +232,11 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 		return clientConfigs.get(clientID);
 	}
 
+	@Override
+	public List<ClientID> clientConfig_list() throws FBaseStorageConnectorException {
+		return new ArrayList<ClientID>(clientConfigs.keySet());
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

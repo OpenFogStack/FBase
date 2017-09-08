@@ -4,11 +4,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import crypto.CryptoProvider.EncryptionAlgorithm;
+import model.config.NodeConfig;
 import model.data.NodeID;
+import storageconnector.AbstractDBConnector;
+import storageconnector.AbstractDBConnector.Connector;
 
 public class Configuration {
 
@@ -18,9 +25,11 @@ public class Configuration {
 
 	// General
 	private String machineName = null;
+	private String machineIPAddress = null;
 	private NodeID nodeID = null;
 	private String location = null;
 	private String description = null;
+	private AbstractDBConnector.Connector databaseConnector = null;
 
 	// Communication
 	private Integer restPort = null;
@@ -50,6 +59,8 @@ public class Configuration {
 			nodeID = new NodeID(properties.getProperty("nodeID"));
 			location = properties.getProperty("location", "Unknown");
 			description = properties.getProperty("description", "Unknown");
+			databaseConnector = Connector.valueOf(
+					properties.getProperty("databaseConnector", Connector.ON_HEAP.toString()));
 
 			// Communication
 			restPort = Integer.parseInt(properties.getProperty("restPort", "-1"));
@@ -64,6 +75,10 @@ public class Configuration {
 			namingServiceAddress = properties.getProperty("namingServiceAddress", "Unknown");
 			namingServicePort = Integer.parseInt(properties.getProperty("namingServicePort", "-1"));
 			namingServicePublicKey = properties.getProperty("namingServicePublicKey", "Unknown");
+
+			// Set IP Address of Machine
+			machineIPAddress = InetAddress.getLocalHost().getHostAddress();		
+			logger.info("The ip address is " + machineIPAddress);
 
 			checkConsistency();
 		} catch (IOException | NumberFormatException e) {
@@ -95,8 +110,30 @@ public class Configuration {
 
 	}
 
+	public NodeConfig buildNodeConfigBasedOnData() {
+		NodeConfig config = new NodeConfig();
+		config.setNodeID(getNodeID());
+		config.setPublicKey(getPublicKey());
+		config.setEncryptionAlgorithm(EncryptionAlgorithm.RSA);
+		config.setPublisherPort(getPublisherPort());
+		config.setMessagePort(getMessagePort());
+		config.setRestPort(getRestPort());
+		config.setDescription(getDescription());
+		config.setLocation(getLocation());
+		// add own ip address
+		List<String> machines = new ArrayList<>();
+		machines.add(getMachineIPAddress());
+		config.setMachines(machines);
+
+		return config;
+	}
+
 	public String getMachineName() {
 		return machineName;
+	}
+
+	public String getMachineIPAddress() {
+		return machineIPAddress;
 	}
 
 	public NodeID getNodeID() {
@@ -109,6 +146,10 @@ public class Configuration {
 
 	public String getDescription() {
 		return description;
+	}
+	
+	public Connector getDatabaseConnector() {
+		return databaseConnector;
 	}
 
 	public Integer getRestPort() {
@@ -126,15 +167,15 @@ public class Configuration {
 	public String getPrivateKey() {
 		return privateKey;
 	}
-	
+
 	public String getPublicKey() {
 		return publicKey;
 	}
-	
+
 	public String getNamingServiceAddress() {
 		return namingServiceAddress;
 	}
-	
+
 	public Integer getNamingServicePort() {
 		return namingServicePort;
 	}

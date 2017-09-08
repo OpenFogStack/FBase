@@ -31,6 +31,7 @@ import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
+import tasks.UpdateNodeConfigTask.Flag;
 
 public class TwoNodeScenario {
 
@@ -58,9 +59,9 @@ public class TwoNodeScenario {
 	@Before
 	public void setUp() throws Exception {
 		fbase1 = new FBase("TwoNodeScenario_1.properties");
-		fbase1.startup();
+		fbase1.startup(false);
 		fbase2 = new FBase("TwoNodeScenario_2.properties");
-		fbase2.startup();
+		fbase2.startup(false);
 
 		nConfig1 = createNodeConfig(fbase1);
 		nConfig2 = createNodeConfig(fbase2);
@@ -113,13 +114,13 @@ public class TwoNodeScenario {
 	public void testUpdateKeygroupConfig() throws InterruptedException, ExecutionException,
 			TimeoutException, FBaseStorageConnectorException, FBaseNamingServiceException {
 		logger.debug("-------Starting testUpdateKeygroupConfig-------");
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");
 
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase2 ready");
 
@@ -152,13 +153,13 @@ public class TwoNodeScenario {
 	public void testUpdateDataRecord() throws InterruptedException, FBaseStorageConnectorException,
 			ExecutionException, TimeoutException {
 		logger.debug("-------Starting testOnePublish-------");
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");
 
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase2 ready");
 
@@ -180,6 +181,8 @@ public class TwoNodeScenario {
 
 		client.runDeleteRecordRequest("http://localhost", 8081, record.getDataIdentifier());
 
+		Thread.sleep(200);
+		
 		assertNull(fbase1.connector.dataRecords_get(record.getDataIdentifier()));
 		assertNull(fbase2.connector.dataRecords_get(record.getDataIdentifier()));
 

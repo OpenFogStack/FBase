@@ -48,7 +48,7 @@ public class SubscriberTest {
 		publisher = contextPub.socket(ZMQ.PUB);
 		publisher.bind(address + ":" + port);
 		fBase = new FBase("SubscriberTest.properties");
-		fBase.startup();
+		fBase.startup(false);
 	}
 
 	@Before

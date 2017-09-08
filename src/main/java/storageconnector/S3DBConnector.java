@@ -194,7 +194,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	@Override
-	protected KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
+	public KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException {
 		try {
 			KeygroupConfig config = JSONable.fromJSON(
@@ -224,7 +224,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	@Override
-	protected NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException {
+	public NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException {
 		try {
 			NodeConfig config = JSONable.fromJSON(
 					s3.getObject(bucketName, getNodeConfigPath(nodeID)).getObjectContent(),
@@ -253,7 +253,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	@Override
-	protected ClientConfig clientConfig_get(ClientID clientID)
+	public ClientConfig clientConfig_get(ClientID clientID)
 			throws FBaseStorageConnectorException {
 		try {
 			ClientConfig config = JSONable.fromJSON(

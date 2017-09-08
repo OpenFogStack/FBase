@@ -26,8 +26,12 @@ import exceptions.FBaseStorageConnectorException;
  * to instantiate them<b>
  * 
  * @author Dave
+ * @author jonathanhasenburg
+ * 
  */
 public abstract class AbstractDBConnector {
+	
+	public enum Connector {ON_HEAP, S3};
 
 	protected AbstractDBConnector() {
 		// default constructor
@@ -140,7 +144,7 @@ public abstract class AbstractDBConnector {
 	 * @return the {@link KeygroupConfig} 
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	protected abstract KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
+	public abstract KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException;
 
 	/**
@@ -164,7 +168,7 @@ public abstract class AbstractDBConnector {
 	 * @return the {@link NodeConfig} or null if none was found
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	protected abstract NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException;
+	public abstract NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException;
 
 	/**
 	 * CLIENT CONFIG<br>
@@ -187,7 +191,7 @@ public abstract class AbstractDBConnector {
 	 * @return the {@link NodeConfig} or null if none was found
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	protected abstract ClientConfig clientConfig_get(ClientID clientID)
+	public abstract ClientConfig clientConfig_get(ClientID clientID)
 			throws FBaseStorageConnectorException;
 
 	/**

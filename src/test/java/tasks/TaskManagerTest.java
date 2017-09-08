@@ -31,7 +31,7 @@ public class TaskManagerTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		fBase = new FBase(null);
-		fBase.startup();
+		fBase.startup(false);
 		taskmanager = fBase.taskmanager;
 	}
 

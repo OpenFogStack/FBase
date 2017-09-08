@@ -171,7 +171,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#getKeygroupConfig(model.data.KeygroupID )
 	 */
 	@Override
-	protected KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
+	public KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException {
 		return keygroupConfigs.get(keygroupID);
 	}
@@ -194,7 +194,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#getNodeConfig()
 	 */
 	@Override
-	protected NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException {
+	public NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException {
 		return nodeConfigs.get(nodeID);
 	}
 
@@ -216,7 +216,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#clientConfig_get(model.data.ClientID)
 	 */
 	@Override
-	protected ClientConfig clientConfig_get(ClientID clientID) throws FBaseStorageConnectorException {
+	public ClientConfig clientConfig_get(ClientID clientID) throws FBaseStorageConnectorException {
 		return clientConfigs.get(clientID);
 	}
 

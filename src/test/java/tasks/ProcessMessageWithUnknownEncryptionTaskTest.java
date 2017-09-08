@@ -31,6 +31,7 @@ import model.config.ReplicaNodeConfig;
 import model.data.KeygroupID;
 import model.messages.Envelope;
 import model.messages.Message;
+import tasks.UpdateNodeConfigTask.Flag;
 
 /**
  * 
@@ -63,9 +64,9 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 	@Before
 	public void setUp() throws Exception {
 		fbase1 = new FBase("ProcessMessageWithUnknownEncryptionTaskTest.properties");
-		fbase1.startup();
+		fbase1.startup(false);
 		nConfig1 = createNodeConfig(fbase1);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");
 
 		kConfigOld = new KeygroupConfig(keygroupID, "secret", EncryptionAlgorithm.AES);

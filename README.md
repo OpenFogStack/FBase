@@ -1,3 +1,7 @@
+# Configuration
+
+If the S3 connector is supposed to be used, AWS credentials must be set locally as described [here](http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html).
+
 # How to run the tests
 
 For some of the tests, a running naming service is required. The naming service has to be started in debug mode and must add an initial node that equals us as configured in the FBase configuration files. The naming service address must configured in the different configuration files for each test individually.
@@ -26,7 +30,7 @@ For some of the tests, a running naming service is required. The naming service 
 ### Naming Service based Management
 - [x] Add keygroup configuration control methods to sender
 - [x] Add response processing to all methods
-- [ ] Add node management methods (e.g. to update a node configuration when a machine is added/removed)
+- [x] Add node management methods (e.g. to update a node configuration when a machine is added/removed)
 - [ ] Add a background task that periodically polls the naming service about the newest configurations
 
 ### Handling Missed Messages

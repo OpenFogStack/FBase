@@ -26,6 +26,8 @@ import model.messages.Message;
 /**
  * Sends requests to designated receivers.
  * 
+ * TODO 2: Check javadoc, is null really an option? Is not an exception thrown?
+ * 
  * @author jonathanhasenburg
  *
  */
@@ -69,7 +71,7 @@ public class NamingServiceSender extends AbstractSender {
 
 		ZMQ.Poller poller = context.poller();
 		poller.register(sender, ZMQ.Poller.POLLIN);
-		long rc = poller.poll(3000);
+		long rc = poller.poll(2000);
 		if (rc == -1)
 			throw new FBaseNamingServiceException(FBaseNamingServiceException.NOT_REACHABLE);
 

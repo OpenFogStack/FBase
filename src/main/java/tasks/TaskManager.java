@@ -15,6 +15,7 @@ import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.messages.Envelope;
+import tasks.UpdateNodeConfigTask.Flag;
 import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
 
 public class TaskManager {
@@ -117,8 +118,15 @@ public class TaskManager {
 		return future;
 	}
 
-	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config) {
-		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, fBase));
+	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config, Flag flag) {
+		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, fBase, flag));
+		return future;
+	}
+
+	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config, Flag flag,
+			boolean notifyNamingService) {
+		Future<Boolean> future =
+				pool.submit(new UpdateNodeConfigTask(config, fBase, flag, notifyNamingService));
 		return future;
 	}
 

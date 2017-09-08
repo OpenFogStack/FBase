@@ -1,5 +1,9 @@
 package control;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import communication.NamingServiceSender;
 import communication.Publisher;
 import communication.SubscriptionRegistry;
@@ -8,7 +12,6 @@ import de.hasenburg.fbase.rest.WebServer;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
-import model.config.NodeConfig;
 import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
@@ -16,7 +19,10 @@ import model.data.KeygroupID;
 import storageconnector.AbstractDBConnector;
 import storageconnector.ConfigAccessHelper;
 import storageconnector.OnHeapDBConnector;
+import storageconnector.S3DBConnector;
+import storageconnector.AbstractDBConnector.Connector;
 import tasks.TaskManager;
+import tasks.UpdateNodeConfigTask.Flag;
 
 /**
  * Main control class of a FBase machine.
@@ -35,16 +41,19 @@ public class FBase {
 	public SubscriptionRegistry subscriptionRegistry = null;
 	private WebServer server = null;
 
-	public FBase(String configName) throws FBaseStorageConnectorException {
+	public FBase(String configName) {
 		configuration = new Configuration(configName);
-		connector = new OnHeapDBConnector();
-		connector.dbConnection_initiate();
 		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort());
-		
-		// TODO 2: Start Background Tasks
 	}
-	
-	public void startup() {
+
+	public void startup(boolean registerAtNamingService) throws InterruptedException,
+			ExecutionException, TimeoutException, FBaseStorageConnectorException {
+		if (Connector.S3.equals(configuration.getDatabaseConnector())) {
+			connector = new S3DBConnector();
+		} else {
+			connector = new OnHeapDBConnector();
+		}
+		connector.dbConnection_initiate();
 		configAccessHelper = new ConfigAccessHelper(this);
 		taskmanager = new TaskManager(this);
 		if (configuration.getRestPort() > 0) {
@@ -54,6 +63,13 @@ public class FBase {
 		namingServiceSender = new NamingServiceSender(configuration.getNamingServiceAddress(),
 				configuration.getNamingServicePort(), this);
 		subscriptionRegistry = new SubscriptionRegistry(this);
+
+		taskmanager.runUpdateNodeConfigTask(null, Flag.INITIAL, registerAtNamingService).get(20,
+				TimeUnit.SECONDS);
+
+		// TODO 2: Start Background Tasks, should check own node configuration regulary to
+		// figure if
+		// removed
 	}
 
 	public void tearDown() {
@@ -78,12 +94,6 @@ public class FBase {
 				"secret", EncryptionAlgorithm.AES);
 		config.addClient(clientConfig.getClientID());
 		taskmanager.runUpdateKeygroupConfigTask(config, false);
-
-		NodeConfig nodeConfig = new NodeConfig();
-		nodeConfig.setNodeID(configuration.getNodeID());
-		nodeConfig.setMessagePort(configuration.getMessagePort());
-		nodeConfig.setPublisherPort(configuration.getPublisherPort());
-		taskmanager.runUpdateNodeConfigTask(nodeConfig);
 
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "M-1"));

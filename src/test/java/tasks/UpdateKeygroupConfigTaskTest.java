@@ -24,6 +24,7 @@ import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
 import model.data.KeygroupID;
 import storageconnector.AbstractDBConnector;
+import tasks.UpdateNodeConfigTask.Flag;
 
 /**
  * By using the {@link UpdateKeygroupConfigTask}, {@link UpdateKeygroupSubscriptionsTask} is
@@ -59,19 +60,19 @@ public class UpdateKeygroupConfigTaskTest {
 	@Before
 	public void setUp() throws Exception {
 		fbase1 = new FBase("TwoNodeScenario_1.properties");
-		fbase1.startup();
+		fbase1.startup(false);
 		fbase2 = new FBase("TwoNodeScenario_2.properties");
-		fbase2.startup();
+		fbase2.startup(false);
 
 		nConfig1 = createNodeConfig(fbase1);
 		nConfig2 = createNodeConfig(fbase2);
 
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2, TimeUnit.SECONDS);
+		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");
 
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1).get(2, TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2, TimeUnit.SECONDS);
+		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		logger.debug("FBase2 ready");
 
 		kConfig = new KeygroupConfig(keygroupID, "secret", EncryptionAlgorithm.AES);

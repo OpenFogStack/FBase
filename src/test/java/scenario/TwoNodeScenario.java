@@ -152,7 +152,7 @@ public class TwoNodeScenario {
 	@Test
 	public void testUpdateDataRecord() throws InterruptedException, FBaseStorageConnectorException,
 			ExecutionException, TimeoutException {
-		logger.debug("-------Starting testOnePublish-------");
+		logger.debug("-------Starting testUpdateDataRecord-------");
 		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
@@ -188,7 +188,7 @@ public class TwoNodeScenario {
 
 		logger.debug("CHECK: " + fbase2.connector.dataRecords_get(record.getDataIdentifier()));
 
-		logger.debug("Finished testOnePublish.");
+		logger.debug("Finished testUpdateDataRecord.");
 	}
 
 }

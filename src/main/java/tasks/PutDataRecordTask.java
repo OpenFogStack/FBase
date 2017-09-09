@@ -9,6 +9,7 @@ import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataRecord;
+import model.data.MessageID;
 import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
@@ -53,22 +54,27 @@ class PutDataRecordTask extends Task<Boolean> {
 			return false;
 		}
 
-		if (publish) {
-			// create envelope
-			Message m = new Message();
-			m.setCommand(Command.PUT_DATA_RECORD);
-			m.setContent(JSONable.toJSON(record));
-			Envelope e = new Envelope(record.getKeygroupID(), m);
+		try {
+			if (publish) {
+				// get next messageID
+				MessageID messageID = fBase.connector.messageHistory_getNextMessageID();
 
-			// publish data
-			try {
+				// create envelope
+				Message m = new Message();
+				m.setMessageID(messageID);
+				m.setCommand(Command.PUT_DATA_RECORD);
+				m.setContent(JSONable.toJSON(record));
+				Envelope e = new Envelope(record.getKeygroupID(), m);
+
 				fBase.publisher.send(e, config.getEncryptionSecret(),
 						config.getEncryptionAlgorithm());
-			} catch (FBaseEncryptionException e1) {
-				logger.warn("Could not publish envelope to other nodes because encyption failed, "
-						+ e1.getMessage());
-				e1.printStackTrace();
+				
+				// store in messageHistory
+				fBase.connector.messageHistory_put(messageID, record.getDataIdentifier());
 			}
+		} catch (FBaseStorageConnectorException | FBaseEncryptionException e) {
+			logger.error("Unable to publish message", e);
+			return false;
 		}
 
 		return true;

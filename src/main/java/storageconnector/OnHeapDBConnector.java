@@ -337,7 +337,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public DataIdentifier messageHistory_get(MessageID messageID)
 			throws FBaseStorageConnectorException {
-		return messageHistory.get(messageID);
+		return messageHistory.get(messageID.getVersion());
 	}
 
 }

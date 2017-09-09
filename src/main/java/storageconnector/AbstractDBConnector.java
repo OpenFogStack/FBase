@@ -326,7 +326,8 @@ public abstract class AbstractDBConnector {
 	 * 
 	 * @param messageID - the {@link MessageID}
 	 * 
-	 * @return the {@link DataIdentifier} related to the given messageID
+	 * @return the {@link DataIdentifier} related to the given messageID or null no entry for
+	 *         the messageID exists
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
 	public abstract DataIdentifier messageHistory_get(MessageID messageID)

@@ -35,7 +35,7 @@ For some of the tests, a running naming service is required. The naming service 
 
 ### Handling Missed Messages
 - [x] Add message history size to machine config
-- [ ] Messaging data needs to be stored after each data related publish
+- [x] Messaging data needs to be stored after each data related publish
 - [ ] Add sender/receiver capabilities (get requests)
 - [ ] Write logic that uses functionality
 

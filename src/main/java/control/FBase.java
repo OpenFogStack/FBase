@@ -49,9 +49,9 @@ public class FBase {
 	public void startup(boolean registerAtNamingService) throws InterruptedException,
 			ExecutionException, TimeoutException, FBaseStorageConnectorException {
 		if (Connector.S3.equals(configuration.getDatabaseConnector())) {
-			connector = new S3DBConnector();
+			connector = new S3DBConnector(this);
 		} else {
-			connector = new OnHeapDBConnector();
+			connector = new OnHeapDBConnector(this);
 		}
 		connector.dbConnection_initiate();
 		configAccessHelper = new ConfigAccessHelper(this);

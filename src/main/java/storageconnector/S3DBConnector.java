@@ -26,6 +26,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
+import control.FBase;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.ClientConfig;
@@ -35,6 +36,7 @@ import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
+import model.data.MessageID;
 import model.data.NodeID;
 
 public class S3DBConnector extends AbstractDBConnector {
@@ -43,12 +45,16 @@ public class S3DBConnector extends AbstractDBConnector {
 
 	private String bucketName = "de.hasenburg.fbase.s3dbconnector-bucket";
 	private AmazonS3 s3;
+	
+	@SuppressWarnings("unused")
+	private FBase fBase = null;
 
-	public S3DBConnector() {
-
+	public S3DBConnector(FBase fBase) {
+		this.fBase = fBase;
 	}
 
-	public S3DBConnector(String bucketName) {
+	public S3DBConnector(FBase fBase, String bucketName) {
+		this.fBase = fBase;
 		this.bucketName = bucketName;
 	}
 
@@ -208,7 +214,6 @@ public class S3DBConnector extends AbstractDBConnector {
 			throw new FBaseStorageConnectorException(e);
 		}
 	}
-	
 
 	@Override
 	public List<KeygroupID> keygroupConfig_list() throws FBaseStorageConnectorException {
@@ -245,13 +250,12 @@ public class S3DBConnector extends AbstractDBConnector {
 		}
 	}
 
-
 	@Override
 	public List<NodeID> nodeConfig_list() throws FBaseStorageConnectorException {
 		// TODO 1: IMPLEMENT
 		throw new RuntimeException("NOT YET IMPLEMENTED!");
 	}
-	
+
 	private String getClientConfigPath(ClientID clientID) {
 		return "ClientConfigs/" + clientID.toString();
 	}
@@ -267,8 +271,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	@Override
-	public ClientConfig clientConfig_get(ClientID clientID)
-			throws FBaseStorageConnectorException {
+	public ClientConfig clientConfig_get(ClientID clientID) throws FBaseStorageConnectorException {
 		try {
 			ClientConfig config = JSONable.fromJSON(
 					s3.getObject(bucketName, getClientConfigPath(clientID)).getObjectContent(),
@@ -281,7 +284,7 @@ public class S3DBConnector extends AbstractDBConnector {
 			throw new FBaseStorageConnectorException(e);
 		}
 	}
-	
+
 	@Override
 	public List<ClientID> clientConfig_list() throws FBaseStorageConnectorException {
 		// TODO Auto-generated method stub
@@ -423,6 +426,26 @@ public class S3DBConnector extends AbstractDBConnector {
 		} catch (AmazonServiceException e) {
 			throw new FBaseStorageConnectorException(e);
 		}
+	}
+
+	@Override
+	public MessageID messageHistory_getNextMessageID() throws FBaseStorageConnectorException {
+		// TODO 1: IMPLEMENT
+		throw new RuntimeException("NOT YET IMPLEMENTED!");
+	}
+
+	@Override
+	public void messageHistory_put(MessageID messageID, DataIdentifier relatedData)
+			throws FBaseStorageConnectorException {
+		// TODO 1: IMPLEMENT
+		throw new RuntimeException("NOT YET IMPLEMENTED!");
+	}
+
+	@Override
+	public DataIdentifier messageHistory_get(MessageID messageID)
+			throws FBaseStorageConnectorException {
+		// TODO 1: IMPLEMENT
+		throw new RuntimeException("NOT YET IMPLEMENTED!");
 	}
 
 }

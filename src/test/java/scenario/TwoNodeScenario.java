@@ -191,4 +191,6 @@ public class TwoNodeScenario {
 		logger.debug("Finished testUpdateDataRecord.");
 	}
 
+	// TODO 1: Add test that involves the MessageReceiver and the MessageSender
+	
 }

@@ -154,8 +154,7 @@ public class NamingServiceSender extends AbstractSender {
 	 * Ask the naming service to return the {@link NodeConfig} with the given {@link NodeID}.
 	 * 
 	 * @param id - the {@link NodeID}
-	 * @return the specified {@link NodeConfig} or null if not existent or service not
-	 *         reachable
+	 * @return the specified {@link NodeConfig} or null if not existent
 	 * @throws FBaseCommunicationException 
 	 */
 	public NodeConfig sendNodeConfigRead(NodeID id) throws FBaseCommunicationException {
@@ -241,8 +240,7 @@ public class NamingServiceSender extends AbstractSender {
 	 * {@link ClientID}.
 	 * 
 	 * @param id - the {@link ClientID}
-	 * @return the specified {@link ClientConfig} or null if not existent or service not
-	 *         reachable
+	 * @return the specified {@link ClientConfig} or null if not existent
 	 * @throws FBaseCommunicationException 
 	 */
 	public ClientConfig sendClientConfigRead(ClientID id) throws FBaseCommunicationException {
@@ -420,8 +418,7 @@ public class NamingServiceSender extends AbstractSender {
 	 * {@link KeygroupID}.
 	 * 
 	 * @param id - the {@link KeygroupID}
-	 * @return the specified {@link KeygroupConfig} or null if not existent or service not
-	 *         reachable
+	 * @return the specified {@link KeygroupConfig} or null if not existent
 	 * @throws FBaseCommunicationException 
 	 */
 	public KeygroupConfig sendKeygroupConfigRead(KeygroupID id) throws FBaseCommunicationException {

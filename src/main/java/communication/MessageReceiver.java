@@ -66,8 +66,10 @@ public class MessageReceiver extends AbstractReceiver {
 					if (record == null) {
 						// record was deleted
 						responseMessage.setContent("");
+						responseMessage.setTextualInfo("Success, record was deleted in the past.");
 					} else {
 						responseMessage.setContent(JSONable.toJSON(record));
+						responseMessage.setTextualInfo("Success, record found.");
 					}
 
 				} catch (NullPointerException e) {

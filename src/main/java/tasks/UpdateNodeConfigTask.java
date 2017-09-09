@@ -68,8 +68,8 @@ public class UpdateNodeConfigTask extends Task<Boolean> {
 				this.config = fBase.connector.nodeConfig_get(fBase.configuration.getNodeID());
 				this.config.getMachines().add(fBase.configuration.getMachineIPAddress());
 			} catch (FBaseStorageConnectorException | NullPointerException e) {
-				logger.error("Exception catched while trying to get config from database. "
-						+ "Building new config." + e);
+				logger.info("Exception catched while trying to get config from database. "
+						+ "Building new config.", e);
 				this.config = fBase.configuration.buildNodeConfigBasedOnData();
 			}
 		}

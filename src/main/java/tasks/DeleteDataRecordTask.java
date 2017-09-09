@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 
 import control.FBase;
 import exceptions.FBaseEncryptionException;
-import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
@@ -50,7 +50,7 @@ class DeleteDataRecordTask extends Task<Boolean> {
 		try {
 			config = fBase.configAccessHelper.keygroupConfig_get(identifier.getKeygroupID());
 			fBase.connector.dataRecords_delete(identifier);
-		} catch (FBaseStorageConnectorException | FBaseNamingServiceException e) {
+		} catch (FBaseStorageConnectorException | FBaseCommunicationException e) {
 			logger.error(e.getMessage());
 			return false;
 		}

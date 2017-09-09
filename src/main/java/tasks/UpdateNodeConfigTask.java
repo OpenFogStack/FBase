@@ -3,7 +3,7 @@ package tasks;
 import org.apache.log4j.Logger;
 
 import control.FBase;
-import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.NodeConfig;
 import tasks.TaskManager.TaskName;
@@ -89,7 +89,7 @@ public class UpdateNodeConfigTask extends Task<Boolean> {
 				if (!fBase.namingServiceSender.sendNodeConfigCreate(this.config)) {
 					fBase.namingServiceSender.sendNodeConfigUpdate(this.config);
 				}
-			} catch (FBaseNamingServiceException e) {
+			} catch (FBaseCommunicationException e) {
 				logger.error("Could not send updated config to naming service", e);
 			}
 		}

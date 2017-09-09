@@ -25,7 +25,7 @@ import org.zeromq.ZMQ;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
-import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseCommunicationException;
 import model.JSONable;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -88,7 +88,7 @@ public class NamingServiceSenderTest {
 
 	@Test
 	public void testPollingSuccess() throws InterruptedException, ExecutionException,
-			TimeoutException, FBaseNamingServiceException {
+			TimeoutException, FBaseCommunicationException {
 		logger.debug("-------Starting testPollingSuccess-------");
 		Future<?> future = executor.submit(new ReceiveHelper());
 		Thread.sleep(200);
@@ -104,7 +104,7 @@ public class NamingServiceSenderTest {
 		try {
 			@SuppressWarnings("unused")
 			String reply = localSender.send(e, null, null);
-		} catch (FBaseNamingServiceException e) {
+		} catch (FBaseCommunicationException e) {
 			logger.debug(e.getMessage());
 			return;
 		}
@@ -113,13 +113,13 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testPollingRecovery() throws InterruptedException, FBaseNamingServiceException,
+	public void testPollingRecovery() throws InterruptedException, FBaseCommunicationException,
 			ExecutionException, TimeoutException {
 		logger.debug("-------Starting testPollingRecovery-------");
 		try {
 			@SuppressWarnings("unused")
 			String reply = localSender.send(e, null, null);
-		} catch (FBaseNamingServiceException e) {
+		} catch (FBaseCommunicationException e) {
 			logger.debug(e.getMessage());
 		}
 		Future<?> future = executor.submit(new ReceiveHelper());
@@ -131,7 +131,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testMalformattedURI() throws InterruptedException, FBaseNamingServiceException,
+	public void testMalformattedURI() throws InterruptedException, FBaseCommunicationException,
 			ExecutionException, TimeoutException {
 		logger.debug("-------Starting testMalformattedURI-------");
 		NamingServiceSender malSender = new NamingServiceSender("asdlkfasdfjk", -1, null);
@@ -215,31 +215,31 @@ public class NamingServiceSenderTest {
 	}
 
 	private void createNodeConfig(NodeConfig config, boolean expected)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		boolean actual = nsSender.sendNodeConfigCreate(config);
 		assertEquals("Could not create node config.", expected, actual);
 	}
 
 	private void updateNodeConfig(NodeConfig config, boolean expected)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		boolean actual = nsSender.sendNodeConfigUpdate(config);
 		assertEquals("Could not update node config.", expected, actual);
 	}
 
 	private void readNodeConfig(NodeID nodeID, NodeConfig expectedConfig)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		NodeConfig actualConfig = nsSender.sendNodeConfigRead(nodeID);
 		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
 	}
 
 	private void deleteNodeConfig(NodeID nodeID, boolean expected)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		boolean actual = nsSender.sendNodeConfigDelete(nodeID);
 		assertEquals("Could not delete node config", expected, actual);
 	}
 
 	@Test
-	public void testSendNodeConfigCreate() throws FBaseNamingServiceException {
+	public void testSendNodeConfigCreate() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendNodeConfigCreate-------");
 		NodeConfig newConfig = makeNodeConfig(ownNodeConfigJSONPath);
 		newConfig.setNodeID(new NodeID("B2"));
@@ -249,7 +249,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendNodeConfigUpdate() throws FBaseNamingServiceException {
+	public void testSendNodeConfigUpdate() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendNodeConfigUpdate-------");
 		NodeConfig configUpdate = makeNodeConfig(ownNodeConfigJSONPath);
 		configUpdate.setDescription("This is a changed description");
@@ -260,7 +260,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendNodeConfigRead() throws FBaseNamingServiceException {
+	public void testSendNodeConfigRead() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendNodeConfigRead-------");
 		readNodeConfig(fbase.configuration.getNodeID(), makeNodeConfig(ownNodeConfigJSONPath));
 		// not existent config
@@ -270,7 +270,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendNodeConfigDelete() throws FBaseNamingServiceException {
+	public void testSendNodeConfigDelete() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendNodeConfigDelete-------");
 		deleteNodeConfig(fbase.configuration.getNodeID(), true);
 		deleteNodeConfig(fbase.configuration.getNodeID(), false);
@@ -296,31 +296,31 @@ public class NamingServiceSenderTest {
 	}
 
 	private void createClientConfig(ClientConfig config, boolean expected)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		boolean actual = nsSender.sendClientConfigCreate(config);
 		assertEquals("Could not create node config.", expected, actual);
 	}
 
 	private void updateClientConfig(ClientConfig config, boolean expected)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		boolean actual = nsSender.sendClientConfigUpdate(config);
 		assertEquals("Could not update node config.", expected, actual);
 	}
 
 	private void readClientConfig(ClientID clientID, ClientConfig expectedConfig)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		ClientConfig actualConfig = nsSender.sendClientConfigRead(clientID);
 		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
 	}
 
 	private void deleteClientConfig(ClientID clientID, boolean expected)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		boolean actual = nsSender.sendClientConfigDelete(clientID);
 		assertEquals("Could not delete node config", expected, actual);
 	}
 
 	@Test
-	public void testSendClientConfigCreateAndRead() throws FBaseNamingServiceException {
+	public void testSendClientConfigCreateAndRead() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendClientConfigCreateAndRead-------");
 		ClientConfig newConfig = makeClientConfig();
 		createClientConfig(newConfig, true);
@@ -329,7 +329,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendClientConfigUpdate() throws FBaseNamingServiceException {
+	public void testSendClientConfigUpdate() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendClientConfigUpdate-------");
 		ClientConfig newConfig = makeClientConfig();
 		createClientConfig(newConfig, true);
@@ -341,7 +341,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendClientConfigDelete() throws FBaseNamingServiceException {
+	public void testSendClientConfigDelete() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendClientConfigDelete-------");
 		ClientConfig newConfig = makeClientConfig();
 		createClientConfig(newConfig, true);
@@ -367,14 +367,14 @@ public class NamingServiceSenderTest {
 	}
 
 	private KeygroupConfig createKeygroupConfig(KeygroupConfig config, int expectedVersion)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		KeygroupConfig actual = nsSender.sendKeygroupConfigCreate(config);
 		assertEquals("Could not create keygroup config.", expectedVersion, actual.getVersion());
 		return actual;
 	}
 
 	private void readKeygroupConfig(KeygroupID keygroupID, KeygroupConfig expectedConfig)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		KeygroupConfig actualConfig = nsSender.sendKeygroupConfigRead(keygroupID);
 		logger.debug("Expected: " + JSONable.toJSON(expectedConfig));
 		logger.debug("Actual: " + JSONable.toJSON(actualConfig));
@@ -382,13 +382,13 @@ public class NamingServiceSenderTest {
 	}
 
 	private void deleteKeygroupConfig(KeygroupID keygroupID, boolean expected)
-			throws FBaseNamingServiceException {
+			throws FBaseCommunicationException {
 		boolean actual = nsSender.sendKeygroupConfigDelete(keygroupID);
 		assertEquals("Could not delete keygroup config", expected, actual);
 	}
 
 	@Test
-	public void testSendKeygroupConfigCreateAndRead() throws FBaseNamingServiceException {
+	public void testSendKeygroupConfigCreateAndRead() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendKeygroupConfigCreateAndRead-------");
 		KeygroupConfig newConfig = makeKeygroupConfig();
 		createKeygroupConfig(newConfig, 1);
@@ -400,7 +400,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendKeygroupConfigAddAndDeleteClient() throws FBaseNamingServiceException {
+	public void testSendKeygroupConfigAddAndDeleteClient() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendKeygroupConfigAddAndDeleteClient-------");
 		KeygroupConfig kConfig = makeKeygroupConfig();
 		createKeygroupConfig(kConfig, 1);
@@ -425,7 +425,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendKeygroupConfigAddAndDeleteTriggerNode() throws FBaseNamingServiceException {
+	public void testSendKeygroupConfigAddAndDeleteTriggerNode() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendKeygroupConfigAddAndDeleteTriggerNode-------");
 		// create trigger node and trigger node config
 		NodeConfig triggerNode = makeNodeConfig(null);
@@ -458,7 +458,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendKeygroupConfigAddReplicaNode() throws FBaseNamingServiceException {
+	public void testSendKeygroupConfigAddReplicaNode() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendKeygroupConfigAddReplicaNode-------");
 		// create replica node and replica node config
 		NodeConfig replicaNode = makeNodeConfig(null);
@@ -484,7 +484,7 @@ public class NamingServiceSenderTest {
 
 	@Test
 	public void testSendKeygroupConfigUpdateCrypto()
-			throws FBaseNamingServiceException, InterruptedException {
+			throws FBaseCommunicationException, InterruptedException {
 		logger.debug("-------Starting testSendKeygroupConfigUpdateCrypto-------");
 		// create keygroup
 		KeygroupConfig kConfig = makeKeygroupConfig();
@@ -503,7 +503,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendKeygroupConfigDeleteNode() throws FBaseNamingServiceException {
+	public void testSendKeygroupConfigDeleteNode() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendKeygroupConfigDeleteNode-------");
 		// create keygroup
 		KeygroupConfig kConfig = makeKeygroupConfig();
@@ -533,7 +533,7 @@ public class NamingServiceSenderTest {
 	}
 
 	@Test
-	public void testSendKeygroupConfigDelete() throws FBaseNamingServiceException {
+	public void testSendKeygroupConfigDelete() throws FBaseCommunicationException {
 		logger.debug("-------Starting testSendKeygroupConfigDeleteNodeAndDelete-------");
 		// create keygroup
 		KeygroupConfig kConfig = makeKeygroupConfig();

@@ -37,11 +37,12 @@ public class MessageSender extends AbstractSender {
 	public MessageSender(NodeConfig targetNode, FBase fBase) {
 		super(getRandomAddress(targetNode.getMachines()), targetNode.getMessagePort(), ZMQ.REQ);
 		this.fBase = fBase;
+		this.targetNode = targetNode;
 	}
 
 	private static String getRandomAddress(List<String> machines) {
 		int randomNum = ThreadLocalRandom.current().nextInt(0, machines.size());
-		return machines.get(randomNum);
+		return "tcp://" + machines.get(randomNum);
 	}
 
 	/**

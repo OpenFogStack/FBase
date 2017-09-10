@@ -26,6 +26,7 @@ For some of the tests, a running naming service is required. The naming service 
 
 ## One to One Communication
 - [x] Rebuild asymmetric encryption so that it uses a symmetric approach for the actual data
+- [ ] Add one to one communication for datarecords
 
 ### Naming Service based Management
 - [x] Add keygroup configuration control methods to sender
@@ -36,8 +37,8 @@ For some of the tests, a running naming service is required. The naming service 
 ### Handling Missed Messages
 - [x] Add message history size to machine config
 - [x] Messaging data needs to be stored after each data related publish
-- [ ] Add sender/receiver capabilities (get requests)
-- [ ] Write logic that uses functionality
+- [x] Add sender/receiver capabilities for missed messages
+- [ ] Write logic that uses functionality (GetDataRecordForMessageIDTask & initialization when Subscriber figures messageID jump)
 
 ## Controlling FBase with Clients
  - [ ] Enable asymmetric encryption

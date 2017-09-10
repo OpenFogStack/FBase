@@ -25,6 +25,7 @@ public class MessageReceiver extends AbstractReceiver {
 	public MessageReceiver(String address, int port, FBase fBase) {
 		super(address, port, ZMQ.REP);
 		this.fBase = fBase;
+		logger.debug("MessageReceiver ready to receive messages.");
 	}
 
 	@Override

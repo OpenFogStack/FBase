@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import communication.MessageReceiver;
 import communication.NamingServiceSender;
 import communication.Publisher;
 import communication.SubscriptionRegistry;
@@ -17,10 +18,10 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import storageconnector.AbstractDBConnector;
+import storageconnector.AbstractDBConnector.Connector;
 import storageconnector.ConfigAccessHelper;
 import storageconnector.OnHeapDBConnector;
 import storageconnector.S3DBConnector;
-import storageconnector.AbstractDBConnector.Connector;
 import tasks.TaskManager;
 import tasks.UpdateNodeConfigTask.Flag;
 
@@ -38,12 +39,13 @@ public class FBase {
 	public TaskManager taskmanager = null;
 	public Publisher publisher = null;
 	public NamingServiceSender namingServiceSender = null;
+	public MessageReceiver messageReceiver = null;
 	public SubscriptionRegistry subscriptionRegistry = null;
 	private WebServer server = null;
 
 	public FBase(String configName) {
 		configuration = new Configuration(configName);
-		publisher = new Publisher("tcp://localhost", configuration.getPublisherPort());
+		publisher = new Publisher("tcp://0.0.0.0", configuration.getPublisherPort());
 	}
 
 	public void startup(boolean registerAtNamingService) throws InterruptedException,
@@ -62,13 +64,17 @@ public class FBase {
 		}
 		namingServiceSender = new NamingServiceSender(configuration.getNamingServiceAddress(),
 				configuration.getNamingServicePort(), this);
+		messageReceiver = new MessageReceiver("tcp://0.0.0.0",
+				configuration.getMessagePort(), this);
+		messageReceiver.startReceiving();
+
 		subscriptionRegistry = new SubscriptionRegistry(this);
 
 		taskmanager.runUpdateNodeConfigTask(null, Flag.INITIAL, registerAtNamingService).get(20,
 				TimeUnit.SECONDS);
 
-		// TODO 2: Start Background Tasks, 
-		
+		// TODO 2: Start Background Tasks,
+
 		// TODO 2: should check own node configuration regulary to figure if removed
 	}
 

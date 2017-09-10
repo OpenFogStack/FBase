@@ -6,6 +6,7 @@ import org.zeromq.ZMQ.Socket;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import de.hasenburg.fbase.model.GetMissedMessageResponse;
 import exceptions.FBaseException;
 import model.JSONable;
 import model.config.NodeConfig;
@@ -64,14 +65,9 @@ public class MessageReceiver extends AbstractReceiver {
 					messageID.setMessageIDString(envelope.getMessage().getContent());
 					DataIdentifier dataID = fBase.connector.messageHistory_get(messageID);
 					DataRecord record = fBase.connector.dataRecords_get(dataID);
-					if (record == null) {
-						// record was deleted
-						responseMessage.setContent("");
-						responseMessage.setTextualInfo("Success, record was deleted in the past.");
-					} else {
-						responseMessage.setContent(JSONable.toJSON(record));
-						responseMessage.setTextualInfo("Success, record found.");
-					}
+					responseMessage.setContent(
+							JSONable.toJSON(new GetMissedMessageResponse(dataID, record)));
+					responseMessage.setTextualInfo("Success");
 
 				} catch (NullPointerException e) {
 					responseMessage.setTextualInfo("No data present for messageID");

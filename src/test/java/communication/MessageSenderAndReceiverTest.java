@@ -85,7 +85,7 @@ public class MessageSenderAndReceiverTest {
 		long startTime = System.currentTimeMillis();
 
 		for (int i = 0; i < n; i++) {
-			DataRecord recordReceived = messageSender.sendGetDataRecord(mID);
+			DataRecord recordReceived = messageSender.sendGetDataRecord(mID).getDataRecord();
 			assertEquals(record, recordReceived);
 		}
 

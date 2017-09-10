@@ -8,10 +8,12 @@ import org.zeromq.ZMQ;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import de.hasenburg.fbase.model.GetMissedMessageResponse;
 import exceptions.FBaseCommunicationException;
 import exceptions.FBaseEncryptionException;
 import model.JSONable;
 import model.config.NodeConfig;
+import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.MessageID;
 import model.messages.Command;
@@ -89,14 +91,16 @@ public class MessageSender extends AbstractSender {
 	}
 
 	/**
-	 * Ask the target node to return the {@link DataRecord} which is related to the given
-	 * {@link MessageID}.
+	 * Ask the target node to return the {@link DataIdentifier} and {@link DataRecord} which
+	 * is related to the given {@link MessageID}. The dataRecord might be null if it was
+	 * deleted.
 	 * 
 	 * @param messageID - the {@link MessageID}
-	 * @return the specified {@link DataRecord} or null if not existent
+	 * @return the specified values wrapped in {@link GetMissedMessageResponse}
 	 * @throws FBaseCommunicationException
 	 */
-	public DataRecord sendGetDataRecord(MessageID messageID) throws FBaseCommunicationException {
+	public GetMissedMessageResponse sendGetDataRecord(MessageID messageID)
+			throws FBaseCommunicationException {
 		Message m = new Message();
 		m.setCommand(Command.GET_DATA_FOR_MESSAGEID);
 		m.setContent(messageID.getMessageIDString());
@@ -104,12 +108,17 @@ public class MessageSender extends AbstractSender {
 			String answer = send(createEncryptedEnvelope(m, targetNode.getPublicKey()), null, null);
 			Message response = createDecryptedMessage(answer, targetNode.getPublicKey());
 			logger.debug(response.getTextualInfo());
-			if (response.getContent() == null || "".equals(response.getContent())) {
-				return null;
-			} else {
-				DataRecord record = JSONable.fromJSON(response.getContent(), DataRecord.class);
-				return record;
-			}
+
+			GetMissedMessageResponse returnVal =
+					JSONable.fromJSON(response.getContent(), GetMissedMessageResponse.class);
+
+			return returnVal;
+			// if (response.getContent() == null || "".equals(response.getContent())) {
+			// return null;
+			// } else {
+			// DataRecord record = JSONable.fromJSON(response.getContent(), DataRecord.class);
+			// return record;
+			// }
 		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage(), e1);
 			return null;

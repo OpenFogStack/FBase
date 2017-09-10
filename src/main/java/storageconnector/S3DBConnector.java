@@ -287,8 +287,8 @@ public class S3DBConnector extends AbstractDBConnector {
 
 	@Override
 	public List<ClientID> clientConfig_list() throws FBaseStorageConnectorException {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO 1: IMPLEMENT
+		throw new RuntimeException("NOT YET IMPLEMENTED!");
 	}
 
 	private String getSubscriberMachinesPath(KeygroupID keygroupID, String machine) {

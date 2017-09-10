@@ -68,6 +68,11 @@ public class Subscriber extends AbstractReceiver {
 	protected void interpreteReceivedEnvelope(Envelope envelope, ZMQ.Socket responseSocket) {
 		Message m = new Message();
 		try {
+			// start task that checks on missed messages if a messageID was set for the message
+			if (m.getMessageID() != null) {
+				fBase.messageIDEvaluator.addReceivedMessageID(m.getMessageID());
+			}
+
 			// Code to interpret message
 			try {
 				envelope.getMessage().decryptFields(secret, algorithm);

@@ -60,6 +60,7 @@ public class NamingServiceSenderTest {
 	public static void setUpBeforeClass() throws Exception {
 		executor = Executors.newCachedThreadPool();
 		fbase = new FBase(configName);
+		fbase.startup(false);
 		localSender = new NamingServiceSender(localAddress, localPort, null);
 		nsSender = new NamingServiceSender(fbase.configuration.getNamingServiceAddress(),
 				fbase.configuration.getNamingServicePort(), fbase);

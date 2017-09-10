@@ -1,6 +1,6 @@
 package tasks;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +71,7 @@ public class PutAndDeleteDataRecordTask {
 		MessageID mID = new MessageID(fBase.configuration.getNodeID(),
 				fBase.configuration.getMachineName(), 1);
 		fBase.taskmanager.runPutDataRecordTask(record, true).get(2, TimeUnit.SECONDS);
+		assertEquals(record, fBase.connector.dataRecords_get(record.getDataIdentifier()));
 		assertEquals(record.getDataIdentifier(), fBase.connector.messageHistory_get(mID));
 		assertEquals(record,
 				fBase.connector.dataRecords_get(fBase.connector.messageHistory_get(mID)));
@@ -79,6 +80,7 @@ public class PutAndDeleteDataRecordTask {
 				2);
 		fBase.taskmanager.runDeleteDataRecordTask(record.getDataIdentifier(), true).get(2,
 				TimeUnit.SECONDS);
+		assertNull(fBase.connector.dataRecords_get(record.getDataIdentifier()));
 		assertEquals(record.getDataIdentifier(), fBase.connector.messageHistory_get(mID));
 		assertEquals(null,
 				fBase.connector.dataRecords_get(fBase.connector.messageHistory_get(mID)));

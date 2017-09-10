@@ -69,8 +69,8 @@ public class Subscriber extends AbstractReceiver {
 		Message m = new Message();
 		try {
 			// start task that checks on missed messages if a messageID was set for the message
-			if (m.getMessageID() != null) {
-				fBase.messageIDEvaluator.addReceivedMessageID(m.getMessageID());
+			if (envelope.getMessage().getMessageID() != null) {
+				fBase.messageIDEvaluator.addReceivedMessageID(envelope.getMessage().getMessageID());
 			}
 
 			// Code to interpret message

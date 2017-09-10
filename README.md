@@ -38,7 +38,7 @@ For some of the tests, a running naming service is required. The naming service 
 - [x] Add message history size to machine config
 - [x] Messaging data needs to be stored after each data related publish
 - [x] Add sender/receiver capabilities for missed messages
-- [ ] Write logic that uses functionality (GetDataRecordForMessageIDTask & initialization when Subscriber figures messageID jump)
+- [x] Write and test logic that uses functionality
 
 ## Controlling FBase with Clients
  - [ ] Enable asymmetric encryption

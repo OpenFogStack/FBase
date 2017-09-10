@@ -55,6 +55,7 @@ public class MessageIDEvaluator {
 	}
 
 	public synchronized void addReceivedMessageID(MessageID messageID) {
+		logger.debug("Adding " + messageID.getMessageIDString() + " to received IDs");
 		getIDSet(getMachineMap(messageID.getNodeID()), messageID.getMachineName())
 				.add(messageID.getVersion());
 	}
@@ -99,14 +100,16 @@ public class MessageIDEvaluator {
 	private Runnable evaluateIDs = () -> {
 		logger.debug("Running through all messageIDs");
 		List<MessageID> missingIDs = getMissingMessageIDs();
-		logger.debug("Found " + missingIDs + " missing IDs");
+		logger.debug("Found " + missingIDs.size() + " missing IDs");
 		if (fBase != null) {
 			NodeID nodeID = null;
 			MessageSender messageSender = null;
 			for (MessageID mID : missingIDs) {
 				try {
 					if (!mID.getNodeID().equals(nodeID)) {
-						messageSender.shutdown();
+						if (messageSender != null) {
+							messageSender.shutdown();
+						}
 						nodeID = mID.getNodeID();
 						logger.debug("Retrieving messages from node " + nodeID);
 						messageSender = new MessageSender(
@@ -128,7 +131,7 @@ public class MessageIDEvaluator {
 				} catch (FBaseStorageConnectorException | FBaseCommunicationException
 						| NullPointerException e) {
 					logger.error("Unable to check on missed messages because cannot get "
-							+ "nodeConfig for nodeID " + nodeID);
+							+ "nodeConfig for nodeID " + nodeID, e);
 				}
 			}
 		} else {

@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -27,6 +28,7 @@ import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
+import model.data.MessageID;
 import model.data.NodeID;
 
 public class S3DBConnectorTest {
@@ -48,7 +50,8 @@ public class S3DBConnectorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		connector = new S3DBConnector(null, "de.hasenburg.fbase.s3dbconnector-testbucket");
+		connector = new S3DBConnector(new NodeID("N1"), "M1",
+				"de.hasenburg.fbase.s3dbconnector-testbucket");
 		connector.dbConnection_initiate();
 		keygroupID1 = new KeygroupID("smartlight", "h1", "lightning");
 		keygroupID2 = new KeygroupID("smartlight", "h1", "brightness");
@@ -56,7 +59,7 @@ public class S3DBConnectorTest {
 
 	@After
 	public void tearDown() throws Exception {
-		connector.deleteBucket();
+		connector.deleteBuckets();
 		connector.dbConnection_close();
 		logger.debug("");
 	}
@@ -137,6 +140,12 @@ public class S3DBConnectorTest {
 		assertEquals(config1, connector.keygroupConfig_get(keygroupID1));
 		assertEquals(config2, connector.keygroupConfig_get(keygroupID2));
 
+		// test list
+		List<KeygroupID> keygroupConfig_list = connector.keygroupConfig_list();
+		assertEquals(2, keygroupConfig_list.size());
+		assertTrue(keygroupConfig_list.contains(config1.getKeygroupID()));
+		assertTrue(keygroupConfig_list.contains(config2.getKeygroupID()));
+
 		logger.debug("Finished testKeygroupConfig.");
 	}
 
@@ -157,6 +166,12 @@ public class S3DBConnectorTest {
 		assertEquals(config1, connector.nodeConfig_get(config1.getNodeID()));
 		assertEquals(config2, connector.nodeConfig_get(config2.getNodeID()));
 
+		// test list
+		List<NodeID> nodeConfig_list = connector.nodeConfig_list();
+		assertEquals(2, nodeConfig_list.size());
+		assertTrue(nodeConfig_list.contains(config1.getNodeID()));
+		assertTrue(nodeConfig_list.contains(config2.getNodeID()));
+
 		logger.debug("Finished testNodeConfig.");
 	}
 
@@ -176,6 +191,12 @@ public class S3DBConnectorTest {
 		// check data
 		assertEquals(config1, connector.clientConfig_get(config1.getClientID()));
 		assertEquals(config2, connector.clientConfig_get(config2.getClientID()));
+
+		// test list
+		List<ClientID> clientConfig_list = connector.clientConfig_list();
+		assertEquals(2, clientConfig_list.size());
+		assertTrue(clientConfig_list.contains(config1.getClientID()));
+		assertTrue(clientConfig_list.contains(config2.getClientID()));
 
 		logger.debug("Finished testClientConfig.");
 	}
@@ -204,7 +225,7 @@ public class S3DBConnectorTest {
 		connector.keyGroupSubscriberMachines_remove(keygroupID1);
 		map = connector.keyGroupSubscriberMachines_listAll();
 		assertEquals(1, map.keySet().size());
-		
+
 		logger.debug("Finished testKeygroupSubscriberMachines.");
 	}
 
@@ -222,13 +243,49 @@ public class S3DBConnectorTest {
 		assertEquals(2, heartbeats.keySet().size());
 		assertTrue(heartbeats.get("M1") >= time && heartbeats.get("M1") < (time + 1000));
 		assertTrue(heartbeats.get("M2") >= time && heartbeats.get("M2") < (time + 1000));
-		
+
 		Thread.sleep(1000);
 		connector.heartbeats_update("M1");
 		heartbeats = connector.heartbeats_getAll();
 		assertTrue(heartbeats.get("M1") >= time + 1000 && heartbeats.get("M1") < (time + 2000));
-		
+
 		logger.debug("Finished testHeartbeats.");
+	}
+
+	@Test
+	public void testMessageHistory() throws InterruptedException, FBaseException {
+		logger.debug("-------Starting testMessageHistory-------");
+		MessageID mID1 = new MessageID();
+		mID1.setMessageIDString("N1/M1/1");
+		MessageID mID2 = new MessageID();
+		mID2.setMessageIDString("N1/M1/2");
+		MessageID mID3 = new MessageID();
+		mID3.setMessageIDString("N2/M1/3");
+		MessageID mID4 = new MessageID();
+		mID4.setMessageIDString("N1/M2/5");
+		DataIdentifier relatedData1 = new DataIdentifier("a", "t", "g", "data");
+		DataIdentifier relatedData2 = new DataIdentifier("a", "i", "g", "datas");
+
+		// store data
+		connector.messageHistory_put(mID1, relatedData1);
+		connector.messageHistory_put(mID2, relatedData1);
+		connector.messageHistory_put(mID3, relatedData2);
+		connector.messageHistory_put(mID4, relatedData2);
+
+		// check data
+		assertEquals(relatedData1, connector.messageHistory_get(mID1));
+		assertEquals(relatedData1, connector.messageHistory_get(mID2));
+		assertEquals(relatedData2, connector.messageHistory_get(mID3));
+		assertEquals(relatedData2, connector.messageHistory_get(mID4));
+
+		// checkNextIDs
+		assertEquals("N1/M1/3", connector.messageHistory_getNextMessageID().getMessageIDString());
+		connector.setNodeIDAndMachineName(new NodeID("N2"), "M1");
+		assertEquals("N2/M1/4", connector.messageHistory_getNextMessageID().getMessageIDString());
+		connector.setNodeIDAndMachineName(new NodeID("N1"), "M2");
+		assertEquals("N1/M2/6", connector.messageHistory_getNextMessageID().getMessageIDString());
+
+		logger.debug("Finished testMessageHistory.");
 	}
 
 }

@@ -56,7 +56,7 @@ public class UpdateNodeConfigTaskTest {
 		assertEquals(2, config2.getMachines().size());
 
 		// cleanup
-		((S3DBConnector) fBase1.connector).deleteBucket();
+		((S3DBConnector) fBase1.connector).deleteBuckets();
 		fBase1.tearDown();
 		fBase2.tearDown();
 	}

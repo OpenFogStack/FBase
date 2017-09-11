@@ -48,7 +48,7 @@ public class S3DBConnectorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		connector = new S3DBConnector("de.hasenburg.fbase.s3dbconnector-testbucket");
+		connector = new S3DBConnector(null, "de.hasenburg.fbase.s3dbconnector-testbucket");
 		connector.dbConnection_initiate();
 		keygroupID1 = new KeygroupID("smartlight", "h1", "lightning");
 		keygroupID2 = new KeygroupID("smartlight", "h1", "brightness");

@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import communication.Subscriber;
 import communication.SubscriptionRegistry;
 import control.FBase;
-import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -44,7 +44,7 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 	@Override
 	public Boolean executeFunctionality() {
 		// TODO 1: handle config is tombstoned
-		
+
 		logger.debug("Updating subscriptions for config " + config.getKeygroupID());
 
 		if (config.getReplicaNodes() != null) {
@@ -69,8 +69,9 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 					NodeConfig nodeConfig = null;
 					try {
 						try {
-							nodeConfig = fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
-						} catch (FBaseNamingServiceException e) {
+							nodeConfig =
+									fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
+						} catch (FBaseCommunicationException e) {
 							logger.error("No config locally, but could not connect to naming "
 									+ "service, but a config might exist there");
 						}
@@ -78,8 +79,8 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 							// subscribe to all machines
 							int publisherPort = nodeConfig.getPublisherPort();
 							for (String machine : nodeConfig.getMachines()) {
-								fBase.subscriptionRegistry.subscribeTo(machine, publisherPort,
-										config.getEncryptionSecret(),
+								fBase.subscriptionRegistry.subscribeTo("tcp://" + machine,
+										publisherPort, config.getEncryptionSecret(),
 										config.getEncryptionAlgorithm(), config.getKeygroupID());
 							}
 						} else {

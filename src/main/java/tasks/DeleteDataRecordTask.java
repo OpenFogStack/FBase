@@ -4,12 +4,13 @@ import org.apache.log4j.Logger;
 
 import control.FBase;
 import exceptions.FBaseEncryptionException;
-import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
+import model.data.MessageID;
 import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
@@ -49,27 +50,32 @@ class DeleteDataRecordTask extends Task<Boolean> {
 		try {
 			config = fBase.configAccessHelper.keygroupConfig_get(identifier.getKeygroupID());
 			fBase.connector.dataRecords_delete(identifier);
-		} catch (FBaseStorageConnectorException | FBaseNamingServiceException e) {
+		} catch (FBaseStorageConnectorException | FBaseCommunicationException e) {
 			logger.error(e.getMessage());
 			return false;
 		}
 
-		if (publish) {
-			// create envelope
-			Message m = new Message();
-			m.setCommand(Command.DELETE_DATA_RECORD);
-			m.setContent(JSONable.toJSON(identifier));
-			Envelope e = new Envelope(identifier.getKeygroupID(), m);
+		try {
+			if (publish) {
+				// get next messageID
+				MessageID messageID = fBase.connector.messageHistory_getNextMessageID();
+				
+				// create envelope
+				Message m = new Message();
+				m.setMessageID(messageID);
+				m.setCommand(Command.DELETE_DATA_RECORD);
+				m.setContent(JSONable.toJSON(identifier));
+				Envelope e = new Envelope(identifier.getKeygroupID(), m);
 
-			// publish data
-			try {
 				fBase.publisher.send(e, config.getEncryptionSecret(),
-						config.getEncryptionAlgorithm());
-			} catch (FBaseEncryptionException e1) {
-				logger.warn("Could not publish envelope to other nodes because encyption failed, "
-						+ e1.getMessage());
-				e1.printStackTrace();
+							config.getEncryptionAlgorithm());
+				
+				// store in messageHistory
+				fBase.connector.messageHistory_put(messageID, identifier);
 			}
+		} catch (FBaseStorageConnectorException | FBaseEncryptionException e) {
+			logger.error("Unable to publish message", e);
+			return false;
 		}
 
 		return true;

@@ -52,6 +52,8 @@ public class UpdateKeygroupConfigTask extends Task<Boolean> {
 
 	@Override
 	public Boolean executeFunctionality() {
+		
+		// TODO 1: Handle tombstoned
 
 		// store config in database
 		try {

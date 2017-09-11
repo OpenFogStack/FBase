@@ -9,7 +9,7 @@ public class Starter {
 
 	public static void main(String[] args) throws FBaseStorageConnectorException,
 			InterruptedException, ExecutionException, TimeoutException {
-		FBase fbase = new FBase(null);
+		FBase fbase = new FBase("local.properties");
 		fbase.startup(true);
 		fbase.fillWithData();
 	}

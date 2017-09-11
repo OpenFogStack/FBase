@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.javatuples.Pair;
 
+import control.Configuration;
+import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -16,8 +18,8 @@ import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
+import model.data.MessageID;
 import model.data.NodeID;
-import exceptions.FBaseStorageConnectorException;
 
 /**
  * This abstract defines the operations for connecting to storageconnector systems in FBase.
@@ -31,8 +33,10 @@ import exceptions.FBaseStorageConnectorException;
  * 
  */
 public abstract class AbstractDBConnector {
-	
-	public enum Connector {ON_HEAP, S3};
+
+	public enum Connector {
+		ON_HEAP, S3
+	};
 
 	protected AbstractDBConnector() {
 		// default constructor
@@ -142,7 +146,7 @@ public abstract class AbstractDBConnector {
 	 * Retrieves configuration details of a keygroup as stored by keygroupConfig_put()
 	 * 
 	 * @param keygroupID identifier of the keygroup
-	 * @return the {@link KeygroupConfig} 
+	 * @return the {@link KeygroupConfig}
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
 	public abstract KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
@@ -159,7 +163,7 @@ public abstract class AbstractDBConnector {
 	 * @throws FBaseStorageConnectorException
 	 */
 	public abstract List<KeygroupID> keygroupConfig_list() throws FBaseStorageConnectorException;
-	
+
 	/**
 	 * NODE CONFIG<br>
 	 * <br>
@@ -194,7 +198,7 @@ public abstract class AbstractDBConnector {
 	 * @throws FBaseStorageConnectorException
 	 */
 	public abstract List<NodeID> nodeConfig_list() throws FBaseStorageConnectorException;
-	
+
 	/**
 	 * CLIENT CONFIG<br>
 	 * <br>
@@ -230,7 +234,7 @@ public abstract class AbstractDBConnector {
 	 * @throws FBaseStorageConnectorException
 	 */
 	public abstract List<ClientID> clientConfig_list() throws FBaseStorageConnectorException;
-	
+
 	/**
 	 * SUBSCRIBER MANAGEMENT<br>
 	 * <br>
@@ -287,6 +291,47 @@ public abstract class AbstractDBConnector {
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
 	public abstract Map<String, Long> heartbeats_getAll() throws FBaseStorageConnectorException;
+
+	/**
+	 * MESSAGEHISTORY<br>
+	 * <br>
+	 * 
+	 * Uses {@link Configuration#getNodeID()} and {@link Configuration#getMachineName()} to
+	 * determine the nodeID and the machineName needed for the messageID
+	 * 
+	 * @return the next {@link MessageID}
+	 * @throws FBaseStorageConnectorException when the operation fails
+	 */
+	public abstract MessageID messageHistory_getNextMessageID()
+			throws FBaseStorageConnectorException;
+
+	/**
+	 * MESSAGEHISTORY<br>
+	 * <br>
+	 * puts something in the messageHistory.
+	 * 
+	 * @param messageID - the {@link MessageID}
+	 * @param relatedData - the {@link DataIdentifier} of the data item the original message
+	 *            related to
+	 * 
+	 * @throws FBaseStorageConnectorException when the operation fails
+	 */
+	public abstract void messageHistory_put(MessageID messageID, DataIdentifier relatedData)
+			throws FBaseStorageConnectorException;
+
+	/**
+	 * MESSAGEHISTORY<br>
+	 * <br>
+	 * gets something in the messageHistory.
+	 * 
+	 * @param messageID - the {@link MessageID}
+	 * 
+	 * @return the {@link DataIdentifier} related to the given messageID or null no entry for
+	 *         the messageID exists
+	 * @throws FBaseStorageConnectorException when the operation fails
+	 */
+	public abstract DataIdentifier messageHistory_get(MessageID messageID)
+			throws FBaseStorageConnectorException;
 
 	/*
 	 * 

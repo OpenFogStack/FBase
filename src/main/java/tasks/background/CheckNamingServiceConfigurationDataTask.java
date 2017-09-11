@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import control.FBase;
-import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -71,7 +71,7 @@ public class CheckNamingServiceConfigurationDataTask extends Task<Boolean> {
 						if (newConfig != null) {
 							fBase.connector.clientConfig_put(id, newConfig);
 						}
-					} catch (FBaseNamingServiceException e) {
+					} catch (FBaseCommunicationException e) {
 						logger.error(e.getMessage(), e);
 					}
 		
@@ -86,7 +86,7 @@ public class CheckNamingServiceConfigurationDataTask extends Task<Boolean> {
 						if (newConfig != null) {
 							fBase.taskmanager.runUpdateNodeConfigTask(newConfig, Flag.PUT, false);
 						}
-					} catch (FBaseNamingServiceException e) {
+					} catch (FBaseCommunicationException e) {
 						logger.error(e.getMessage(), e);
 					}
 		
@@ -101,7 +101,7 @@ public class CheckNamingServiceConfigurationDataTask extends Task<Boolean> {
 						if (newConfig != null) {
 							fBase.taskmanager.runUpdateKeygroupConfigTask(newConfig, false);
 						}
-					} catch (FBaseNamingServiceException e) {
+					} catch (FBaseCommunicationException e) {
 						logger.error(e.getMessage(), e);
 					}
 		

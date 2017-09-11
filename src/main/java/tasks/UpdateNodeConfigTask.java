@@ -3,7 +3,7 @@ package tasks;
 import org.apache.log4j.Logger;
 
 import control.FBase;
-import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.NodeConfig;
 import tasks.TaskManager.TaskName;
@@ -68,8 +68,8 @@ public class UpdateNodeConfigTask extends Task<Boolean> {
 				this.config = fBase.connector.nodeConfig_get(fBase.configuration.getNodeID());
 				this.config.getMachines().add(fBase.configuration.getMachineIPAddress());
 			} catch (FBaseStorageConnectorException | NullPointerException e) {
-				logger.error("Exception catched while trying to get config from database. "
-						+ "Building new config." + e);
+				logger.info("Exception catched while trying to get config from database. "
+						+ "Building new config.", e);
 				this.config = fBase.configuration.buildNodeConfigBasedOnData();
 			}
 		}
@@ -89,7 +89,7 @@ public class UpdateNodeConfigTask extends Task<Boolean> {
 				if (!fBase.namingServiceSender.sendNodeConfigCreate(this.config)) {
 					fBase.namingServiceSender.sendNodeConfigUpdate(this.config);
 				}
-			} catch (FBaseNamingServiceException e) {
+			} catch (FBaseCommunicationException e) {
 				logger.error("Could not send updated config to naming service", e);
 			}
 		}

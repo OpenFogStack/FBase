@@ -1,5 +1,6 @@
 package control;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -30,6 +31,7 @@ public class Configuration {
 	private String location = null;
 	private String description = null;
 	private AbstractDBConnector.Connector databaseConnector = null;
+	private Integer messageHistorySize = null;
 
 	// Communication
 	private Integer restPort = null;
@@ -48,11 +50,15 @@ public class Configuration {
 	public Configuration(String configName) {
 		this.properties = new Properties();
 		if (configName == null) {
-			configName = "config.properties";
+			configName = "local.properties";
 			logger.debug("Reading configuration with default name " + configName);
 		}
 		InputStream is = Configuration.class.getClassLoader().getResourceAsStream(configName);
 		try {
+			if (is == null) {
+				is = new FileInputStream(configName);
+			}
+			
 			properties.load(is);
 			// General
 			machineName = properties.getProperty("machineName");
@@ -61,6 +67,8 @@ public class Configuration {
 			description = properties.getProperty("description", "Unknown");
 			databaseConnector = Connector.valueOf(
 					properties.getProperty("databaseConnector", Connector.ON_HEAP.toString()));
+			messageHistorySize =
+					Integer.parseInt(properties.getProperty("messageHistorySize", "10000"));
 
 			// Communication
 			restPort = Integer.parseInt(properties.getProperty("restPort", "-1"));
@@ -77,7 +85,7 @@ public class Configuration {
 			namingServicePublicKey = properties.getProperty("namingServicePublicKey", "Unknown");
 
 			// Set IP Address of Machine
-			machineIPAddress = InetAddress.getLocalHost().getHostAddress();		
+			machineIPAddress = InetAddress.getLocalHost().getHostAddress();
 			logger.info("The ip address is " + machineIPAddress);
 
 			checkConsistency();
@@ -147,9 +155,13 @@ public class Configuration {
 	public String getDescription() {
 		return description;
 	}
-	
+
 	public Connector getDatabaseConnector() {
 		return databaseConnector;
+	}
+	
+	public Integer getMessageHistorySize() {
+		return messageHistorySize;
 	}
 
 	public Integer getRestPort() {

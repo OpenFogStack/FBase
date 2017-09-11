@@ -1,7 +1,7 @@
 package storageconnector;
 
 import control.FBase;
-import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -33,10 +33,10 @@ public class ConfigAccessHelper {
 	 * @param keygroupID
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
-	 * @throws FBaseNamingServiceException 
+	 * @throws FBaseCommunicationException 
 	 */
 	public KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
-			throws FBaseStorageConnectorException, FBaseNamingServiceException {
+			throws FBaseStorageConnectorException, FBaseCommunicationException {
 		KeygroupConfig config = fBase.connector.keygroupConfig_get(keygroupID);
 		if (config == null) {
 			config = fBase.namingServiceSender.sendKeygroupConfigRead(keygroupID);
@@ -51,10 +51,10 @@ public class ConfigAccessHelper {
 	 * @param nodeID
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
-	 * @throws FBaseNamingServiceException
+	 * @throws FBaseCommunicationException
 	 */
 	public NodeConfig nodeConfig_get(NodeID nodeID)
-			throws FBaseStorageConnectorException, FBaseNamingServiceException {
+			throws FBaseStorageConnectorException, FBaseCommunicationException {
 		NodeConfig nodeConfig = fBase.connector.nodeConfig_get(nodeID);
 		if (nodeConfig == null) {
 			nodeConfig = fBase.namingServiceSender.sendNodeConfigRead(nodeID);
@@ -70,10 +70,10 @@ public class ConfigAccessHelper {
 	 * @param clientID
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
-	 * @throws FBaseNamingServiceException
+	 * @throws FBaseCommunicationException
 	 */
 	public ClientConfig clientConfig_get(ClientID clientID)
-			throws FBaseStorageConnectorException, FBaseNamingServiceException {
+			throws FBaseStorageConnectorException, FBaseCommunicationException {
 		ClientConfig clientConfig = fBase.connector.clientConfig_get(clientID);
 		if (clientConfig == null) {
 			clientConfig = fBase.namingServiceSender.sendClientConfigRead(clientID);

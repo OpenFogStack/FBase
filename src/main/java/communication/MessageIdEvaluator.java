@@ -18,30 +18,30 @@ import model.data.MessageID;
 import model.data.NodeID;
 
 /**
- * The {@link MessageIDEvaluator} manages all messageIDs received.
+ * The {@link MessageIdEvaluator} manages all messageIDs received.
  * 
  * Everytime,
  * {@link Subscriber#interpreteReceivedEnvelope(model.messages.Envelope, org.zeromq.ZMQ.Socket)}
  * is called, the subscriber adds the ID of the contained envelope if one is set using
  * {@link #addReceivedMessageID(MessageID)}.
  * 
- * The {@link MessageIDEvaluator} continuously runs through all not evaluated messageIDs. If
+ * The {@link MessageIdEvaluator} continuously runs through all not evaluated messageIDs. If
  * he finds a gap, he will create a messageSender and ask the related node about the send
  * data.
  * 
  * @author jonathanhasenburg
  *
  */
-public class MessageIDEvaluator {
+public class MessageIdEvaluator {
 
-	private static Logger logger = Logger.getLogger(MessageIDEvaluator.class.getName());
+	private static Logger logger = Logger.getLogger(MessageIdEvaluator.class.getName());
 
 	private FBase fBase;
 	private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
 	private TreeMap<NodeID, TreeMap<String, TreeSet<Integer>>> idStorage = new TreeMap<>();
 
-	public MessageIDEvaluator(FBase fBase) {
+	public MessageIdEvaluator(FBase fBase) {
 		this.fBase = fBase;
 	}
 

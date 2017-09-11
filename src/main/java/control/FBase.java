@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import communication.MessageIDEvaluator;
+import communication.MessageIdEvaluator;
 import communication.MessageReceiver;
 import communication.NamingServiceSender;
 import communication.Publisher;
@@ -42,7 +42,7 @@ public class FBase {
 	public NamingServiceSender namingServiceSender = null;
 	public MessageReceiver messageReceiver = null;
 	public SubscriptionRegistry subscriptionRegistry = null;
-	public MessageIDEvaluator messageIDEvaluator = null;
+	public MessageIdEvaluator messageIdEvaluator = null;
 	private WebServer server = null;
 
 	public FBase(String configName) {
@@ -71,8 +71,8 @@ public class FBase {
 		messageReceiver.startReceiving();
 
 		subscriptionRegistry = new SubscriptionRegistry(this);
-		messageIDEvaluator = new MessageIDEvaluator(this);
-		messageIDEvaluator.startup();
+		messageIdEvaluator = new MessageIdEvaluator(this);
+		messageIdEvaluator.startup();
 		
 
 		taskmanager.runUpdateNodeConfigTask(null, Flag.INITIAL, registerAtNamingService).get(20,
@@ -85,7 +85,7 @@ public class FBase {
 
 	public void tearDown() {
 		publisher.shutdown();
-		messageIDEvaluator.tearDown();
+		messageIdEvaluator.tearDown();
 		messageReceiver.stopReception();
 		if (server != null) {
 			server.stopServer();

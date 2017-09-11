@@ -234,7 +234,7 @@ public class TwoNodeScenario {
 		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2,
 				TimeUnit.SECONDS);
 		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
-		fbase2.messageIDEvaluator
+		fbase2.messageIdEvaluator
 				.addReceivedMessageID(new MessageID(nConfig1.getNodeID(), "M1", 0));
 		logger.debug("FBase2 ready");
 
@@ -251,12 +251,12 @@ public class TwoNodeScenario {
 		assertEquals(record3, record3N2);
 
 		// now lets test what happens if we add a messageID that was not send
-		fbase2.messageIDEvaluator
+		fbase2.messageIdEvaluator
 				.addReceivedMessageID(new MessageID(nConfig1.getNodeID(), "M1", 10));
 
 		Thread.sleep(4000); // waiting for messageID evaluator
 
-		assertTrue(fbase2.messageIDEvaluator.getMissingMessageIDs().isEmpty());
+		assertTrue(fbase2.messageIdEvaluator.getMissingMessageIDs().isEmpty());
 
 		logger.debug("Finished testMessageHistory.");
 	}

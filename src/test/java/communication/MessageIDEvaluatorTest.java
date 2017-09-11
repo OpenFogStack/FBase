@@ -13,7 +13,7 @@ import model.data.MessageID;
 import model.data.NodeID;
 
 /**
- * Tests the {@link MessageIDEvaluator}, but does not start the evaluateIDs task.
+ * Tests the {@link MessageIdEvaluator}, but does not start the evaluateIDs task.
  * 
  * @author jonathanhasenburg
  *
@@ -47,7 +47,7 @@ public class MessageIDEvaluatorTest {
 	@Test
 	public void test() throws InterruptedException {
 		logger.debug("-------Starting test-------");
-		MessageIDEvaluator evaluator = new MessageIDEvaluator(null);
+		MessageIdEvaluator evaluator = new MessageIdEvaluator(null);
 		evaluator.addReceivedMessageID(new MessageID(nodeID1, machineName1, 1));
 		evaluator.addReceivedMessageID(new MessageID(nodeID1, machineName1, 3));
 		evaluator.addReceivedMessageID(new MessageID(nodeID1, machineName2, 2));

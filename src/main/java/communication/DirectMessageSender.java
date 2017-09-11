@@ -26,9 +26,9 @@ import model.messages.Message;
  * @author jonathanhasenburg
  *
  */
-public class MessageSender extends AbstractSender {
+public class DirectMessageSender extends AbstractSender {
 
-	private static Logger logger = Logger.getLogger(MessageSender.class.getName());
+	private static Logger logger = Logger.getLogger(DirectMessageSender.class.getName());
 
 	private FBase fBase = null;
 	private NodeConfig targetNode = null;
@@ -36,7 +36,7 @@ public class MessageSender extends AbstractSender {
 	/**
 	 * Initializes the Message, it then can be used without further modifications.
 	 */
-	public MessageSender(NodeConfig targetNode, FBase fBase) {
+	public DirectMessageSender(NodeConfig targetNode, FBase fBase) {
 		super(getRandomAddress(targetNode.getMachines()), targetNode.getMessagePort(), ZMQ.REQ);
 		this.fBase = fBase;
 		this.targetNode = targetNode;

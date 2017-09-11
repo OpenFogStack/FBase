@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import communication.MessageIdEvaluator;
-import communication.MessageReceiver;
+import communication.DirectMessageReceiver;
 import communication.NamingServiceSender;
 import communication.Publisher;
 import communication.SubscriptionRegistry;
@@ -40,7 +40,7 @@ public class FBase {
 	public TaskManager taskmanager = null;
 	public Publisher publisher = null;
 	public NamingServiceSender namingServiceSender = null;
-	public MessageReceiver messageReceiver = null;
+	public DirectMessageReceiver directMessageReceiver = null;
 	public SubscriptionRegistry subscriptionRegistry = null;
 	public MessageIdEvaluator messageIdEvaluator = null;
 	private WebServer server = null;
@@ -66,9 +66,9 @@ public class FBase {
 		}
 		namingServiceSender = new NamingServiceSender(configuration.getNamingServiceAddress(),
 				configuration.getNamingServicePort(), this);
-		messageReceiver = new MessageReceiver("tcp://0.0.0.0",
+		directMessageReceiver = new DirectMessageReceiver("tcp://0.0.0.0",
 				configuration.getMessagePort(), this);
-		messageReceiver.startReceiving();
+		directMessageReceiver.startReceiving();
 
 		subscriptionRegistry = new SubscriptionRegistry(this);
 		messageIdEvaluator = new MessageIdEvaluator(this);
@@ -86,7 +86,7 @@ public class FBase {
 	public void tearDown() {
 		publisher.shutdown();
 		messageIdEvaluator.tearDown();
-		messageReceiver.stopReception();
+		directMessageReceiver.stopReception();
 		if (server != null) {
 			server.stopServer();
 		}

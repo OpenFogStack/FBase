@@ -26,7 +26,7 @@ import model.data.NodeID;
  * {@link #addReceivedMessageID(MessageID)}.
  * 
  * The {@link MessageIdEvaluator} continuously runs through all not evaluated messageIDs. If
- * he finds a gap, he will create a messageSender and ask the related node about the send
+ * he finds a gap, he will create a directMessageSender and ask the related node about the send
  * data.
  * 
  * @author jonathanhasenburg
@@ -103,20 +103,20 @@ public class MessageIdEvaluator {
 		logger.debug("Found " + missingIDs.size() + " missing IDs");
 		if (fBase != null) {
 			NodeID nodeID = null;
-			MessageSender messageSender = null;
+			DirectMessageSender directMessageSender = null;
 			for (MessageID mID : missingIDs) {
 				try {
 					if (!mID.getNodeID().equals(nodeID)) {
-						if (messageSender != null) {
-							messageSender.shutdown();
+						if (directMessageSender != null) {
+							directMessageSender.shutdown();
 						}
 						nodeID = mID.getNodeID();
 						logger.debug("Retrieving messages from node " + nodeID);
-						messageSender = new MessageSender(
+						directMessageSender = new DirectMessageSender(
 								fBase.configAccessHelper.nodeConfig_get(nodeID), fBase);
 					}
 
-					GetMissedMessageResponse response = messageSender.sendGetDataRecord(mID);
+					GetMissedMessageResponse response = directMessageSender.sendGetDataRecord(mID);
 
 					if (response.getDataIdentifier() == null) {
 						logger.debug("Node does not have information about the message anymore");

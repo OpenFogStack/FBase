@@ -24,17 +24,17 @@ import model.data.KeygroupID;
 import model.data.MessageID;
 
 /**
- * Test for {@link MessageSender} and {@link MessageReceiver}.
+ * Test for {@link DirectMessageSender} and {@link DirectMessageReceiver}.
  * 
  * @author jonathanhasenburg
  *
  */
-public class MessageSenderAndReceiverTest {
+public class DirectMessageSenderAndReceiverTest {
 
-	private static Logger logger = Logger.getLogger(MessageSenderAndReceiverTest.class.getName());
+	private static Logger logger = Logger.getLogger(DirectMessageSenderAndReceiverTest.class.getName());
 
 	FBase fBase = null;
-	MessageSender messageSender = null;
+	DirectMessageSender directMessageSender = null;
 	private static KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
 	NodeConfig myNode = null;
 
@@ -51,7 +51,7 @@ public class MessageSenderAndReceiverTest {
 		fBase = new FBase("MessageSenderAndReceiverTest_Config.properties");
 		fBase.startup(false);
 		myNode = fBase.configuration.buildNodeConfigBasedOnData();
-		messageSender = new MessageSender(myNode, fBase);
+		directMessageSender = new DirectMessageSender(myNode, fBase);
 		KeygroupConfig keygroupConfig =
 				new KeygroupConfig(keygroupID, "testscret", EncryptionAlgorithm.AES);
 		fBase.taskmanager.runUpdateKeygroupConfigTask(keygroupConfig, false).get(2,
@@ -62,7 +62,7 @@ public class MessageSenderAndReceiverTest {
 	public void tearDown() throws Exception {
 		fBase.tearDown();
 		fBase = null;
-		messageSender.shutdown();
+		directMessageSender.shutdown();
 		Thread.sleep(500);
 		logger.debug("\n");
 	}
@@ -85,7 +85,7 @@ public class MessageSenderAndReceiverTest {
 		long startTime = System.currentTimeMillis();
 
 		for (int i = 0; i < n; i++) {
-			DataRecord recordReceived = messageSender.sendGetDataRecord(mID).getDataRecord();
+			DataRecord recordReceived = directMessageSender.sendGetDataRecord(mID).getDataRecord();
 			assertEquals(record, recordReceived);
 		}
 

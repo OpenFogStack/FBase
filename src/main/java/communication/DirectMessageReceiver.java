@@ -17,16 +17,16 @@ import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
 
-public class MessageReceiver extends AbstractReceiver {
+public class DirectMessageReceiver extends AbstractReceiver {
 
-	private static Logger logger = Logger.getLogger(MessageReceiver.class.getName());
+	private static Logger logger = Logger.getLogger(DirectMessageReceiver.class.getName());
 
 	private FBase fBase = null;
 
-	public MessageReceiver(String address, int port, FBase fBase) {
+	public DirectMessageReceiver(String address, int port, FBase fBase) {
 		super(address, port, ZMQ.REP);
 		this.fBase = fBase;
-		logger.debug("MessageReceiver ready to receive messages.");
+		logger.debug("DirectMessageReceiver ready to receive messages.");
 	}
 
 	@Override

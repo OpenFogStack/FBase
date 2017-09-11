@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -227,7 +228,7 @@ public class TwoNodeScenario {
 		fbase1.taskmanager.runPutDataRecordTask(record2, true).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runDeleteDataRecordTask(record1.getDataIdentifier(), true).get(2,
 				TimeUnit.SECONDS);
-		
+
 		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2,
 				TimeUnit.SECONDS);
 		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2,
@@ -236,7 +237,7 @@ public class TwoNodeScenario {
 		fbase2.messageIDEvaluator
 				.addReceivedMessageID(new MessageID(nConfig1.getNodeID(), "M1", 0));
 		logger.debug("FBase2 ready");
-		
+
 		fbase1.taskmanager.runPutDataRecordTask(record3, true).get(2, TimeUnit.SECONDS);
 
 		Thread.sleep(4000); // waiting for messageID evaluator
@@ -248,6 +249,14 @@ public class TwoNodeScenario {
 		assertEquals(null, record1N2);
 		assertEquals(record2, record2N2);
 		assertEquals(record3, record3N2);
+
+		// now lets test what happens if we add a messageID that was not send
+		fbase2.messageIDEvaluator
+				.addReceivedMessageID(new MessageID(nConfig1.getNodeID(), "M1", 10));
+
+		Thread.sleep(4000); // waiting for messageID evaluator
+
+		assertTrue(fbase2.messageIDEvaluator.getMissingMessageIDs().isEmpty());
 
 		logger.debug("Finished testMessageHistory.");
 	}

@@ -107,18 +107,18 @@ public class MessageSender extends AbstractSender {
 		try {
 			String answer = send(createEncryptedEnvelope(m, targetNode.getPublicKey()), null, null);
 			Message response = createDecryptedMessage(answer, targetNode.getPublicKey());
-			logger.debug(response.getTextualInfo());
 
-			GetMissedMessageResponse returnVal =
-					JSONable.fromJSON(response.getContent(), GetMissedMessageResponse.class);
+			GetMissedMessageResponse returnVal;
+
+			if (response.getContent() != null) {
+				returnVal =
+						JSONable.fromJSON(response.getContent(), GetMissedMessageResponse.class);
+			} else {
+				returnVal = new GetMissedMessageResponse();
+			}
+			returnVal.setTextualInfo(response.getTextualInfo());
 
 			return returnVal;
-			// if (response.getContent() == null || "".equals(response.getContent())) {
-			// return null;
-			// } else {
-			// DataRecord record = JSONable.fromJSON(response.getContent(), DataRecord.class);
-			// return record;
-			// }
 		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage(), e1);
 			return null;
@@ -161,7 +161,10 @@ public class MessageSender extends AbstractSender {
 		}
 		Message m = JSONable.fromJSON(s, Message.class);
 		m.decryptFields(fBase.configuration.getPrivateKey(), EncryptionAlgorithm.RSA);
-		m.verifyMessage(nodePublicKey, EncryptionAlgorithm.RSA);
+		if (m.getContent() != null) {
+			// we can only verify, if a content was set
+			m.verifyMessage(nodePublicKey, EncryptionAlgorithm.RSA);
+		}
 		logger.debug("Reply of node received");
 		logger.debug("Message content: " + m.getContent());
 		logger.debug("Message textual info: " + m.getTextualInfo());

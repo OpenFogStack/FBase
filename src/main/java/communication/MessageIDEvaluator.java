@@ -115,10 +115,12 @@ public class MessageIDEvaluator {
 						messageSender = new MessageSender(
 								fBase.configAccessHelper.nodeConfig_get(nodeID), fBase);
 					}
-					
+
 					GetMissedMessageResponse response = messageSender.sendGetDataRecord(mID);
 
-					if (response.getDataRecord() == null) {
+					if (response.getDataIdentifier() == null) {
+						logger.debug("Node does not have information about the message anymore");
+					} else if (response.getDataRecord() == null) {
 						logger.debug("Data record " + response.getDataIdentifier() + " is deleted");
 						fBase.taskmanager.runDeleteDataRecordTask(response.getDataIdentifier(),
 								false);
@@ -126,7 +128,7 @@ public class MessageIDEvaluator {
 						logger.debug("Data record " + response.getDataIdentifier() + " is put");
 						fBase.taskmanager.runPutDataRecordTask(response.getDataRecord(), false);
 					}
-					
+
 					addReceivedMessageID(mID); // to remember that we got it
 				} catch (FBaseStorageConnectorException | FBaseCommunicationException
 						| NullPointerException e) {

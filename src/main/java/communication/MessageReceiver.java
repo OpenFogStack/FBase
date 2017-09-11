@@ -83,8 +83,11 @@ public class MessageReceiver extends AbstractReceiver {
 
 			// sign and encrypt responseMessage
 			logger.debug("Result: " + responseMessage.getTextualInfo());
-			responseMessage.signMessage(fBase.configuration.getPrivateKey(),
+			if (responseMessage.getContent() != null) {
+				// we can only sign if content != null
+				responseMessage.signMessage(fBase.configuration.getPrivateKey(),
 					EncryptionAlgorithm.RSA);
+			}
 			responseMessage.encryptFields(requestingNode.getPublicKey(), EncryptionAlgorithm.RSA);
 		} catch (FBaseException e) {
 			logger.error("Could not process message from " + envelope.getNodeID(), e);

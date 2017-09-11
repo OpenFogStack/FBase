@@ -18,9 +18,9 @@ import model.data.NodeID;
  * @author jonathanhasenburg
  *
  */
-public class MessageIDEvaluatorTest {
+public class MessageIdEvaluatorTest {
 
-	private static Logger logger = Logger.getLogger(MessageIDEvaluatorTest.class.getName());
+	private static Logger logger = Logger.getLogger(MessageIdEvaluatorTest.class.getName());
 
 	NodeID nodeID1 = new NodeID("nodeID1");
 	NodeID nodeID2 = new NodeID("nodeID2");

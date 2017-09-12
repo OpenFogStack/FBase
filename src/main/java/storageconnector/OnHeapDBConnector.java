@@ -13,7 +13,6 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
-import control.FBase;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -65,10 +64,12 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 */
 	private final TreeMap<Integer, DataIdentifier> messageHistory = new TreeMap<>();
 
-	private FBase fBase = null;
+	private NodeID nodeID = null;
+	private String machineName = null;
 
-	public OnHeapDBConnector(FBase fBase) {
-		this.fBase = fBase;
+	public OnHeapDBConnector(NodeID nodeID, String machineName) {
+		this.nodeID = nodeID;
+		this.machineName = machineName;
 	}
 
 	/*
@@ -319,12 +320,12 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public MessageID messageHistory_getNextMessageID() throws FBaseStorageConnectorException {
 		if (messageHistory.isEmpty()) {
-			return new MessageID(fBase.configuration.getNodeID(),
-					fBase.configuration.getMachineName(), 1);
+			return new MessageID(nodeID,
+					machineName, 1);
 		}
 
 		int nextVersion = messageHistory.lastKey() + 1;
-		return new MessageID(fBase.configuration.getNodeID(), fBase.configuration.getMachineName(),
+		return new MessageID(nodeID, machineName,
 				nextVersion);
 	}
 

@@ -53,9 +53,11 @@ public class FBase {
 	public void startup(boolean registerAtNamingService) throws InterruptedException,
 			ExecutionException, TimeoutException, FBaseStorageConnectorException {
 		if (Connector.S3.equals(configuration.getDatabaseConnector())) {
-			connector = new S3DBConnector(this);
+			connector =
+					new S3DBConnector(configuration.getNodeID(), configuration.getMachineName());
 		} else {
-			connector = new OnHeapDBConnector(this);
+			connector = new OnHeapDBConnector(configuration.getNodeID(),
+					configuration.getMachineName());
 		}
 		connector.dbConnection_initiate();
 		configAccessHelper = new ConfigAccessHelper(this);
@@ -66,14 +68,14 @@ public class FBase {
 		}
 		namingServiceSender = new NamingServiceSender(configuration.getNamingServiceAddress(),
 				configuration.getNamingServicePort(), this);
-		directMessageReceiver = new DirectMessageReceiver("tcp://0.0.0.0",
-				configuration.getMessagePort(), this);
+
+		directMessageReceiver =
+				new DirectMessageReceiver("tcp://0.0.0.0", configuration.getMessagePort(), this);
 		directMessageReceiver.startReceiving();
 
 		subscriptionRegistry = new SubscriptionRegistry(this);
 		messageIdEvaluator = new MessageIdEvaluator(this);
 		messageIdEvaluator.startup();
-		
 
 		taskmanager.runUpdateNodeConfigTask(null, Flag.INITIAL, registerAtNamingService).get(20,
 				TimeUnit.SECONDS);

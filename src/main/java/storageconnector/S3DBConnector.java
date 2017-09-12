@@ -46,11 +46,11 @@ public class S3DBConnector extends AbstractDBConnector {
 
 	private String bucketPrefix = "de.hasenburg.fbase.s3dbconnector-bucket";
 
-	private enum Suffixes {
+	private enum Suffix {
 		DATA_RECORD, KEYGROUP, NODE, CLIENT, SUBSCRIBER_MACHINES, HEARTBEATS, MESSAGE_HISTORY
 	}
 
-	private Map<Suffixes, String> suffixMap;
+	private Map<Suffix, String> suffixMap;
 
 	private AmazonS3 s3;
 
@@ -61,13 +61,13 @@ public class S3DBConnector extends AbstractDBConnector {
 		this.nodeID = nodeID;
 		this.machineName = machineName;
 		suffixMap = new HashMap<>();
-		suffixMap.put(Suffixes.DATA_RECORD, ".data-records");
-		suffixMap.put(Suffixes.KEYGROUP, ".keygroup-configs");
-		suffixMap.put(Suffixes.NODE, ".node-configs");
-		suffixMap.put(Suffixes.CLIENT, ".client-configs");
-		suffixMap.put(Suffixes.SUBSCRIBER_MACHINES, ".subscriber-machines");
-		suffixMap.put(Suffixes.HEARTBEATS, ".heartbeats");
-		suffixMap.put(Suffixes.MESSAGE_HISTORY, ".message-history");
+		suffixMap.put(Suffix.DATA_RECORD, ".data-records");
+		suffixMap.put(Suffix.KEYGROUP, ".keygroup-configs");
+		suffixMap.put(Suffix.NODE, ".node-configs");
+		suffixMap.put(Suffix.CLIENT, ".client-configs");
+		suffixMap.put(Suffix.SUBSCRIBER_MACHINES, ".subscriber-machines");
+		suffixMap.put(Suffix.HEARTBEATS, ".heartbeats");
+		suffixMap.put(Suffix.MESSAGE_HISTORY, ".message-history");
 	}
 
 	public S3DBConnector(NodeID nodeID, String machineName, String bucketName) {
@@ -141,7 +141,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	private String getDataRecordBucketName() {
-		return bucketPrefix + suffixMap.get(Suffixes.DATA_RECORD);
+		return bucketPrefix + suffixMap.get(Suffix.DATA_RECORD);
 	}
 
 	private String getDataRecordPath(DataIdentifier identifier) {
@@ -244,7 +244,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	private String getKeygroupConfigBucketName() {
-		return bucketPrefix + suffixMap.get(Suffixes.KEYGROUP);
+		return bucketPrefix + suffixMap.get(Suffix.KEYGROUP);
 	}
 
 	private String getKeygroupConfigPath(KeygroupID keygroupID) {
@@ -304,7 +304,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	private String getNodeConfigBucketName() {
-		return bucketPrefix + suffixMap.get(Suffixes.NODE);
+		return bucketPrefix + suffixMap.get(Suffix.NODE);
 	}
 
 	private String getNodeConfigPath(NodeID nodeID) {
@@ -361,7 +361,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	private String getClientConfigBucketName() {
-		return bucketPrefix + suffixMap.get(Suffixes.CLIENT);
+		return bucketPrefix + suffixMap.get(Suffix.CLIENT);
 	}
 
 	private String getClientConfigPath(ClientID clientID) {
@@ -419,7 +419,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	private String getSubscriberMachinesBucketName() {
-		return bucketPrefix + suffixMap.get(Suffixes.SUBSCRIBER_MACHINES);
+		return bucketPrefix + suffixMap.get(Suffix.SUBSCRIBER_MACHINES);
 	}
 
 	private String getSubscriberMachinesPath(KeygroupID keygroupID, String machine) {
@@ -534,7 +534,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	private String getHeartbeatBucketName() {
-		return bucketPrefix + suffixMap.get(Suffixes.HEARTBEATS);
+		return bucketPrefix + suffixMap.get(Suffix.HEARTBEATS);
 	}
 
 	private String getHeartbeatsPath(String machine) {
@@ -582,7 +582,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	private String getMessageBucketName() {
-		return bucketPrefix + suffixMap.get(Suffixes.MESSAGE_HISTORY);
+		return bucketPrefix + suffixMap.get(Suffix.MESSAGE_HISTORY);
 	}
 
 	private String getMessageIDPath(MessageID messageID) {

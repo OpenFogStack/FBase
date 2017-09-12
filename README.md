@@ -8,6 +8,9 @@ For some of the tests, a running naming service is required. The naming service 
 
 # Current ToDos / Missing Functionality
 
+## Startup
+- [ ] A machineName should be dynamically created on Startup
+
 ## General Node Database
 - [x] Add a connector that supports multi-machine nodes
 - [x] Add versions to all configurations so that a node/machine can identify updates
@@ -39,6 +42,7 @@ For some of the tests, a running naming service is required. The naming service 
 - [x] Messaging data needs to be stored after each data related publish
 - [x] Add sender/receiver capabilities for missed messages
 - [x] Write and test logic that uses functionality
+- [ ] Add message history cleanup functionality (on receiver and sender side)
 
 ## Controlling FBase with Clients
  - [ ] Enable asymmetric encryption

@@ -552,7 +552,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	@Override
-	public Map<String, Long> heartbeats_getAll() throws FBaseStorageConnectorException {
+	public Map<String, Long> heartbeats_listAll() throws FBaseStorageConnectorException {
 		try {
 			Map<String, Long> heartbeats = new HashMap<>();
 			ObjectListing ol = s3.listObjects(getHeartbeatBucketName());

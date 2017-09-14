@@ -239,14 +239,14 @@ public class S3DBConnectorTest {
 		connector.heartbeats_update("M2");
 
 		// check map
-		Map<String, Long> heartbeats = connector.heartbeats_getAll();
+		Map<String, Long> heartbeats = connector.heartbeats_listAll();
 		assertEquals(2, heartbeats.keySet().size());
 		assertTrue(heartbeats.get("M1") >= time && heartbeats.get("M1") < (time + 1000));
 		assertTrue(heartbeats.get("M2") >= time && heartbeats.get("M2") < (time + 1000));
 
 		Thread.sleep(1000);
 		connector.heartbeats_update("M1");
-		heartbeats = connector.heartbeats_getAll();
+		heartbeats = connector.heartbeats_listAll();
 		assertTrue(heartbeats.get("M1") >= time + 1000 && heartbeats.get("M1") < (time + 2000));
 
 		logger.debug("Finished testHeartbeats.");

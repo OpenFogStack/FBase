@@ -47,3 +47,4 @@ For some of the tests, a running naming service is required. The naming service 
 ## Controlling FBase with Clients
  - [ ] Enable asymmetric encryption
  - [ ] Identify and add missing control methods
+ - [ ] Keygroup updates/deletions from client are forwarded to other nodes

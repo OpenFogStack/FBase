@@ -313,7 +313,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#heartbeats_getAll()
 	 */
 	@Override
-	public Map<String, Long> heartbeats_getAll() throws FBaseStorageConnectorException {
+	public Map<String, Long> heartbeats_listAll() throws FBaseStorageConnectorException {
 		return new HashMap<>(heartbeats);
 	}
 

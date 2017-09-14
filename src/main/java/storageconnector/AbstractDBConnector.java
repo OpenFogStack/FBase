@@ -290,7 +290,7 @@ public abstract class AbstractDBConnector {
 	 *         reported to be alive.
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract Map<String, Long> heartbeats_getAll() throws FBaseStorageConnectorException;
+	public abstract Map<String, Long> heartbeats_listAll() throws FBaseStorageConnectorException;
 
 	/**
 	 * MESSAGEHISTORY<br>

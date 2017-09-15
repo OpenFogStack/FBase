@@ -24,9 +24,9 @@ import model.config.NodeConfig;
  *
  */
 @Path("nodes")
-public class NodeResource {
+public class NodesResource {
 
-	private static Logger logger = Logger.getLogger(NodeResource.class.getName());
+	private static Logger logger = Logger.getLogger(NodesResource.class.getName());
 
 	@Inject
 	FBase fBase;

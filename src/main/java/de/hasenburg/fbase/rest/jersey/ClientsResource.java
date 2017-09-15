@@ -38,9 +38,9 @@ import model.messages.Message;
  *
  */
 @Path("clients")
-public class ClientResource {
+public class ClientsResource {
 
-	private static Logger logger = Logger.getLogger(ClientResource.class.getName());
+	private static Logger logger = Logger.getLogger(ClientsResource.class.getName());
 
 	@Inject
 	FBase fBase;

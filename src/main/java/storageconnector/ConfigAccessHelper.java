@@ -2,6 +2,7 @@ package storageconnector;
 
 import control.FBase;
 import exceptions.FBaseCommunicationException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -33,10 +34,12 @@ public class ConfigAccessHelper {
 	 * @param keygroupID
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
-	 * @throws FBaseCommunicationException 
+	 * @throws FBaseCommunicationException
+	 * @throws FBaseNamingServiceException
 	 */
 	public KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
-			throws FBaseStorageConnectorException, FBaseCommunicationException {
+			throws FBaseStorageConnectorException, FBaseCommunicationException,
+			FBaseNamingServiceException {
 		KeygroupConfig config = fBase.connector.keygroupConfig_get(keygroupID);
 		if (config == null) {
 			config = fBase.namingServiceSender.sendKeygroupConfigRead(keygroupID);
@@ -52,9 +55,10 @@ public class ConfigAccessHelper {
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
 	 * @throws FBaseCommunicationException
+	 * @throws FBaseNamingServiceException
 	 */
-	public NodeConfig nodeConfig_get(NodeID nodeID)
-			throws FBaseStorageConnectorException, FBaseCommunicationException {
+	public NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException,
+			FBaseCommunicationException, FBaseNamingServiceException {
 		NodeConfig nodeConfig = fBase.connector.nodeConfig_get(nodeID);
 		if (nodeConfig == null) {
 			nodeConfig = fBase.namingServiceSender.sendNodeConfigRead(nodeID);
@@ -71,9 +75,10 @@ public class ConfigAccessHelper {
 	 * @return see above
 	 * @throws FBaseStorageConnectorException
 	 * @throws FBaseCommunicationException
+	 * @throws FBaseNamingServiceException
 	 */
-	public ClientConfig clientConfig_get(ClientID clientID)
-			throws FBaseStorageConnectorException, FBaseCommunicationException {
+	public ClientConfig clientConfig_get(ClientID clientID) throws FBaseStorageConnectorException,
+			FBaseCommunicationException, FBaseNamingServiceException {
 		ClientConfig clientConfig = fBase.connector.clientConfig_get(clientID);
 		if (clientConfig == null) {
 			clientConfig = fBase.namingServiceSender.sendClientConfigRead(clientID);

@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import communication.SubscriptionRegistry;
 import control.FBase;
 import exceptions.FBaseEncryptionException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseCommunicationException;
 import model.JSONable;
 import model.config.KeygroupConfig;
@@ -53,7 +54,7 @@ class ProcessMessageWithUnknownEncryptionTask extends Task<Boolean> {
 		KeygroupConfig config;
 		try {
 			config = fBase.namingServiceSender.sendKeygroupConfigRead(envelope.getKeygroupID());
-		} catch (FBaseCommunicationException e1) {
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e1) {
 			// cannot connect to naming service
 			logger.error("Cannot connect to naming service");
 			return false;

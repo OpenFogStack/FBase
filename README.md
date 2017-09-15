@@ -10,6 +10,8 @@ For some of the tests, a running naming service is required. The naming service 
 
 ## Startup
 - [ ] A machineName should be dynamically created on Startup
+- [ ] Background task that checks whether node config contains myself (might have been overwritten by removal of machine due to heartbeats)
+- [ ] Add background task that checks whether node config only contains nodes of machines that have heartbeats (overwritten by starting node)
 
 ## General Node Database
 - [x] Add a connector that supports multi-machine nodes
@@ -21,11 +23,11 @@ For some of the tests, a running naming service is required. The naming service 
 ### Subscription Management
 - [x] Add background task that checks whether any of the keygroups I am responsible for have been updated by another machine (CheckKeygroupConfigurationsOnUpdatesTask) #11
 - [x] Instead of unsubscribing/subscribing, each keygroup config update should lead to a complete reset of subscriptions
-- [ ] Add background task that checks whether any keygroups don't have a responsible machine yet #11
+- [ ] Make subscription management code as defined in thesis (event detection)
 
 ### Heartbeats
 - [ ] Add background task that stores own heartbeats in the node database #11
-- [ ] Add background task that checks other machine's heartbeats and removes machines from a node if they did not respond to long #11
+- [ ] Add background task that checks other machine's heartbeats and removes machines from a node if they did not respond to long #11 (run subscription management and clean heartbeat table/node config after started subscriptions)
 
 ## One to One Communication
 - [x] Rebuild asymmetric encryption so that it uses a symmetric approach for the actual data
@@ -38,11 +40,11 @@ For some of the tests, a running naming service is required. The naming service 
 - [x] Add a background task that periodically polls the naming service about the newest configurations
 
 ### Handling Missed Messages
-- [x] Add message history size to machine config
+- [ ] Add message history size to machine config (node specific)
 - [x] Messaging data needs to be stored after each data related publish
 - [x] Add sender/receiver capabilities for missed messages
 - [x] Write and test logic that uses functionality
-- [ ] Add message history cleanup functionality (on receiver and sender side)
+- [ ] (Add message history cleanup functionality (on receiver and sender side)), thesis states not implemented
 
 ## Controlling FBase with Clients
  - [ ] Enable asymmetric encryption

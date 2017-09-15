@@ -78,7 +78,7 @@ public class TwoNodeScenario {
 		kConfig.setReplicaNodes(replicaNodeConfigs);
 		logger.debug(kConfig.getReplicaNodes().size());
 
-		client = new Client();
+		client = new Client(null);
 	}
 
 	@After

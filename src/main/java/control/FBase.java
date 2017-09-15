@@ -102,6 +102,9 @@ public class FBase {
 	public void fillWithData() throws FBaseStorageConnectorException {
 		ClientConfig clientConfig = new ClientConfig();
 		clientConfig.setClientID(new ClientID("C-1"));
+		clientConfig.setEncryptionAlgorithm(EncryptionAlgorithm.RSA);
+		clientConfig.setPublicKey(
+				"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnvVCGNNQMcI9FCio5Hhu0JNW3kXTYj+XqmuFolQyNj+kbEZgZ718i2ujRoz5PSKU8oWSwiDKDxHmhnEAwvwX2w4E/p74SSWuv18FLcobBVad4QUbJFLCp1+JmPLJuBN/Vjvke3RYUgZcZifaH8OQDaAnJsWrNlGHRjafXwFxiwHD6KA6J8mW7y+xtcS3WDsstAwVrxZMkENnkEg3syCOKPsaUuUQgo/yE2GCaJd41v8rGee+V7ThDcVqyAJpWi/tDGclEJvH2HrPsxzUnY0cl10OAkzzZiF7lWIr/cGWpRvlzygeHqT538mLckImFRwxF4EVU/N5AoDDPhWdhNCy4QIDAQAB");
 		connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
 
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");

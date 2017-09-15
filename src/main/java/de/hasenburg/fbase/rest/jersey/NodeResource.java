@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import control.FBase;
 import exceptions.FBaseCommunicationException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.NodeConfig;
@@ -41,7 +42,8 @@ public class NodeResource {
 			if (config == null) {
 				return Response.status(404, "Config does not exist").build();
 			}
-		} catch (FBaseStorageConnectorException | FBaseCommunicationException e) {
+		} catch (FBaseStorageConnectorException | FBaseCommunicationException
+				| FBaseNamingServiceException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();
 		}

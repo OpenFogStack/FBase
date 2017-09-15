@@ -28,6 +28,9 @@ import model.messages.ResponseCode;
 /**
  * Sends requests to designated receivers.
  * 
+ * TODO 2: Don't catch encryption exception?
+ * TODO 2: Remove booleans as return value, because no exception equals success
+ * 
  * @author jonathanhasenburg
  *
  */

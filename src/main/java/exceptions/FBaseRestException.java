@@ -18,6 +18,7 @@ public class FBaseRestException extends FBaseException {
 	public static final String NOT_FOUND = "No data record with the given identifier was found "
 			+ "or no matching keygroup exists that is needed to put/get data";
 	public static final String NOT_FOUND_CONFIG = "The requested keygroup config does not exist";
+	public static final String NOT_FOUND_CLIENT = "No client with the given identifier was found";
 	public static final String SERVER_ERROR = "Please check the server log";
 	public static final String BODY_NOT_PARSEABLE = "The request body is not parseable";
 	public static final String BODY_CONTENT_NOT_SIGNED = "The request body is not signed";
@@ -28,6 +29,8 @@ public class FBaseRestException extends FBaseException {
 			"The query parameter does not match the data fround in the body";
 	public static final String KEYGROUP_ALREADY_EXISTS =
 			"The keygroup could not be created because it already existed.";
+	public static final String CLIENT_ALREADY_EXISTS =
+			"The client could not be created because it already existed.";
 
 	private static final long serialVersionUID = 1L;
 

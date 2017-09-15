@@ -81,6 +81,18 @@ public class ServletHelperMethods {
 	 * Body Parsing
 	 */
 
+	public static Message parseBody(HttpServletRequest req)
+			throws IOException, FBaseRestException {
+		String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+	
+		Message m = JSONable.fromJSON(body, Message.class);
+		if (m == null) {
+			throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
+		}
+		
+		return m;
+	}
+	
 	public static Message parseAndVerifyBody(HttpServletRequest req, ClientConfig clientConfig)
 			throws IOException, FBaseRestException {
 		String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));

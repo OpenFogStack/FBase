@@ -50,3 +50,6 @@ For some of the tests, a running naming service is required. The naming service 
  - [ ] Enable asymmetric encryption
  - [ ] Identify and add missing control methods
  - [ ] Keygroup updates/deletions from client are forwarded to other nodes
+ - [x] Keygroup C, R, D
+ - [ ] Client C, D
+ - [ ] DataRecord P, R, D, List

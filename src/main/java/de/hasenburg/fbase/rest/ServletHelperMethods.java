@@ -12,6 +12,7 @@ import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseCommunicationException;
 import exceptions.FBaseNamingServiceException;
+import exceptions.FBaseEncryptionException;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
@@ -20,6 +21,7 @@ import model.config.KeygroupConfig;
 import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.KeygroupID;
+import model.messages.Message;
 
 public class ServletHelperMethods {
 
@@ -80,18 +82,34 @@ public class ServletHelperMethods {
 	 * Body Parsing
 	 */
 
-	public static KeygroupConfig parseBodyToConfig(HttpServletRequest req,
-			KeygroupConfig keygroupConfig, String secret, EncryptionAlgorithm algorithm)
+	public static Message parseBody(HttpServletRequest req)
 			throws IOException, FBaseRestException {
 		String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-		if (secret != null && algorithm != null) {
-			body = CryptoProvider.decrypt(body, secret, algorithm);
-		}
-		keygroupConfig = JSONable.fromJSON(body, KeygroupConfig.class);
-		if (keygroupConfig == null) {
+	
+		Message m = JSONable.fromJSON(body, Message.class);
+		if (m == null) {
 			throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
 		}
-		return keygroupConfig;
+		
+		return m;
+	}
+	
+	public static Message parseAndVerifyBody(HttpServletRequest req, ClientConfig clientConfig)
+			throws IOException, FBaseRestException {
+		String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+	
+		Message m = JSONable.fromJSON(body, Message.class);
+		if (m == null) {
+			throw new FBaseRestException(FBaseRestException.BODY_NOT_PARSEABLE, 400);
+		}
+		
+		try {
+			m.verifyMessage(clientConfig.getPublicKey(), clientConfig.getEncryptionAlgorithm());
+		} catch (FBaseEncryptionException e) {
+			throw new FBaseRestException(FBaseRestException.BODY_CONTENT_NOT_SIGNED, 401);
+		}
+		
+		return m;
 	}
 
 	/*
@@ -111,7 +129,7 @@ public class ServletHelperMethods {
 		}
 		return clientConfig;
 	}
-
+	
 	public static KeygroupConfig getConfig(KeygroupID keygroupID, FBase fBase)
 			throws FBaseStorageConnectorException, FBaseRestException, FBaseNamingServiceException {
 		KeygroupConfig keygroupConfig;

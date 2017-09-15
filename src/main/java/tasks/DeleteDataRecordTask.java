@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import control.FBase;
 import exceptions.FBaseEncryptionException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
@@ -50,7 +51,8 @@ class DeleteDataRecordTask extends Task<Boolean> {
 		try {
 			config = fBase.configAccessHelper.keygroupConfig_get(identifier.getKeygroupID());
 			fBase.connector.dataRecords_delete(identifier);
-		} catch (FBaseStorageConnectorException | FBaseCommunicationException e) {
+		} catch (FBaseStorageConnectorException | FBaseCommunicationException
+				| FBaseNamingServiceException e) {
 			logger.error(e.getMessage());
 			return false;
 		}
@@ -59,7 +61,7 @@ class DeleteDataRecordTask extends Task<Boolean> {
 			if (publish) {
 				// get next messageID
 				MessageID messageID = fBase.connector.messageHistory_getNextMessageID();
-				
+
 				// create envelope
 				Message m = new Message();
 				m.setMessageID(messageID);
@@ -68,8 +70,8 @@ class DeleteDataRecordTask extends Task<Boolean> {
 				Envelope e = new Envelope(identifier.getKeygroupID(), m);
 
 				fBase.publisher.send(e, config.getEncryptionSecret(),
-							config.getEncryptionAlgorithm());
-				
+						config.getEncryptionAlgorithm());
+
 				// store in messageHistory
 				fBase.connector.messageHistory_put(messageID, identifier);
 			}

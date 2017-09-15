@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import control.FBase;
 import de.hasenburg.fbase.model.GetMissedMessageResponse;
 import exceptions.FBaseCommunicationException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.data.MessageID;
 import model.data.NodeID;
@@ -131,7 +132,7 @@ public class MessageIdEvaluator {
 
 					addReceivedMessageID(mID); // to remember that we got it
 				} catch (FBaseStorageConnectorException | FBaseCommunicationException
-						| NullPointerException e) {
+						| NullPointerException | FBaseNamingServiceException e) {
 					logger.error("Unable to check on missed messages because cannot get "
 							+ "nodeConfig for nodeID " + nodeID, e);
 				}

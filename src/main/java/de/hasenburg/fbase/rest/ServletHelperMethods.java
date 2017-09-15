@@ -11,6 +11,7 @@ import control.FBase;
 import crypto.CryptoProvider;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseCommunicationException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseRestException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
@@ -98,7 +99,7 @@ public class ServletHelperMethods {
 	 */
 
 	public static ClientConfig getConfig(ClientID clientID, FBase fBase)
-			throws FBaseStorageConnectorException, FBaseRestException {
+			throws FBaseStorageConnectorException, FBaseRestException, FBaseNamingServiceException {
 		ClientConfig clientConfig;
 		try {
 			clientConfig = fBase.configAccessHelper.clientConfig_get(clientID);
@@ -112,7 +113,7 @@ public class ServletHelperMethods {
 	}
 
 	public static KeygroupConfig getConfig(KeygroupID keygroupID, FBase fBase)
-			throws FBaseStorageConnectorException, FBaseRestException {
+			throws FBaseStorageConnectorException, FBaseRestException, FBaseNamingServiceException {
 		KeygroupConfig keygroupConfig;
 		try {
 			keygroupConfig = fBase.configAccessHelper.keygroupConfig_get(keygroupID);

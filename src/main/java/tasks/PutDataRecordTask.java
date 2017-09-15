@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import control.FBase;
 import exceptions.FBaseEncryptionException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
@@ -49,7 +50,8 @@ class PutDataRecordTask extends Task<Boolean> {
 		try {
 			config = fBase.configAccessHelper.keygroupConfig_get(record.getKeygroupID());
 			fBase.connector.dataRecords_put(record);
-		} catch (FBaseStorageConnectorException | FBaseCommunicationException e) {
+		} catch (FBaseStorageConnectorException | FBaseCommunicationException
+				| FBaseNamingServiceException e) {
 			logger.error(e.getMessage());
 			return false;
 		}
@@ -68,7 +70,7 @@ class PutDataRecordTask extends Task<Boolean> {
 
 				fBase.publisher.send(e, config.getEncryptionSecret(),
 						config.getEncryptionAlgorithm());
-				
+
 				// store in messageHistory
 				fBase.connector.messageHistory_put(messageID, record.getDataIdentifier());
 			}

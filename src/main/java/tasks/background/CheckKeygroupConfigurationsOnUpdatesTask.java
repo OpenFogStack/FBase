@@ -10,6 +10,7 @@ import org.javatuples.Pair;
 
 import control.FBase;
 import exceptions.FBaseException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
@@ -77,8 +78,9 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 					try {
 						KeygroupConfig config = fBase.configAccessHelper.keygroupConfig_get(k);
 						currentKeygroupConfigurations.put(config, config.getVersion());
-					} catch (FBaseStorageConnectorException | FBaseCommunicationException e) {
-						handleFBaseStorageConnectorException(e);
+					} catch (FBaseStorageConnectorException | FBaseCommunicationException
+							| FBaseNamingServiceException e) {
+						handleFBaseException(e);
 					}
 				});
 
@@ -94,7 +96,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 				savedKeygroupConfigurations.clear();
 				savedKeygroupConfigurations.putAll(currentKeygroupConfigurations);
 			} catch (FBaseStorageConnectorException e) {
-				handleFBaseStorageConnectorException(e);
+				handleFBaseException(e);
 			}
 
 			try {
@@ -118,7 +120,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 		return false;
 	}
 
-	private void handleFBaseStorageConnectorException(FBaseException e) {
+	private void handleFBaseException(FBaseException e) {
 		// show must go on
 		logger.error(e.getMessage());
 		e.printStackTrace();

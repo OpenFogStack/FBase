@@ -8,6 +8,7 @@ import communication.Subscriber;
 import communication.SubscriptionRegistry;
 import control.FBase;
 import exceptions.FBaseCommunicationException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -71,7 +72,7 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 						try {
 							nodeConfig =
 									fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
-						} catch (FBaseCommunicationException e) {
+						} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
 							logger.error("No config locally, but could not connect to naming "
 									+ "service, but a config might exist there");
 						}

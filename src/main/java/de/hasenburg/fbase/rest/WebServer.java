@@ -1,10 +1,18 @@
 package de.hasenburg.fbase.rest;
 
+import java.io.IOException;
+
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.internal.inject.AbstractBinder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 import control.FBase;
 
@@ -31,6 +39,11 @@ public class WebServer {
 		servletContext.addServlet(new ServletHolder(new RecordListServlet(fBase)), "/record/list");
 		servletContext.addServlet(new ServletHolder(new KeygroupConfigServlet(fBase)),
 				"/keygroupConfig");
+		
+		// jersey
+		ResourceConfig config = new AppResourceConfig(fBase);
+		ServletHolder jersey = new ServletHolder(new ServletContainer(config));
+		servletContext.addServlet(jersey, "/jersey/*");
 
 		// add handlers to HandlerList
 		HandlerList handlers = new HandlerList();
@@ -57,5 +70,39 @@ public class WebServer {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Resource config to set jersey resource package and inject FBase object
+	 */
+	class AppResourceConfig extends ResourceConfig {
+	    public AppResourceConfig(FBase fBase) {
+	        register(new AppBinder(fBase));
+	        register(new ContainerRequestFilter() {
+				
+				@Override
+				public void filter(ContainerRequestContext requestContext) throws IOException {
+					logger.info("Received request " + requestContext.getUriInfo());
+				}
+			});
+	        packages("de.hasenburg.fbase.rest.jersey");
+	    }
+	    
+		class AppBinder extends AbstractBinder {
+			
+			private FBase fBase;
+			
+		    public AppBinder(FBase fBase) {
+				this.fBase = fBase;
+			}
+
+			@Override
+		    protected void configure() {
+		        bind(fBase).to(FBase.class);
+		    }
+		}
+	    
+	}
+	
+
 
 }

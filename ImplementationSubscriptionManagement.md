@@ -26,26 +26,25 @@
 ### [5] Not interpretable message
 
 - [ ] Add encryption exception handling to subscriber
-- [ ] Catched: get newest keygroup config version from naming service and check on changes
-- [ ] Change detected: run UpdateKeygroupConfigTask
+- [ ] Catched: get newest keygroup config version from naming service
+- [ ] Run UpdateKeygroupConfigTask
 
 ### [6] Periodic configuration update
 
-- [ ] Background task that periodically polls all configurations
-- [ ] Change detected: run UpdateKeygroupConfigTask or UpdateForeignNodeConfigTask
+- [ ] Background task that periodically polls all responsible keygroup configurations and node configurations for nodes present in the keygroups
+- [ ] Keygroup: run UpdateKeygroupConfigTask
+- [ ] Node: UpdateForeignNodeConfigTask
 
-### [7] Subscriber receives configuration update
-
-- [ ] Add configuration update handling to subscriber
-- [ ] Run UpdateKeygroupConfigTask or UpdateForeignNodeConfigTask
-
-### [8] Recognize foreign configuration update
-Needed if [4] or [6] are performed by other node
+### [7] Recognize foreign keygroup update
+Needed if [4] is performed by other node
 
 - [ ] Add background task that checks whether version of keygroup config changed
 - [ ] Changed: Run UpdateKeygroupSubscriptionsTask
-- [ ] Add background task that checks whether internal version vectors of node config changed
-- [ ] Changed: Run UpdateKeygroupSubscriptionsForChangedNodeConfigTask
+
+### [8] Subscriber receives configuration update
+
+- [ ] Add configuration update handling to subscriber
+- [ ] Run UpdateKeygroupConfigTask or UpdateForeignNodeConfigTask
 
 ## Tasks (not background)
 
@@ -60,31 +59,28 @@ Needed if [4] or [6] are performed by other node
 
 ### [B] UpdateKeygroupConfigTask
 
-1. Store configuration in node database and increment internal version vector if version differs from stored version
+1. Put configuration in node database if version differs
 2. Run UpdateKeygroupSubscriptionsTask
 3. Publish config to all subscribers if started by [4]
 
 ### [C] UpdateForeignNodeConfigTask
 
-1. Store configuration in node database and increment internal version vector if version differs from stored version (if the received configuration had a version vector, it is ignored, because it is the internal vector of another node)
+1. Put configuration in node database
 2. Get all keygroups in which node participates
-3. Run UpdateKeygroupSubscriptionsForChangedNodeConfigTask
+  * if (subscriptions for keygroup != node.machines)
+  * Run UpdateKeygroupSubscriptionsTask for keygroup
 
 ### [A] RemoveMachineFromNodeTask
 
-1. Remove machine from node config
-  * Store config in node database, increment internal version vector
-  * Notify naming service about updated configuration
-  * Publish node config to all subscribers for all keygroups
-3. Remove machine from responsibility table
-4. Remove machine from heartbeats table
+1. Remove machine from responsibility table
+2. Remove machine from heartbeats table
+3. Rebuild nodeconfig and send to naming service
+4. Rebuild nodeconfig and publish to all subscribers for all keygroups
 5. UpdateKeygroupSubscriptionsTask
 
 ### AddMachineToNodeTask
 Not used here, is used by startup functionality
 
-1. Add machine to node config
-  * Store config in node database, increment internal version vector
-  * Notify naming service about updated configuration
-  * Publish node config to all subscribers for all keygroups
-2. Run UpdateOwnNodeConfigTask
+1. Put heartbeat into heartbeats
+2. Rebuild nodeconfig and send to naming service
+3. Rebuild nodeconfig and publish to all subscribers for all keygroups

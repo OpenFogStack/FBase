@@ -39,7 +39,7 @@ public class WebServer {
 		servletContext.addServlet(new ServletHolder(new RecordListServlet(fBase)), "/record/list");
 		servletContext.addServlet(new ServletHolder(new KeygroupConfigServlet(fBase)),
 				"/keygroupConfig");
-		
+
 		// jersey
 		ResourceConfig config = new AppResourceConfig(fBase);
 		ServletHolder jersey = new ServletHolder(new ServletContainer(config));
@@ -70,39 +70,38 @@ public class WebServer {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Resource config to set jersey resource package and inject FBase object
 	 */
 	class AppResourceConfig extends ResourceConfig {
-	    public AppResourceConfig(FBase fBase) {
-	        register(new AppBinder(fBase));
-	        register(new ContainerRequestFilter() {
-				
+		public AppResourceConfig(FBase fBase) {
+			register(new AppBinder(fBase));
+			register(new ContainerRequestFilter() {
+
 				@Override
 				public void filter(ContainerRequestContext requestContext) throws IOException {
-					logger.info("Received request " + requestContext.getUriInfo());
+					logger.info("Received request to "
+							+ requestContext.getUriInfo().getPath(true));
 				}
 			});
-	        packages("de.hasenburg.fbase.rest.jersey");
-	    }
-	    
+			packages("de.hasenburg.fbase.rest.jersey");
+		}
+
 		class AppBinder extends AbstractBinder {
-			
+
 			private FBase fBase;
-			
-		    public AppBinder(FBase fBase) {
+
+			public AppBinder(FBase fBase) {
 				this.fBase = fBase;
 			}
 
 			@Override
-		    protected void configure() {
-		        bind(fBase).to(FBase.class);
-		    }
+			protected void configure() {
+				bind(fBase).to(FBase.class);
+			}
 		}
-	    
-	}
-	
 
+	}
 
 }

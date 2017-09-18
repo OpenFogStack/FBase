@@ -15,6 +15,7 @@ import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.NodeConfig;
+import model.messages.Message;
 
 /**
  * The only supported node method is get. The client should not be able to run any other
@@ -48,7 +49,9 @@ public class NodesResource {
 			return Response.status(500, e.getMessage()).build();
 		}
 
-		return Response.ok(JSONable.toJSON(config)).build();
+		Message m = new Message();
+		m.setContent(JSONable.toJSON(config));
+		return Response.ok(JSONable.toJSON(m)).build();
 	}
 
 }

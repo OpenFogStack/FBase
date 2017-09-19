@@ -66,9 +66,16 @@ public class Subscriber extends AbstractReceiver {
 
 	@Override
 	protected void interpreteReceivedEnvelope(Envelope envelope, ZMQ.Socket responseSocket) {
+		if (fBase == null) {
+			logger.warn("The subscriber is started without an fBase instance, "
+					+ "so messages are not interpreted and only counted");
+			return;
+		}
+
 		Message m = new Message();
 		try {
-			// start task that checks on missed messages if a messageID was set for the message
+			// start task that checks on missed messages if a messageID was set for the
+			// message
 			if (envelope.getMessage().getMessageID() != null) {
 				fBase.messageIdEvaluator.addReceivedMessageID(envelope.getMessage().getMessageID());
 			}

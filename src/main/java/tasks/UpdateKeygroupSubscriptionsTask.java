@@ -87,7 +87,8 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 					// get node configs
 					NodeConfig nodeConfig = null;
 					nodeConfig = fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
-					if (nodeConfig != null) {
+					if (nodeConfig != null && nodeConfig.getPublisherPort() != null
+							&& nodeConfig.getMachines() != null) {
 						// subscribe to all machines
 						int publisherPort = nodeConfig.getPublisherPort();
 						for (String machine : nodeConfig.getMachines()) {

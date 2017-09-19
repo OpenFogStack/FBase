@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
@@ -35,16 +36,16 @@ public class UpdateForeignNodeConfigTask extends Task<Boolean> {
 	private NodeConfig config = null;
 
 	public UpdateForeignNodeConfigTask(NodeConfig config, FBase fBase) {
-		super(TaskName.UPDATE_NODE_CONFIG, fBase);
+		super(TaskName.UPDATE_FOREIGN_NODE_CONFIG, fBase);
 		this.config = config;
 	}
 
 	@Override
-	public Boolean executeFunctionality() throws FBaseException {
-
+	public Boolean executeFunctionality() throws FBaseException {		
 		// check if machines changed
 		NodeConfig oldConfig = fBase.connector.nodeConfig_get(config.getNodeID());
 		if (oldConfig.getMachines().equals(config.getMachines())) {
+			logger.warn("Machines of to be put config do not differ to machines of stored config");
 			return false;
 		}
 
@@ -57,12 +58,14 @@ public class UpdateForeignNodeConfigTask extends Task<Boolean> {
 		for (KeygroupID keygroupID : fBase.connector.keygroupConfig_list()) {
 			KeygroupConfig keygroupConfig = fBase.connector.keygroupConfig_get(keygroupID);
 			for (ReplicaNodeConfig repN : keygroupConfig.getReplicaNodes()) {
-				if (config.getNodeID().equals(repN)) {
+				if (config.getNodeID().equals(repN.getNodeID())) {
 					toBeUpdatedKeygroups.put(keygroupID, keygroupConfig);
 					break;
 				}
 			}
 		}
+		logger.debug("To be updated keygroup configurations: " + toBeUpdatedKeygroups.keySet()
+				.stream().map(e -> e.getID()).collect(Collectors.joining(", ")));
 
 		// start update keygroup subscriptions task
 		toBeUpdatedKeygroups.values().parallelStream().forEach(config -> {

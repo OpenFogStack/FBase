@@ -123,6 +123,11 @@ public class TaskManager {
 		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, fBase, flag));
 		return future;
 	}
+	
+	public Future<Boolean> runUpdateForeignNodeConfigTask(NodeConfig config) {
+		Future<Boolean> future = pool.submit(new UpdateForeignNodeConfigTask(config, fBase));
+		return future;
+	}
 
 	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config, Flag flag,
 			boolean notifyNamingService) {

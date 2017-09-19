@@ -24,16 +24,16 @@ import model.messages.Message;
 
 /**
  * 
- * The supported methods are:
- * 	GET {@link ClientConfig} for a given {@link ClientID}
- *  POST given {@link ClientConfig}
- *  PUT {@link ClientConfig} by replacing current with given
- *  DELETE {@link ClientConfig} with a given {@link ClientID}
- *  
- *  TODO
- *  PUT should only be possible to own config
- *  DELETE should only be possible to own config
- *  
+ * The supported methods are: <br>
+ * GET {@link ClientConfig} for a given {@link ClientID} <br>
+ * POST given {@link ClientConfig} <br>
+ * PUT {@link ClientConfig} by replacing current with given <br>
+ * DELETE {@link ClientConfig} with a given {@link ClientID}
+ * 
+ * TODO C <br>
+ * PUT should only be possible to own config <br>
+ * DELETE should only be possible to own config
+ * 
  * @author jonathanhasenburg
  *
  */
@@ -67,7 +67,7 @@ public class ClientsResource {
 		m.setContent(JSONable.toJSON(config));
 		return Response.ok(JSONable.toJSON(m)).build();
 	}
-	
+
 	@POST
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -77,7 +77,7 @@ public class ClientsResource {
 		if (clientConfig == null) {
 			return Response.status(400, "Body is not a client config").build();
 		}
-		
+
 		try {
 			fBase.namingServiceSender.sendClientConfigCreate(clientConfig);
 		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
@@ -87,7 +87,7 @@ public class ClientsResource {
 
 		return Response.ok().build();
 	}
-	
+
 	@PUT
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -97,7 +97,7 @@ public class ClientsResource {
 		if (clientConfig == null) {
 			return Response.status(400, "Body is not a client config").build();
 		}
-		
+
 		try {
 			fBase.namingServiceSender.sendClientConfigUpdate(clientConfig);
 		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
@@ -107,13 +107,12 @@ public class ClientsResource {
 
 		return Response.ok().build();
 	}
-	
+
 	@PUT
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{clientID}")
-	@Consumes(MediaType.APPLICATION_JSON)
 	public Response deleteClientConfig(@PathParam("clientID") String clientID) {
-		
+
 		try {
 			fBase.namingServiceSender.sendClientConfigDelete(new ClientID(clientID));
 		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {

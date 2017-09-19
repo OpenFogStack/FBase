@@ -32,6 +32,7 @@
 ### [6] Periodic configuration update
 
 - [ ] Background task that periodically polls all responsible keygroup configurations and node configurations for nodes present in the keygroups
+- [ ] Node fetches configuration from naming service when client askes it about it, but not present
 - [ ] Keygroup: run UpdateKeygroupConfigTask
 - [ ] Node: UpdateForeignNodeConfigTask
 
@@ -58,16 +59,17 @@ Needed if [4] is performed by other node
 3. Update responsibility table
 
 ### [B] UpdateKeygroupConfigTask
+Only run if version differs
 
-1. Put configuration in node database if version differs
+1. Put configuration in node database
 2. Run UpdateKeygroupSubscriptionsTask
 3. Publish config to all subscribers if started by [4]
 
 ### [C] UpdateForeignNodeConfigTask
+Only run if the machines changed
 
 1. Put configuration in node database
 2. Get all keygroups in which node participates
-  * if (subscriptions for keygroup != node.machines)
   * Run UpdateKeygroupSubscriptionsTask for keygroup
 
 ### [A] RemoveMachineFromNodeTask

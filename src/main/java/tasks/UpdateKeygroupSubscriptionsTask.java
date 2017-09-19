@@ -3,15 +3,15 @@ package tasks;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+import org.javatuples.Pair;
 
 import communication.Subscriber;
 import communication.SubscriptionRegistry;
 import control.FBase;
-import exceptions.FBaseCommunicationException;
-import exceptions.FBaseNamingServiceException;
-import exceptions.FBaseStorageConnectorException;
+import exceptions.FBaseException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
+import model.config.ReplicaNodeConfig;
 import storageconnector.AbstractDBConnector;
 import tasks.TaskManager.TaskName;
 
@@ -43,78 +43,76 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 	}
 
 	@Override
-	public Boolean executeFunctionality() {
-		// TODO 1: handle config is tombstoned
-
+	public Boolean executeFunctionality() throws FBaseException {
 		logger.debug("Updating subscriptions for config " + config.getKeygroupID());
 
-		if (config.getReplicaNodes() != null) {
+		// get old subscriber and remove them from registry
+		ArrayList<Subscriber> oldSubscriber =
+				fBase.subscriptionRegistry.removeSubscriberForKeygroup(config.getKeygroupID());
+		int size = 0;
+		if (oldSubscriber != null) {
+			size = oldSubscriber.size();
+		}
+		logger.debug("Number of old subscriptions: " + size);
 
-			// get old subscriber and remove them from registry
-			ArrayList<Subscriber> oldSubscriber =
-					fBase.subscriptionRegistry.removeSubscriberForKeygroup(config.getKeygroupID());
-			int size = 0;
-			if (oldSubscriber != null) {
-				size = oldSubscriber.size();
+		// check whether still apart of the keygroup
+		boolean partOfKeygroup = false;
+		for (ReplicaNodeConfig rn : config.getReplicaNodes()) {
+			if (fBase.configuration.getNodeID().equals(rn.getNodeID())) {
+				partOfKeygroup = true;
 			}
-			logger.debug("Number of old subscriptions: " + size);
+		}
 
+		// check is not tombstoned
+		boolean active = true; // TODO 1: set value to !config.isTombstoned();
+
+		// check responsibility
+		boolean responsible = false;
+		Pair<String, Integer> keygroupResponsibility =
+				fBase.connector.keyGroupSubscriberMachines_listAll().get(config.getKeygroupID());
+		if (keygroupResponsibility == null || keygroupResponsibility.getValue0()
+				.equals(fBase.configuration.getMachineName())) {
+			responsible = true;
+		}
+
+		// if all true
+		if (partOfKeygroup && active && responsible) {
 			// create new subscriber via registry
 			logger.debug("Creating subscriptions for " + config.getReplicaNodes().size()
 					+ " replica nodes");
-			config.getReplicaNodes().forEach(rnConfig -> {
+			for (ReplicaNodeConfig rnConfig : config.getReplicaNodes()) {
 				// don't subscribe to own machines or itself
 				if (!fBase.configuration.getNodeID().equals(rnConfig.getNodeID())) {
 					logger.debug("Subscribing to machines of node " + rnConfig.getNodeID().getID());
 					// get node configs
 					NodeConfig nodeConfig = null;
-					try {
-						try {
-							nodeConfig =
-									fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
-						} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
-							logger.error("No config locally, but could not connect to naming "
-									+ "service, but a config might exist there");
+					nodeConfig = fBase.configAccessHelper.nodeConfig_get(rnConfig.getNodeID());
+					if (nodeConfig != null) {
+						// subscribe to all machines
+						int publisherPort = nodeConfig.getPublisherPort();
+						for (String machine : nodeConfig.getMachines()) {
+							fBase.subscriptionRegistry.subscribeTo("tcp://" + machine,
+									publisherPort, config.getEncryptionSecret(),
+									config.getEncryptionAlgorithm(), config.getKeygroupID());
 						}
-						if (nodeConfig != null) {
-							// subscribe to all machines
-							int publisherPort = nodeConfig.getPublisherPort();
-							for (String machine : nodeConfig.getMachines()) {
-								fBase.subscriptionRegistry.subscribeTo("tcp://" + machine,
-										publisherPort, config.getEncryptionSecret(),
-										config.getEncryptionAlgorithm(), config.getKeygroupID());
-							}
-						} else {
-							logger.error(
-									"No node config existed for " + rnConfig.getNodeID().getID());
-						}
-
-					} catch (FBaseStorageConnectorException e) {
-						logger.error("Could not get node configuration from node DB for "
-								+ rnConfig.getNodeID() + ", so no subscription could be created");
+					} else {
+						logger.error("No node config existed for " + rnConfig.getNodeID().getID());
 					}
+
 				}
-			});
-			logger.debug("Number of new subscriptions: "
-					+ fBase.subscriptionRegistry.getNumberOfActiveSubscriptions(config.getID()));
-
-			// stop old subscriber if existent
-			if (oldSubscriber != null) {
-				oldSubscriber.forEach(s -> s.stopReception());
 			}
-		} else {
-			logger.debug("No replica nodes exist config " + config.getKeygroupID());
-		}
-
-		// update keygroup subscriber machines database entry
-		try {
+			// update keygroup subscriber machines database entry
 			fBase.connector.keyGroupSubscriberMachines_put(config.getKeygroupID(),
 					fBase.configuration.getMachineName());
-		} catch (FBaseStorageConnectorException e) {
-			e.printStackTrace();
-			logger.error("Could not update keygroup subscriber machines database entry! "
-					+ "Even though the subscriptions have been initialized, "
-					+ "data conflicts might occur.");
+
+			logger.debug("Number of new subscriptions: "
+					+ fBase.subscriptionRegistry.getNumberOfActiveSubscriptions(config.getID()));
+		}
+
+		// stop old subscriber if existent
+		if (oldSubscriber != null) {
+			oldSubscriber.forEach(s -> s.stopReception());
+			logger.debug("Stopped old subscribers");
 		}
 
 		return true;

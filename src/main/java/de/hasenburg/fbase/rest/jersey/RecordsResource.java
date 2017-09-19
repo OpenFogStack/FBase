@@ -52,7 +52,7 @@ public class RecordsResource {
 	@GET
 	@Path("list/{keygroupID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getDataRecords(@PathParam("keygroupID") String keygroupID) {
+	public Response listDataRecords(@PathParam("keygroupID") String keygroupID) {
 
 		Set<DataIdentifier> dataIdentifiers = null;
 		try {

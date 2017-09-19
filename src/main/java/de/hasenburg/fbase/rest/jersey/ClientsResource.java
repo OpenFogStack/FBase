@@ -2,6 +2,7 @@ package de.hasenburg.fbase.rest.jersey;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -27,7 +28,7 @@ import model.messages.Message;
  * The supported methods are: <br>
  * GET {@link ClientConfig} for a given {@link ClientID} <br>
  * POST given {@link ClientConfig} <br>
- * PUT {@link ClientConfig} by replacing current with given <br>
+ * PUT {@link ClientConfig} by replacing current with given (something must exist) <br>
  * DELETE {@link ClientConfig} with a given {@link ClientID}
  * 
  * TODO C <br>
@@ -80,7 +81,9 @@ public class ClientsResource {
 
 		try {
 			fBase.namingServiceSender.sendClientConfigCreate(clientConfig);
-		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			fBase.connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException
+				| FBaseStorageConnectorException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();
 		}
@@ -100,7 +103,9 @@ public class ClientsResource {
 
 		try {
 			fBase.namingServiceSender.sendClientConfigUpdate(clientConfig);
-		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			fBase.connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException
+				| FBaseStorageConnectorException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();
 		}
@@ -108,13 +113,14 @@ public class ClientsResource {
 		return Response.ok().build();
 	}
 
-	@PUT
+	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{clientID}")
 	public Response deleteClientConfig(@PathParam("clientID") String clientID) {
 
 		try {
 			fBase.namingServiceSender.sendClientConfigDelete(new ClientID(clientID));
+			// TODO C: Remove config from database
 		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();

@@ -1,21 +1,13 @@
 package client;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import exceptions.FBaseEncryptionException;
-import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.messages.Message;
 
 /**
  * A client implemantation which allows the usage of the FBase rest interface

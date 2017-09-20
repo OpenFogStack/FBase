@@ -21,7 +21,6 @@ import org.junit.Test;
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseStorageConnectorException;
-import model.JSONable;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
@@ -85,8 +84,8 @@ public class UpdateKeygroupSubscriptionsTaskTest {
 		nConfig2.addMachine("localhost");
 		nConfig2.addMachine("localhost");
 
-		fBase.connector.nodeConfig_put(nConfig1.getNodeID(), JSONable.clone(nConfig1));
-		fBase.connector.nodeConfig_put(nConfig2.getNodeID(), JSONable.clone(nConfig2));
+		fBase.connector.nodeConfig_put(nConfig1.getNodeID(), nConfig1);
+		fBase.connector.nodeConfig_put(nConfig2.getNodeID(), nConfig2);
 
 		// node configs for keygroups
 		kConfig1.addReplicaNode(new ReplicaNodeConfig(nConfig1.getNodeID()));

@@ -17,7 +17,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import client.Client;
+import com.mashape.unirest.http.exceptions.UnirestException;
+
+import client.RecordRequest;
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseCommunicationException;
@@ -38,7 +40,6 @@ public class TwoNodeScenario {
 
 	private static FBase fbase1 = null;
 	private static FBase fbase2 = null;
-	private static Client client = null;
 
 	private static NodeConfig nConfig1 = null;
 	private static NodeConfig nConfig2 = null;
@@ -68,18 +69,17 @@ public class TwoNodeScenario {
 		kConfig = new KeygroupConfig(keygroupID, "secret", EncryptionAlgorithm.AES);
 		kConfig.addReplicaNode(new ReplicaNodeConfig(nConfig1.getNodeID()));
 		kConfig.addReplicaNode(new ReplicaNodeConfig(nConfig2.getNodeID()));
-		
+
 		fbase1.connector.nodeConfig_put(nConfig1.getNodeID(), nConfig1);
 		fbase1.connector.nodeConfig_put(nConfig2.getNodeID(), nConfig2);
-		fbase1.connector.keygroupConfig_put(kConfig.getKeygroupID(), kConfig);
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(3, TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");
 
 		fbase2.connector.nodeConfig_put(nConfig1.getNodeID(), nConfig1);
 		fbase2.connector.nodeConfig_put(nConfig2.getNodeID(), nConfig2);
-		fbase2.connector.keygroupConfig_put(kConfig.getKeygroupID(), kConfig);
+		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(3, TimeUnit.SECONDS);
 		logger.debug("FBase2 ready");
 
-		client = new Client(null);
 	}
 
 	@After
@@ -88,7 +88,6 @@ public class TwoNodeScenario {
 		fbase2.tearDown();
 		fbase1 = null;
 		fbase2 = null;
-		client = null;
 		Thread.sleep(500);
 		logger.debug("\n");
 	}
@@ -102,19 +101,21 @@ public class TwoNodeScenario {
 	}
 
 	@Test
-	// TODO 1: TEST SHOULD ALSO USE CLIENT
+	// TODO T: TEST SHOULD ALSO USE CLIENT
 	public void testUpdateKeygroupConfig() throws InterruptedException, ExecutionException,
 			TimeoutException, FBaseStorageConnectorException, FBaseCommunicationException,
 			FBaseNamingServiceException {
 		logger.debug("-------Starting testUpdateKeygroupConfig-------");
 
+		// we create a new keygroup config that has the same id as kConfig1
 		KeygroupConfig kConfig2 = new KeygroupConfig(kConfig.getKeygroupID(),
 				kConfig.getEncryptionSecret(), kConfig.getEncryptionAlgorithm());
 		kConfig2.addClient(new ClientID("Client 1"));
 		kConfig2.setReplicaNodes(kConfig.getReplicaNodes());
 
 		assertNotEquals(kConfig, kConfig2);
-
+		
+		kConfig2.setVersion(2);
 		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig2, true).get(2, TimeUnit.SECONDS);
 
 		Thread.sleep(200);
@@ -135,14 +136,16 @@ public class TwoNodeScenario {
 
 	@Test
 	public void testUpdateDataRecord() throws InterruptedException, FBaseStorageConnectorException,
-			ExecutionException, TimeoutException {
+			ExecutionException, TimeoutException, UnirestException {
 		logger.debug("-------Starting testUpdateDataRecord-------");
+
+		RecordRequest recordRequest = new RecordRequest("localhost", 8081);
 
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "X35"));
 		record.setValueWithoutKey("Test value");
 
-		client.runPutRecordRequest("http://localhost", 8081, record);
+		recordRequest.putDataRecord(record);
 
 		DataRecord recordAtNode1 = fbase1.connector.dataRecords_get(record.getDataIdentifier());
 		DataRecord recordAtNode2 = fbase2.connector.dataRecords_get(record.getDataIdentifier());
@@ -154,7 +157,7 @@ public class TwoNodeScenario {
 
 		// delete data
 
-		client.runDeleteRecordRequest("http://localhost", 8081, record.getDataIdentifier());
+		recordRequest.deleteDataRecord(record.getDataIdentifier());
 
 		Thread.sleep(200);
 
@@ -184,7 +187,9 @@ public class TwoNodeScenario {
 		logger.debug("-------Starting testMessageHistory-------");
 		// stop fbase2 subscriptions
 		fbase2.subscriptionRegistry.unsubscribeFromKeygroup(kConfig.getKeygroupID());
-		
+		logger.info("Current fBase2 subscriptions: "
+				+ fbase2.subscriptionRegistry.getNumberOfActiveSubscriptions());
+
 		DataRecord record1 = new DataRecord();
 		record1.setDataIdentifier(new DataIdentifier(keygroupID, "X35-1"));
 		record1.setValueWithoutKey("Test value");
@@ -202,6 +207,7 @@ public class TwoNodeScenario {
 		fbase1.taskmanager.runDeleteDataRecordTask(record1.getDataIdentifier(), true).get(2,
 				TimeUnit.SECONDS);
 
+		kConfig.setVersion(2); // increase version so we can use config again
 		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
 		fbase2.messageIdEvaluator
 				.addReceivedMessageID(new MessageID(nConfig1.getNodeID(), "M1", 0));
@@ -220,6 +226,7 @@ public class TwoNodeScenario {
 		assertEquals(record3, record3N2);
 
 		// now lets test what happens if we add a messageID that was not send
+		logger.debug("ADDING ANOTHER MESSAGE ID, REPLIES SHOULD BE EMPTY");
 		fbase2.messageIdEvaluator
 				.addReceivedMessageID(new MessageID(nConfig1.getNodeID(), "M1", 10));
 

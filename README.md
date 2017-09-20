@@ -29,5 +29,6 @@ For some of the tests, a running naming service is required. The naming service 
  - [ ] Enable encryption and authentication
  - [ ] Method to instruct machine to update all configurations with naming service data
  - [x] Keygroup C, R, D
+ - [ ] Keygroup all update methods
  - [X] Client C, D
  - [X] DataRecord P, R, D, List

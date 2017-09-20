@@ -29,6 +29,7 @@ import tasks.TaskManager.TaskName;
  * {@link UpdateKeygroupConfigTask}, or when a machine takes over a subscription from another
  * machine.
  * 
+ * 
  * @author jonathanhasenburg
  *
  */
@@ -77,6 +78,13 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 		if (keygroupResponsibility == null || keygroupResponsibility.getValue0()
 				.equals(fBase.configuration.getMachineName())) {
 			responsible = true;
+		}
+
+		// keygroup not of importance for node anymore
+		if (responsible && (!partOfKeygroup || !active)) {
+			logger.debug("Keygroup not of importance for node anymore");
+			// update keygroup subscriber machines database entry
+			fBase.connector.keyGroupSubscriberMachines_remove(config.getKeygroupID());
 		}
 
 		// if all true

@@ -9,7 +9,6 @@
 - [ ] Detected: run RemoveMachineFromNodeTask
 
 ### [2] No responsibility detected
-
 - [ ] Background task to detect missing responsibilities
 - [ ] Detected: run UpdateKeygroupSubscriptionsTask
 
@@ -31,10 +30,9 @@
 
 ### [6] Periodic configuration update
 
-- [ ] Background task that periodically polls all responsible keygroup configurations and node configurations for nodes present in the keygroups
-- [ ] Node fetches configuration from naming service when client askes it about it, but not present
-- [ ] Keygroup: run UpdateKeygroupConfigTask
-- [ ] Node: UpdateForeignNodeConfigTask
+- [x] Background task that periodically polls all responsible keygroup configurations and node configurations for nodes present in the keygroups
+- [x] Keygroup: run UpdateKeygroupConfigTask
+- [x] Node: UpdateForeignNodeConfigTask
 
 ### [7] Recognize foreign keygroup update
 Needed if [4] is performed by other node
@@ -85,4 +83,4 @@ Not used here, is used by startup functionality
 
 1. Put heartbeat into heartbeats
 2. Rebuild nodeconfig and send to naming service
-3. Rebuild nodeconfig and publish to all subscribers for all keygroups
+3. Rebuild nodeconfig and publish to all subscribers for all keygroups (must be done by another node!)

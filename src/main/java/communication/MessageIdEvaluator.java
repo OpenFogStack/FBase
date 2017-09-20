@@ -117,7 +117,7 @@ public class MessageIdEvaluator {
 							directMessageSender.shutdown();
 						}
 						nodeID = mID.getNodeID();
-						logger.debug("Retrieving messages from node " + nodeID);
+						logger.info("Retrieving missed messages from node " + nodeID);
 						directMessageSender = new DirectMessageSender(
 								fBase.configAccessHelper.nodeConfig_get(nodeID), fBase);
 					}

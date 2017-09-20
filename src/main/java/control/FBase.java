@@ -86,9 +86,11 @@ public class FBase {
 		messageIdEvaluator = new MessageIdEvaluator(this);
 		messageIdEvaluator.startup();
 
+		// add machine to node
 		addMachineToNodeConfiguration(tellEveryone);
 
-		// TODO 2: Start Background Tasks,
+		// TODO 2: Start Background Tasks
+		taskmanager.startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(0);
 
 	}
 

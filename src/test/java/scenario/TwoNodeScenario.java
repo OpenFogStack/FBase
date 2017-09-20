@@ -102,6 +102,7 @@ public class TwoNodeScenario {
 	}
 
 	@Test
+	// TODO 1: TEST SHOULD ALSO USE CLIENT
 	public void testUpdateKeygroupConfig() throws InterruptedException, ExecutionException,
 			TimeoutException, FBaseStorageConnectorException, FBaseCommunicationException,
 			FBaseNamingServiceException {

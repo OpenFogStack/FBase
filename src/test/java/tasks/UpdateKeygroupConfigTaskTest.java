@@ -100,6 +100,7 @@ public class UpdateKeygroupConfigTaskTest {
 		kConfigV1.setVersion(0);
 		future = fBase.taskmanager.runUpdateKeygroupConfigTask(kConfigV1, true);
 		Thread.sleep(1000); // wait for subscriber
+		kConfigV1.setVersion(1);
 		validateResult(0, false, future.get(3, TimeUnit.SECONDS), kConfigV1, 0);
 		logger.debug("Finished versionAbort.");
 	}

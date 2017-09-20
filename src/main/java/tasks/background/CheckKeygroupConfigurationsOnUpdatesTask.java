@@ -20,6 +20,8 @@ import tasks.TaskManager.TaskName;
 import tasks.UpdateKeygroupSubscriptionsTask;
 
 /**
+ * !!!!! REBUILD TASK !!!!!
+ * 
  * This background tasks checks whether any of the keygroups the executing machine is
  * responsible for have been updated without noticing. If so, it will start the
  * {@link UpdateKeygroupSubscriptionsTask} for them.

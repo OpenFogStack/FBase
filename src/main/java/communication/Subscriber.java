@@ -8,6 +8,7 @@ import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseEncryptionException;
 import model.JSONable;
 import model.config.KeygroupConfig;
+import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
@@ -83,21 +84,21 @@ public class Subscriber extends AbstractReceiver {
 			// Code to interpret message
 			try {
 				envelope.getMessage().decryptFields(secret, algorithm);
-				fBase.taskmanager.runLogTask(envelope.getMessage().getCommand() + " - "
-						+ envelope.getMessage().getContent());
-				if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-					DataRecord update =
-							JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
+				Command command = envelope.getMessage().getCommand();
+				String content = envelope.getMessage().getContent();
+				fBase.taskmanager.runLogTask(command + " - " + content);
+				if (Command.PUT_DATA_RECORD.equals(command)) {
+					DataRecord update = JSONable.fromJSON(content, DataRecord.class);
 					fBase.taskmanager.runPutDataRecordTask(update, false);
-				} else if (Command.DELETE_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-					DataIdentifier identifier = JSONable
-							.fromJSON(envelope.getMessage().getContent(), DataIdentifier.class);
+				} else if (Command.DELETE_DATA_RECORD.equals(command)) {
+					DataIdentifier identifier = JSONable.fromJSON(content, DataIdentifier.class);
 					fBase.taskmanager.runDeleteDataRecordTask(identifier, false);
-				} else if (Command.UPDATE_KEYGROUP_CONFIG
-						.equals(envelope.getMessage().getCommand())) {
-					KeygroupConfig config = JSONable.fromJSON(envelope.getMessage().getContent(),
-							KeygroupConfig.class);
+				} else if (Command.UPDATE_KEYGROUP_CONFIG.equals(command)) {
+					KeygroupConfig config = JSONable.fromJSON(content, KeygroupConfig.class);
 					fBase.taskmanager.runUpdateKeygroupConfigTask(config, false);
+				} else if (Command.UPDATE_FOREIGN_NODE_CONFIG.equals(command)) {
+					NodeConfig config = JSONable.fromJSON(content, NodeConfig.class);
+					fBase.taskmanager.runUpdateForeignNodeConfigTask(config);
 				}
 				m.setTextualInfo("Message processed");
 			} catch (FBaseEncryptionException e) {

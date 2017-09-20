@@ -44,8 +44,8 @@ Needed if [4] is performed by other node
 
 ### [8] Subscriber receives configuration update
 
-- [ ] Add configuration update handling to subscriber
-- [ ] Run UpdateKeygroupConfigTask or UpdateForeignNodeConfigTask
+- [x] Add configuration update handling to subscriber
+- [x] Run UpdateKeygroupConfigTask or UpdateForeignNodeConfigTask
 
 ## Tasks (not background)
 

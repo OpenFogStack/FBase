@@ -17,9 +17,12 @@ import model.data.NodeID;
 import tasks.Task;
 import tasks.TaskManager.TaskName;
 import tasks.UpdateKeygroupConfigTask;
-import tasks.UpdateNodeConfigTask.Flag;
 
 /**
+ * !!!!!!!!!!!!!!!!!
+ * TODO REBUILD TASK
+ * !!!!!!!!!!!!!!!!!
+ * 
  * This background tasks regularily updates the configuration data stored in the node database
  * with the data found at the naming service. For that it does the following:
  * 

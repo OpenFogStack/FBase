@@ -1,19 +1,26 @@
 package control;
 
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import communication.MessageIdEvaluator;
+import org.apache.log4j.Logger;
+import org.javatuples.Pair;
+
 import communication.DirectMessageReceiver;
+import communication.MessageIdEvaluator;
 import communication.NamingServiceSender;
 import communication.Publisher;
 import communication.SubscriptionRegistry;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import de.hasenburg.fbase.rest.WebServer;
+import exceptions.FBaseCommunicationException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
+import model.config.NodeConfig;
 import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
@@ -24,7 +31,6 @@ import storageconnector.ConfigAccessHelper;
 import storageconnector.OnHeapDBConnector;
 import storageconnector.S3DBConnector;
 import tasks.TaskManager;
-import tasks.UpdateNodeConfigTask.Flag;
 
 /**
  * Main control class of a FBase machine.
@@ -33,6 +39,8 @@ import tasks.UpdateNodeConfigTask.Flag;
  *
  */
 public class FBase {
+
+	private static Logger logger = Logger.getLogger(FBase.class.getName());
 
 	public Configuration configuration = null;
 	public AbstractDBConnector connector = null;
@@ -50,8 +58,9 @@ public class FBase {
 		publisher = new Publisher("tcp://0.0.0.0", configuration.getPublisherPort());
 	}
 
-	public void startup(boolean registerAtNamingService) throws InterruptedException,
-			ExecutionException, TimeoutException, FBaseStorageConnectorException {
+	public void startup(boolean tellEveryone) throws InterruptedException, ExecutionException,
+			TimeoutException, FBaseStorageConnectorException, FBaseCommunicationException,
+			FBaseNamingServiceException {
 		if (Connector.S3.equals(configuration.getDatabaseConnector())) {
 			connector =
 					new S3DBConnector(configuration.getNodeID(), configuration.getMachineName());
@@ -77,12 +86,36 @@ public class FBase {
 		messageIdEvaluator = new MessageIdEvaluator(this);
 		messageIdEvaluator.startup();
 
-		taskmanager.runUpdateNodeConfigTask(null, Flag.INITIAL, registerAtNamingService).get(20,
-				TimeUnit.SECONDS);
+		addMachineToNodeConfiguration(tellEveryone);
 
 		// TODO 2: Start Background Tasks,
 
-		// TODO 2: should check own node configuration regulary to figure if removed
+	}
+
+	private void addMachineToNodeConfiguration(boolean tellEveryone)
+			throws FBaseStorageConnectorException, FBaseCommunicationException,
+			FBaseNamingServiceException {
+		NodeConfig nodeConfig = configuration.buildNodeConfigBasedOnData();
+		// add other machines based on heartbeats (I am not included here, because I did not
+		// report a heartbeat yet)
+		Map<String, Pair<String, Long>> heartbeats = connector.heartbeats_listAll();
+		for (Pair<String, Long> address : heartbeats.values()) {
+			nodeConfig.addMachine(address.getValue0());
+		}
+
+		if (tellEveryone) {
+			// only updates are possible, because a node cannot create itself, only other
+			// nodes can
+			try {
+				namingServiceSender.sendNodeConfigUpdate(nodeConfig);
+				logger.info("Updated node configuration at the namingservice");
+			} catch (FBaseCommunicationException e) {
+				logger.info("Could not update node configuration at the naming service: "
+						+ e.getMessage());
+			}
+			// TODO 1: Needs to be published to other nodes, but how?
+		}
+
 	}
 
 	public void tearDown() {
@@ -99,7 +132,8 @@ public class FBase {
 		}
 	}
 
-	public void fillWithData() throws FBaseStorageConnectorException {
+	public void fillWithData() throws FBaseStorageConnectorException, InterruptedException,
+			ExecutionException, TimeoutException {
 		ClientConfig clientConfig = new ClientConfig();
 		clientConfig.setClientID(new ClientID("C-1"));
 		clientConfig.setEncryptionAlgorithm(EncryptionAlgorithm.RSA);
@@ -111,7 +145,7 @@ public class FBase {
 		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"),
 				"secret", EncryptionAlgorithm.AES);
 		config.addClient(clientConfig.getClientID());
-		taskmanager.runUpdateKeygroupConfigTask(config, false);
+		taskmanager.runUpdateKeygroupConfigTask(config, false).get(1, TimeUnit.SECONDS);
 
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "M-1"));

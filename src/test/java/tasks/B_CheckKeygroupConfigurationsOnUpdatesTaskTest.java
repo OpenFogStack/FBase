@@ -16,6 +16,8 @@ import org.junit.Test;
 
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseCommunicationException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
 import model.data.KeygroupID;
@@ -43,8 +45,9 @@ public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 	}
 
 	@Test
-	public void test() throws FBaseStorageConnectorException, InterruptedException,
-			ExecutionException, TimeoutException {
+	public void test()
+			throws FBaseStorageConnectorException, InterruptedException, ExecutionException,
+			TimeoutException, FBaseCommunicationException, FBaseNamingServiceException {
 		logger.debug("-------Starting test-------");
 		FBase fbase = new FBase(null);
 		fbase.startup(false);
@@ -62,8 +65,7 @@ public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 				new KeygroupConfig(id, null, EncryptionAlgorithm.AES));
 		Thread.sleep(2000);
 		assertEquals(
-				TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS
-						+ " should not have been twice by now, ",
+				TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS + " should not have been twice by now, ",
 				new Integer(2), fbase.taskmanager.getHistoricTaskNumbers()
 						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
 		task.cancel(true);

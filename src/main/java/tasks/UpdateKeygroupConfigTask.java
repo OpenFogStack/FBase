@@ -47,7 +47,7 @@ public class UpdateKeygroupConfigTask extends Task<Boolean> {
 
 		// check version change
 		KeygroupConfig oldConfig = fBase.connector.keygroupConfig_get(config.getKeygroupID());
-		if (oldConfig.getVersion() >= config.getVersion()) {
+		if (oldConfig != null && oldConfig.getVersion() >= config.getVersion()) {
 			logger.warn("Version of to be put config not greater than stored config");
 			return false;
 		}

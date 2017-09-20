@@ -6,8 +6,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -33,7 +31,6 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.data.MessageID;
-import tasks.UpdateNodeConfigTask.Flag;
 
 public class TwoNodeScenario {
 
@@ -69,15 +66,18 @@ public class TwoNodeScenario {
 		nConfig2 = fbase2.configuration.buildNodeConfigBasedOnData();
 
 		kConfig = new KeygroupConfig(keygroupID, "secret", EncryptionAlgorithm.AES);
-		ReplicaNodeConfig repConfig1 = new ReplicaNodeConfig();
-		repConfig1.setNodeID(nConfig1.getNodeID());
-		ReplicaNodeConfig repConfig2 = new ReplicaNodeConfig();
-		repConfig2.setNodeID(nConfig2.getNodeID());
-		Set<ReplicaNodeConfig> replicaNodeConfigs = new HashSet<ReplicaNodeConfig>();
-		replicaNodeConfigs.add(repConfig1);
-		replicaNodeConfigs.add(repConfig2);
-		kConfig.setReplicaNodes(replicaNodeConfigs);
-		logger.debug(kConfig.getReplicaNodes().size());
+		kConfig.addReplicaNode(new ReplicaNodeConfig(nConfig1.getNodeID()));
+		kConfig.addReplicaNode(new ReplicaNodeConfig(nConfig2.getNodeID()));
+		
+		fbase1.connector.nodeConfig_put(nConfig1.getNodeID(), nConfig1);
+		fbase1.connector.nodeConfig_put(nConfig2.getNodeID(), nConfig2);
+		fbase1.connector.keygroupConfig_put(kConfig.getKeygroupID(), kConfig);
+		logger.debug("FBase1 ready");
+
+		fbase2.connector.nodeConfig_put(nConfig1.getNodeID(), nConfig1);
+		fbase2.connector.nodeConfig_put(nConfig2.getNodeID(), nConfig2);
+		fbase2.connector.keygroupConfig_put(kConfig.getKeygroupID(), kConfig);
+		logger.debug("FBase2 ready");
 
 		client = new Client(null);
 	}
@@ -106,19 +106,6 @@ public class TwoNodeScenario {
 			TimeoutException, FBaseStorageConnectorException, FBaseCommunicationException,
 			FBaseNamingServiceException {
 		logger.debug("-------Starting testUpdateKeygroupConfig-------");
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
-		logger.debug("FBase1 ready");
-
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
-		logger.debug("FBase2 ready");
 
 		KeygroupConfig kConfig2 = new KeygroupConfig(kConfig.getKeygroupID(),
 				kConfig.getEncryptionSecret(), kConfig.getEncryptionAlgorithm());
@@ -149,19 +136,6 @@ public class TwoNodeScenario {
 	public void testUpdateDataRecord() throws InterruptedException, FBaseStorageConnectorException,
 			ExecutionException, TimeoutException {
 		logger.debug("-------Starting testUpdateDataRecord-------");
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
-		logger.debug("FBase1 ready");
-
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
-		logger.debug("FBase2 ready");
 
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "X35"));
@@ -207,6 +181,9 @@ public class TwoNodeScenario {
 	public void testMessageHistory() throws InterruptedException, FBaseStorageConnectorException,
 			ExecutionException, TimeoutException {
 		logger.debug("-------Starting testMessageHistory-------");
+		// stop fbase2 subscriptions
+		fbase2.subscriptionRegistry.unsubscribeFromKeygroup(kConfig.getKeygroupID());
+		
 		DataRecord record1 = new DataRecord();
 		record1.setDataIdentifier(new DataIdentifier(keygroupID, "X35-1"));
 		record1.setValueWithoutKey("Test value");
@@ -219,22 +196,11 @@ public class TwoNodeScenario {
 		record3.setDataIdentifier(new DataIdentifier(keygroupID, "X44-3"));
 		record3.setValueWithoutKey("Test value");
 
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
-		logger.debug("FBase1 ready");
-
 		fbase1.taskmanager.runPutDataRecordTask(record1, true).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runPutDataRecordTask(record2, true).get(2, TimeUnit.SECONDS);
 		fbase1.taskmanager.runDeleteDataRecordTask(record1.getDataIdentifier(), true).get(2,
 				TimeUnit.SECONDS);
 
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
-		fbase2.taskmanager.runUpdateNodeConfigTask(nConfig2, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
 		fbase2.taskmanager.runUpdateKeygroupConfigTask(kConfig, false).get(2, TimeUnit.SECONDS);
 		fbase2.messageIdEvaluator
 				.addReceivedMessageID(new MessageID(nConfig1.getNodeID(), "M1", 0));

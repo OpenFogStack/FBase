@@ -21,9 +21,9 @@ import communication.NamingServiceSender;
 import communication.Publisher;
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
+import exceptions.FBaseCommunicationException;
 import exceptions.FBaseEncryptionException;
 import exceptions.FBaseNamingServiceException;
-import exceptions.FBaseCommunicationException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
@@ -32,7 +32,6 @@ import model.config.ReplicaNodeConfig;
 import model.data.KeygroupID;
 import model.messages.Envelope;
 import model.messages.Message;
-import tasks.UpdateNodeConfigTask.Flag;
 
 /**
  * 
@@ -67,8 +66,6 @@ public class ProcessMessageWithUnknownEncryptionTaskTest {
 		fbase1 = new FBase("ProcessMessageWithUnknownEncryptionTaskTest.properties");
 		fbase1.startup(false);
 		nConfig1 = createNodeConfig(fbase1);
-		fbase1.taskmanager.runUpdateNodeConfigTask(nConfig1, Flag.PUT, false).get(2,
-				TimeUnit.SECONDS);
 		logger.debug("FBase1 ready");
 
 		kConfigOld = new KeygroupConfig(keygroupID, "secret", EncryptionAlgorithm.AES);

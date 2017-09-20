@@ -50,6 +50,7 @@ class PutDataRecordTask extends Task<Boolean> {
 		try {
 			config = fBase.configAccessHelper.keygroupConfig_get(record.getKeygroupID());
 			fBase.connector.dataRecords_put(record);
+			logger.debug("Put record into database");
 		} catch (FBaseStorageConnectorException | FBaseCommunicationException
 				| FBaseNamingServiceException e) {
 			logger.error(e.getMessage());

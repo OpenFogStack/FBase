@@ -15,18 +15,17 @@ import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.messages.Envelope;
-import tasks.UpdateNodeConfigTask.Flag;
 import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
 
 public class TaskManager {
 
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(TaskManager.class.getName());
 	private ExecutorService pool = null;
 	private final AtomicInteger[] runningTasks = new AtomicInteger[TaskName.values().length];
 
 	// if set to true by enable storingHistory, the taskmanager will store how often it run
-	// each
-	// task
+	// each task
 	private boolean storingHistory = false;
 	private final AtomicInteger[] taskHistory = new AtomicInteger[TaskName.values().length];
 
@@ -34,9 +33,8 @@ public class TaskManager {
 
 	public enum TaskName {
 		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, UPDATE_KEYGROUP_SUBSCRIPTIONS, PUT_DATA_RECORD,
-		DELETE_DATA_RECORD, UPDATE_NODE_CONFIG, UPDATE_FOREIGN_NODE_CONFIG,
-		CHECK_KEYGROUP_SUBSCRIPTIONS, PROCESS_MESSAGE_WITH_UNKNOWN_ENCRYPTION,
-		CHECK_NAMING_SERVICE_CONFIGURATION_DATA
+		DELETE_DATA_RECORD, UPDATE_FOREIGN_NODE_CONFIG, CHECK_KEYGROUP_SUBSCRIPTIONS,
+		PROCESS_MESSAGE_WITH_UNKNOWN_ENCRYPTION, CHECK_NAMING_SERVICE_CONFIGURATION_DATA
 	}
 
 	public void storeHistory() {
@@ -60,7 +58,6 @@ public class TaskManager {
 	}
 
 	public void deregisterTask(TaskName name) {
-		logger.debug("Deregistering task " + name);
 		runningTasks[name.ordinal()].decrementAndGet();
 	}
 
@@ -119,20 +116,8 @@ public class TaskManager {
 		return future;
 	}
 
-	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config, Flag flag) {
-		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, fBase, flag));
-		return future;
-	}
-	
 	public Future<Boolean> runUpdateForeignNodeConfigTask(NodeConfig config) {
 		Future<Boolean> future = pool.submit(new UpdateForeignNodeConfigTask(config, fBase));
-		return future;
-	}
-
-	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config, Flag flag,
-			boolean notifyNamingService) {
-		Future<Boolean> future =
-				pool.submit(new UpdateNodeConfigTask(config, fBase, flag, notifyNamingService));
 		return future;
 	}
 

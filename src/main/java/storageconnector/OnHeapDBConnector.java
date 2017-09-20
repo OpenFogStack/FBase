@@ -51,7 +51,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	private final Map<KeygroupID, Pair<String, Integer>> keygroupSubscribers = new HashMap<>();
 
 	/** stores liveness info per machine */
-	private final Map<String, Long> heartbeats = new HashMap<>();
+	private final Map<String, Pair<String, Long>> heartbeats = new HashMap<>();
 
 	/** stores data records */
 	private final Map<KeygroupID, Map<DataIdentifier, DataRecord>> records = new HashMap<>();
@@ -303,8 +303,9 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#heartbeats_update(java.lang.String)
 	 */
 	@Override
-	public void heartbeats_update(String machine) throws FBaseStorageConnectorException {
-		heartbeats.put(machine, System.currentTimeMillis());
+	public void heartbeats_update(String machine, String address)
+			throws FBaseStorageConnectorException {
+		heartbeats.put(machine, new Pair<String, Long>(address, System.currentTimeMillis()));
 	}
 
 	/*
@@ -313,20 +314,18 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#heartbeats_getAll()
 	 */
 	@Override
-	public Map<String, Long> heartbeats_listAll() throws FBaseStorageConnectorException {
+	public Map<String, Pair<String, Long>> heartbeats_listAll() throws FBaseStorageConnectorException {
 		return new HashMap<>(heartbeats);
 	}
 
 	@Override
 	public MessageID messageHistory_getNextMessageID() throws FBaseStorageConnectorException {
 		if (messageHistory.isEmpty()) {
-			return new MessageID(nodeID,
-					machineName, 1);
+			return new MessageID(nodeID, machineName, 1);
 		}
 
 		int nextVersion = messageHistory.lastKey() + 1;
-		return new MessageID(nodeID, machineName,
-				nextVersion);
+		return new MessageID(nodeID, machineName, nextVersion);
 	}
 
 	@Override

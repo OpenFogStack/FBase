@@ -2,6 +2,7 @@ package de.hasenburg.fbase.rest.jersey;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -24,16 +25,16 @@ import model.messages.Message;
 
 /**
  * 
- * The supported methods are:
- * 	GET {@link ClientConfig} for a given {@link ClientID}
- *  POST given {@link ClientConfig}
- *  PUT {@link ClientConfig} by replacing current with given
- *  DELETE {@link ClientConfig} with a given {@link ClientID}
- *  
- *  TODO
- *  PUT should only be possible to own config
- *  DELETE should only be possible to own config
- *  
+ * The supported methods are: <br>
+ * GET {@link ClientConfig} for a given {@link ClientID} <br>
+ * POST given {@link ClientConfig} <br>
+ * PUT {@link ClientConfig} by replacing current with given (something must exist) <br>
+ * DELETE {@link ClientConfig} with a given {@link ClientID}
+ * 
+ * TODO C <br>
+ * PUT should only be possible to own config <br>
+ * DELETE should only be possible to own config
+ * 
  * @author jonathanhasenburg
  *
  */
@@ -67,7 +68,7 @@ public class ClientsResource {
 		m.setContent(JSONable.toJSON(config));
 		return Response.ok(JSONable.toJSON(m)).build();
 	}
-	
+
 	@POST
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -77,17 +78,19 @@ public class ClientsResource {
 		if (clientConfig == null) {
 			return Response.status(400, "Body is not a client config").build();
 		}
-		
+
 		try {
 			fBase.namingServiceSender.sendClientConfigCreate(clientConfig);
-		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			fBase.connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException
+				| FBaseStorageConnectorException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();
 		}
 
 		return Response.ok().build();
 	}
-	
+
 	@PUT
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -97,25 +100,27 @@ public class ClientsResource {
 		if (clientConfig == null) {
 			return Response.status(400, "Body is not a client config").build();
 		}
-		
+
 		try {
 			fBase.namingServiceSender.sendClientConfigUpdate(clientConfig);
-		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			fBase.connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException
+				| FBaseStorageConnectorException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();
 		}
 
 		return Response.ok().build();
 	}
-	
-	@PUT
+
+	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{clientID}")
-	@Consumes(MediaType.APPLICATION_JSON)
 	public Response deleteClientConfig(@PathParam("clientID") String clientID) {
-		
+
 		try {
 			fBase.namingServiceSender.sendClientConfigDelete(new ClientID(clientID));
+			// TODO C: Remove config from database
 		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();

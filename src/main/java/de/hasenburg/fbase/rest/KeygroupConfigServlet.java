@@ -32,7 +32,7 @@ import model.messages.Message;
 public class KeygroupConfigServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private static Logger logger = Logger.getLogger(RecordServlet.class.getName());
+	private static Logger logger = Logger.getLogger(KeygroupConfigServlet.class.getName());
 	private final FBase fBase;
 
 	public KeygroupConfigServlet(FBase fBase) {

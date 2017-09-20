@@ -35,8 +35,6 @@ public class WebServer {
 		ServletContextHandler servletContext =
 				new ServletContextHandler(ServletContextHandler.SESSIONS);
 		servletContext.setContextPath("/");
-		servletContext.addServlet(new ServletHolder(new RecordServlet(fBase)), "/record");
-		servletContext.addServlet(new ServletHolder(new RecordListServlet(fBase)), "/record/list");
 		servletContext.addServlet(new ServletHolder(new KeygroupConfigServlet(fBase)),
 				"/keygroupConfig");
 

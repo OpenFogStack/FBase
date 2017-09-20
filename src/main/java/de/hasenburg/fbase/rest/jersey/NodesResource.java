@@ -21,6 +21,10 @@ import model.messages.Message;
  * The only supported node method is get. The client should not be able to run any other
  * operations.
  * 
+ * 
+ * TODO C <br>
+ * Do not return the whole config (e.g. keys)
+ * 
  * @author jonathanhasenburg
  *
  */

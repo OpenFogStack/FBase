@@ -306,7 +306,7 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param config - the {@link KeygroupConfig}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
 	 * @throws FBaseCommunicationException
-	 * @throws FBaseNamingServiceException 
+	 * @throws FBaseNamingServiceException
 	 */
 	public KeygroupConfig sendKeygroupConfigCreate(KeygroupConfig config)
 			throws FBaseCommunicationException, FBaseNamingServiceException {

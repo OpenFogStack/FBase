@@ -67,7 +67,7 @@ public class UpdateForeignNodeConfigTaskTest {
 
 		kConfig1 = new KeygroupConfig(keygroupID1, "secret", EncryptionAlgorithm.AES);
 		kConfig2 = new KeygroupConfig(keygroupID2, "secret", EncryptionAlgorithm.AES);
-		kConfig3 = new KeygroupConfig(keygroupID2, "secret", EncryptionAlgorithm.AES);
+		kConfig3 = new KeygroupConfig(keygroupID3, "secret", EncryptionAlgorithm.AES);
 		
 		nConfig1 = new NodeConfig();
 		nConfig1.setNodeID(new NodeID("N1"));

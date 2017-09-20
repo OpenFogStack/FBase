@@ -1,6 +1,7 @@
 package tasks;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
@@ -12,6 +13,7 @@ import exceptions.FBaseException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
+import model.data.KeygroupID;
 import storageconnector.AbstractDBConnector;
 import tasks.TaskManager.TaskName;
 
@@ -68,8 +70,10 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 
 		// check responsibility
 		boolean responsible = false;
+		Map<KeygroupID, Pair<String, Integer>> allKeygroupResponsibilities =
+				fBase.connector.keyGroupSubscriberMachines_listAll();
 		Pair<String, Integer> keygroupResponsibility =
-				fBase.connector.keyGroupSubscriberMachines_listAll().get(config.getKeygroupID());
+				allKeygroupResponsibilities.get(config.getKeygroupID());
 		if (keygroupResponsibility == null || keygroupResponsibility.getValue0()
 				.equals(fBase.configuration.getMachineName())) {
 			responsible = true;

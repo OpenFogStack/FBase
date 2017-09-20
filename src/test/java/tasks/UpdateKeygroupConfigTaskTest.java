@@ -81,7 +81,6 @@ public class UpdateKeygroupConfigTaskTest {
 				subscriber.getNumberOfReceivedMessages());
 		assertEquals("KeygroupConfig in database not as expected", expectedConfig,
 				fBase.connector.keygroupConfig_get(keygroupID));
-		logger.debug(fBase.taskmanager.getHistoricTaskNumbers());
 		assertEquals("The wrong number of UpdatedKeygroupSubscriptionsTasks has been executed",
 				expectedNumberOfTasks, fBase.taskmanager.getHistoricTaskNumbers()
 						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS).intValue());

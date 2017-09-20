@@ -26,8 +26,8 @@ For some of the tests, a running naming service is required. The naming service 
 - [ ] (Add message history cleanup functionality (on receiver and sender side)), thesis states not implemented
 
 ## Controlling FBase with Clients
- - [ ] Enable asymmetric encryption
+ - [ ] Enable encryption and authentication
  - [ ] Method to instruct machine to update all configurations with naming service data
  - [x] Keygroup C, R, D
- - [ ] Client C, D
- - [ ] DataRecord P, R, D, List
+ - [X] Client C, D
+ - [X] DataRecord P, R, D, List

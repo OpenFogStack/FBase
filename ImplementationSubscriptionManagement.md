@@ -25,9 +25,9 @@
 
 ### [5] Not interpretable message
 
-- [ ] Add encryption exception handling to subscriber
-- [ ] Catched: get newest keygroup config version from naming service
-- [ ] Run UpdateKeygroupConfigTask
+- [x] Add encryption exception handling to subscriber
+- [x] Catched: get newest keygroup config version from naming service
+- [x] Run UpdateKeygroupConfigTask
 
 ### [6] Periodic configuration update
 

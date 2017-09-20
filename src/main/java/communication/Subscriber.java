@@ -75,12 +75,6 @@ public class Subscriber extends AbstractReceiver {
 
 		Message m = new Message();
 		try {
-			// start task that checks on missed messages if a messageID was set for the
-			// message
-			if (envelope.getMessage().getMessageID() != null) {
-				fBase.messageIdEvaluator.addReceivedMessageID(envelope.getMessage().getMessageID());
-			}
-
 			// Code to interpret message
 			try {
 				envelope.getMessage().decryptFields(secret, algorithm);
@@ -99,6 +93,12 @@ public class Subscriber extends AbstractReceiver {
 				} else if (Command.UPDATE_FOREIGN_NODE_CONFIG.equals(command)) {
 					NodeConfig config = JSONable.fromJSON(content, NodeConfig.class);
 					fBase.taskmanager.runUpdateForeignNodeConfigTask(config);
+				}
+
+				// only add the messageID, if message was processed (e.g. could be encrypted)
+				if (envelope.getMessage().getMessageID() != null) {
+					fBase.messageIdEvaluator
+							.addReceivedMessageID(envelope.getMessage().getMessageID());
 				}
 				m.setTextualInfo("Message processed");
 			} catch (FBaseEncryptionException e) {

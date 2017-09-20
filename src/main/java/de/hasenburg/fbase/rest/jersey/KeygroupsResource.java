@@ -1,8 +1,10 @@
 package de.hasenburg.fbase.rest.jersey;
 
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -21,7 +23,6 @@ import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
 import model.config.TriggerNodeConfig;
-import model.data.ClientID;
 import model.data.KeygroupID;
 import model.messages.Message;
 
@@ -35,7 +36,6 @@ import model.messages.Message;
  * 
  * Update Keygroups by <br>
  * * Adding a {@link ClientConfig} <br>
- * * Adding a {@link ReplicaNodeConfig} <br>
  * * Adding a {@link ReplicaNodeConfig} <br>
  * * Adding a {@link TriggerNodeConfig} <br>
  * * Updating the Crypto information <br>
@@ -58,14 +58,15 @@ public class KeygroupsResource {
 	FBase fBase;
 
 	@GET
-	@Path("{keygroupID}")
+	@Path("{app}/{tenant}/{group}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getKeygroupConfig(@PathParam("keygroupID") String keygroupID) {
+	public Response getKeygroupConfig(@PathParam("app") String app,
+	@PathParam("tenant") String tenant, @PathParam("group") String group) {
 
 		KeygroupConfig config = null;
 		try {
 			config = fBase.configAccessHelper
-					.keygroupConfig_get(KeygroupID.createFromString(keygroupID));
+					.keygroupConfig_get(new KeygroupID(app, tenant, group));
 
 			if (config == null) {
 				return Response.status(404, "Keygroup does not exist").build();
@@ -83,12 +84,41 @@ public class KeygroupsResource {
 
 	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
-	@Path("{keygroupID}")
-	public Response deleteKeygroupConfig(@PathParam("keygroupID") String clientID) {
+	@Path("{app}/{tenant}/{group}")
+	public Response deleteKeygroupConfig(@PathParam("app") String app,
+			@PathParam("tenant") String tenant, @PathParam("group") String group) {
 
 		try {
-			fBase.namingServiceSender.sendClientConfigDelete(new ClientID(clientID));
-			// TODO C: Remove config from database
+			KeygroupID kID = new KeygroupID(app, tenant, group);
+			fBase.namingServiceSender.sendKeygroupConfigDelete(kID);
+			// we only get here, if naming service approves
+
+			// get tompstoned version
+			KeygroupConfig config = fBase.namingServiceSender.sendKeygroupConfigRead(kID);
+			fBase.taskmanager.runUpdateKeygroupConfigTask(config, true); // forward to other
+																			// nodes
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	@POST
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response createKeygroupConfig(String json) {
+
+		KeygroupConfig keygroupConfig = JSONable.fromJSON(json, KeygroupConfig.class);
+		if (keygroupConfig == null) {
+			return Response.status(400, "Body is not a keygroup config").build();
+		}
+
+		try {
+			KeygroupConfig approvedConfig =
+					fBase.namingServiceSender.sendKeygroupConfigCreate(keygroupConfig);
+			fBase.taskmanager.runUpdateKeygroupConfigTask(approvedConfig, true);
 		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();

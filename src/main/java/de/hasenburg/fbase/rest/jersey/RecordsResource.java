@@ -50,14 +50,14 @@ public class RecordsResource {
 	FBase fBase;
 
 	@GET
-	@Path("list/{keygroupID}")
+	@Path("{app}/{tenant}/{group}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response listDataRecords(@PathParam("keygroupID") String keygroupID) {
+	public Response listDataRecords(@PathParam("app") String app,
+			@PathParam("tenant") String tenant, @PathParam("group") String group) {
 
 		Set<DataIdentifier> dataIdentifiers = null;
 		try {
-			dataIdentifiers =
-					fBase.connector.dataRecords_list(KeygroupID.createFromString(keygroupID));
+			dataIdentifiers = fBase.connector.dataRecords_list(new KeygroupID(app, tenant, group));
 
 			if (dataIdentifiers == null) {
 				return Response.status(404, "Keygroup does not exist").build();
@@ -75,14 +75,15 @@ public class RecordsResource {
 	}
 
 	@GET
-	@Path("{dataIdentifier}")
+	@Path("{app}/{tenant}/{group}/{dataID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getDataRecord(@PathParam("dataIdentifier") String dataIdentifer) {
+	public Response getDataRecord(@PathParam("app") String app, @PathParam("tenant") String tenant,
+			@PathParam("group") String group, @PathParam("dataID") String dataID) {
 
 		DataRecord record = null;
 		try {
-			record = fBase.connector
-					.dataRecords_get(DataIdentifier.createFromString(dataIdentifer));
+			record = fBase.connector.dataRecords_get(
+					new DataIdentifier(new KeygroupID(app, tenant, group), dataID));
 
 			if (record == null) {
 				return Response.status(404, "Record does not exist").build();
@@ -98,7 +99,6 @@ public class RecordsResource {
 	}
 
 	@PUT
-	@Path("{dataIdentifier}")
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response putDataRecord(String json) {
@@ -113,7 +113,7 @@ public class RecordsResource {
 			future.get(5, TimeUnit.SECONDS);
 		} catch (ExecutionException e) {
 			logger.error(e.getCause());
-			Response.status(500, e.getCause().getMessage());
+			return Response.status(500, e.getCause().getMessage()).build();
 		} catch (TimeoutException | InterruptedException e) {
 			logger.error(e);
 		}
@@ -122,18 +122,20 @@ public class RecordsResource {
 	}
 
 	@DELETE
-	@Path("{dataIdentifier}")
+	@Path("{app}/{tenant}/{group}/{dataID}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response deleteDataRecord(@PathParam("dataIdentifier") String dataIdentifer) {
+	public Response deleteDataRecord(@PathParam("app") String app,
+			@PathParam("tenant") String tenant, @PathParam("group") String group,
+			@PathParam("dataID") String dataID) {
 
-		Future<Boolean> future = fBase.taskmanager
-				.runDeleteDataRecordTask(DataIdentifier.createFromString(dataIdentifer), true);
+		Future<Boolean> future = fBase.taskmanager.runDeleteDataRecordTask(
+				new DataIdentifier(new KeygroupID(app, tenant, group), dataID), true);
 
 		try {
 			future.get(5, TimeUnit.SECONDS);
 		} catch (ExecutionException e) {
 			logger.error(e.getCause());
-			Response.status(500, e.getCause().getMessage());
+			return Response.status(500, e.getCause().getMessage()).build();
 		} catch (TimeoutException | InterruptedException e) {
 			logger.error(e);
 		}

@@ -79,8 +79,8 @@ public class WebServer {
 
 				@Override
 				public void filter(ContainerRequestContext requestContext) throws IOException {
-					logger.info("Received request to "
-							+ requestContext.getUriInfo().getPath(true));
+					logger.info("Received " + requestContext.getRequest().getMethod()
+							+ " request to " + requestContext.getUriInfo().getPath(true));
 				}
 			});
 			packages("de.hasenburg.fbase.rest.jersey");

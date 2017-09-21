@@ -35,8 +35,6 @@ public class WebServer {
 		ServletContextHandler servletContext =
 				new ServletContextHandler(ServletContextHandler.SESSIONS);
 		servletContext.setContextPath("/");
-		servletContext.addServlet(new ServletHolder(new KeygroupConfigServlet(fBase)),
-				"/keygroupConfig");
 
 		// jersey
 		ResourceConfig config = new AppResourceConfig(fBase);

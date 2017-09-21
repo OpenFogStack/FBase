@@ -37,8 +37,8 @@
 ### [7] Recognize foreign keygroup update
 Needed if [4] is performed by other node
 
-- [ ] Add background task that checks whether version of keygroup config changed
-- [ ] Changed: Run UpdateKeygroupSubscriptionsTask
+- [x] Add background task that checks whether version of keygroup config changed
+- [x] Changed: Run UpdateKeygroupSubscriptionsTask
 
 ### [8] Subscriber receives configuration update
 

@@ -16,7 +16,7 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.messages.Envelope;
 import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
-import tasks.background.PollLatesConfigurationDataForResponsibleKeygroupsTask;
+import tasks.background.PollLatestConfigurationDataForResponsibleKeygroupsTask;
 
 public class TaskManager {
 
@@ -34,7 +34,7 @@ public class TaskManager {
 
 	public enum TaskName {
 		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, UPDATE_KEYGROUP_SUBSCRIPTIONS, PUT_DATA_RECORD,
-		DELETE_DATA_RECORD, UPDATE_FOREIGN_NODE_CONFIG, CHECK_KEYGROUP_SUBSCRIPTIONS,
+		DELETE_DATA_RECORD, UPDATE_FOREIGN_NODE_CONFIG, B_CHECK_KEYGROUP_CONFIGURATIONS_ON_UPDATES,
 		PROCESS_MESSAGE_WITH_UNKNOWN_ENCRYPTION, CHECK_NAMING_SERVICE_CONFIGURATION_DATA,
 		B_POLL_LATEST_CONFIGURATION_DATA_FOR_RESPONSIBLE_KEYGROUPS
 	}
@@ -146,7 +146,7 @@ public class TaskManager {
 	public Future<Boolean> startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(
 			int checkInterval) {
 		Future<Boolean> future = pool.submit(
-				new PollLatesConfigurationDataForResponsibleKeygroupsTask(fBase, checkInterval));
+				new PollLatestConfigurationDataForResponsibleKeygroupsTask(fBase, checkInterval));
 		return future;
 	}
 

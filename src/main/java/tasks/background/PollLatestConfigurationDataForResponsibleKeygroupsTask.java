@@ -37,19 +37,19 @@ import tasks.UpdateKeygroupConfigTask;
  * @author jonathanhasenburg
  *
  */
-public class PollLatesConfigurationDataForResponsibleKeygroupsTask extends Task<Boolean> {
+public class PollLatestConfigurationDataForResponsibleKeygroupsTask extends Task<Boolean> {
 
 	private static Logger logger =
-			Logger.getLogger(PollLatesConfigurationDataForResponsibleKeygroupsTask.class.getName());
+			Logger.getLogger(PollLatestConfigurationDataForResponsibleKeygroupsTask.class.getName());
 
 	/**
-	 * Creates a new {@link PollLatesConfigurationDataForResponsibleKeygroupsTask}. If
+	 * Creates a new {@link PollLatestConfigurationDataForResponsibleKeygroupsTask}. If
 	 * checkInterval <= 0, the default is used (6h)
 	 * 
 	 * @param fBase
 	 * @param checkInterval - the interval to check in milliseconds
 	 */
-	public PollLatesConfigurationDataForResponsibleKeygroupsTask(FBase fBase, int checkInterval) {
+	public PollLatestConfigurationDataForResponsibleKeygroupsTask(FBase fBase, int checkInterval) {
 		super(TaskName.B_POLL_LATEST_CONFIGURATION_DATA_FOR_RESPONSIBLE_KEYGROUPS, fBase);
 		if (checkInterval > 0) {
 			this.checkInterval = checkInterval;

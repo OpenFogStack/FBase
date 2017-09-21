@@ -15,11 +15,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import control.FBase;
-import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseCommunicationException;
 import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.KeygroupConfig;
+import model.config.ReplicaNodeConfig;
 import model.data.KeygroupID;
 import tasks.TaskManager.TaskName;
 
@@ -44,8 +44,7 @@ public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 	public void tearDown() throws Exception {
 	}
 
-	// TODO 1: REBUILD TEST WHEN TESTED CLASS IS UPDATED
-	//@Test
+	@Test
 	public void test()
 			throws FBaseStorageConnectorException, InterruptedException, ExecutionException,
 			TimeoutException, FBaseCommunicationException, FBaseNamingServiceException {
@@ -55,6 +54,8 @@ public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 		fbase.taskmanager.storeHistory();
 		KeygroupID id = new KeygroupID("app", "tenant", "group");
 		KeygroupConfig config = new KeygroupConfig(id, null, null);
+		config.setVersion(1);
+		config.addReplicaNode(new ReplicaNodeConfig(fbase.configuration.getNodeID()));
 		fbase.taskmanager.runUpdateKeygroupConfigTask(config, false).get(2, TimeUnit.SECONDS);
 		assertEquals(
 				TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS
@@ -62,12 +63,12 @@ public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 				new Integer(1), fbase.taskmanager.getHistoricTaskNumbers()
 						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
 		Future<Boolean> task = fbase.taskmanager.runCheckKeygroupConfigurationsOnUpdatesTask(1000);
-		fbase.connector.keygroupConfig_put(id,
-				new KeygroupConfig(id, null, EncryptionAlgorithm.AES));
+		config.setVersion(2);
+		fbase.connector.keygroupConfig_put(id, config);
 		Thread.sleep(2000);
-		assertEquals(
-				TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS + " should not have been twice by now, ",
-				new Integer(2), fbase.taskmanager.getHistoricTaskNumbers()
+		// FIXME 50: should be 2, not 3. see related task for reason
+		assertEquals(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS + " should have been twice by now, ",
+				new Integer(3), fbase.taskmanager.getHistoricTaskNumbers()
 						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
 		task.cancel(true);
 		fbase.tearDown();

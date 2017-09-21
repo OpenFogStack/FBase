@@ -112,12 +112,6 @@ public class TaskManager {
 		return future;
 	}
 
-	public Future<Boolean> runCheckKeygroupConfigurationsOnUpdatesTask(int interval) {
-		Future<Boolean> future =
-				pool.submit(new CheckKeygroupConfigurationsOnUpdatesTask(fBase, interval));
-		return future;
-	}
-
 	public Future<Boolean> runUpdateForeignNodeConfigTask(NodeConfig config) {
 		Future<Boolean> future = pool.submit(new UpdateForeignNodeConfigTask(config, fBase));
 		return future;
@@ -143,6 +137,12 @@ public class TaskManager {
 	 * ------ Background Initiators ------
 	 */
 
+	public Future<Boolean> startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(int interval) {
+		Future<Boolean> future =
+				pool.submit(new CheckKeygroupConfigurationsOnUpdatesTask(fBase, interval));
+		return future;
+	}
+	
 	public Future<Boolean> startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(
 			int checkInterval) {
 		Future<Boolean> future = pool.submit(

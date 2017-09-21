@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
@@ -43,6 +44,10 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 	private static Logger logger =
 			Logger.getLogger(CheckKeygroupConfigurationsOnUpdatesTask.class.getName());
 
+	static {
+		logger.setLevel(Level.INFO);
+	}
+	
 	/**
 	 * Creates a new {@link CheckKeygroupConfigurationsOnUpdatesTask}. If checkInterval <= 0,
 	 * the default is used (10 sec)
@@ -52,7 +57,9 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 	 */
 	public CheckKeygroupConfigurationsOnUpdatesTask(FBase fBase, int checkInterval) {
 		super(TaskName.B_CHECK_KEYGROUP_CONFIGURATIONS_ON_UPDATES, fBase);
-		this.checkInterval = checkInterval;
+		if (checkInterval > 0) {
+			this.checkInterval = checkInterval;
+		}
 	}
 
 	private int checkInterval = 10000;
@@ -65,6 +72,8 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 
 		while (!Thread.currentThread().isInterrupted()) {
+			logger.info("Checking keygroup configurations on updates");
+			
 			currentResponsibleKeygroups.clear();
 			currentKeygroupConfigurations.clear();
 			try {

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
@@ -42,6 +43,10 @@ public class PollLatestConfigurationDataForResponsibleKeygroupsTask extends Task
 	private static Logger logger =
 			Logger.getLogger(PollLatestConfigurationDataForResponsibleKeygroupsTask.class.getName());
 
+	static {
+		logger.setLevel(Level.INFO);
+	}
+	
 	/**
 	 * Creates a new {@link PollLatestConfigurationDataForResponsibleKeygroupsTask}. If
 	 * checkInterval <= 0, the default is used (6h)
@@ -63,6 +68,8 @@ public class PollLatestConfigurationDataForResponsibleKeygroupsTask extends Task
 
 		while (!Thread.currentThread().isInterrupted()) {
 
+			logger.info("Polling latest configuration data");
+			
 			try {
 				// get responsible keygroupIDs
 				List<KeygroupID> keygroupIDs = new ArrayList<>();

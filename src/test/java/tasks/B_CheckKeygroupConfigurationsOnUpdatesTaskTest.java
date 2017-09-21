@@ -62,7 +62,7 @@ public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 						+ " should not have been executed so often, ",
 				new Integer(1), fbase.taskmanager.getHistoricTaskNumbers()
 						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
-		Future<Boolean> task = fbase.taskmanager.runCheckKeygroupConfigurationsOnUpdatesTask(1000);
+		Future<Boolean> task = fbase.taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(1000);
 		config.setVersion(2);
 		fbase.connector.keygroupConfig_put(id, config);
 		Thread.sleep(2000);

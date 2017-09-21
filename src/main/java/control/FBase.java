@@ -89,8 +89,9 @@ public class FBase {
 		// add machine to node
 		addMachineToNodeConfiguration(tellEveryone);
 
-		// TODO 2: Start Background Tasks
+		// start background tasks (interval 0 = default)
 		taskmanager.startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(0);
+		taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(0);
 
 	}
 

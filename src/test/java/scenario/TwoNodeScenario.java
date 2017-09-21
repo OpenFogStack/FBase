@@ -33,6 +33,7 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.data.MessageID;
+import tasks.TaskManager.TaskName;
 
 public class TwoNodeScenario {
 
@@ -60,8 +61,10 @@ public class TwoNodeScenario {
 	public void setUp() throws Exception {
 		fbase1 = new FBase("TwoNodeScenario_1.properties");
 		fbase1.startup(false);
+		fbase1.taskmanager.storeHistory();
 		fbase2 = new FBase("TwoNodeScenario_2.properties");
 		fbase2.startup(false);
+		fbase2.taskmanager.storeHistory();
 
 		nConfig1 = fbase1.configuration.buildNodeConfigBasedOnData();
 		nConfig2 = fbase2.configuration.buildNodeConfigBasedOnData();
@@ -101,7 +104,6 @@ public class TwoNodeScenario {
 	}
 
 	@Test
-	// TODO T: TEST SHOULD ALSO USE CLIENT
 	public void testUpdateKeygroupConfig() throws InterruptedException, ExecutionException,
 			TimeoutException, FBaseStorageConnectorException, FBaseCommunicationException,
 			FBaseNamingServiceException {
@@ -114,7 +116,7 @@ public class TwoNodeScenario {
 		kConfig2.setReplicaNodes(kConfig.getReplicaNodes());
 
 		assertNotEquals(kConfig, kConfig2);
-		
+
 		kConfig2.setVersion(2);
 		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig2, true).get(2, TimeUnit.SECONDS);
 
@@ -129,7 +131,22 @@ public class TwoNodeScenario {
 		assertEquals(kConfig2, configAtNode1);
 		assertEquals(kConfig2, configAtNode2);
 
-		// TODO T: Include test of changed secret
+		// lets create a new config that has the same id, but a different secret
+		KeygroupConfig kConfig3 = new KeygroupConfig(kConfig.getKeygroupID(),
+				"aCOMPLETELYdifferentSecret", kConfig.getEncryptionAlgorithm());
+		kConfig2.addClient(new ClientID("Client 1"));
+		kConfig2.setReplicaNodes(kConfig.getReplicaNodes());
+
+		assertNotEquals(kConfig, kConfig3);
+
+		kConfig3.setVersion(3);
+		logger.debug("XXXX\nXXXX\nXXXX\nXXXX\nXXXX\nTest changed secret");
+		fbase1.taskmanager.runUpdateKeygroupConfigTask(kConfig3, true).get(2, TimeUnit.SECONDS);
+
+		Thread.sleep(4000);
+		assertEquals("ProcessMessageWithUnknownEncryption should have been executed once",
+				new Integer(1), fbase2.taskmanager.getHistoricTaskNumbers()
+						.get(TaskName.PROCESS_MESSAGE_WITH_UNKNOWN_ENCRYPTION));
 
 		logger.debug("Finished testUpdateKeygroupConfig.");
 	}

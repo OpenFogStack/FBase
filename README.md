@@ -10,10 +10,7 @@ For some of the tests, a running naming service is required. The naming service 
 
 ## Startup
 - [ ] A machineName should be dynamically created on Startup
-- [ ] Run AddMachineToNodeTask
-- [ ] Background task that checks whether node config contains myself (might have been overwritten by removal of machine due to heartbeats)
-- [ ] Add background task that checks whether node config only contains nodes of machines that have heartbeats (overwritten by starting node)
-- [ ] Add version vector support for two above
+- [x] Run AddMachineToNodeTask (ended up not being a task)
 
 ## Subscription Management incl. Heartbeats
 - See ImplementationSubscriptionManagement.md
@@ -29,6 +26,6 @@ For some of the tests, a running naming service is required. The naming service 
  - [ ] Enable encryption and authentication
  - [ ] Method to instruct machine to update all configurations with naming service data
  - [x] Keygroup C, R, D
- - [ ] Keygroup all update methods
+ - [x] Keygroup all update methods
  - [X] Client C, D
  - [X] DataRecord P, R, D, List

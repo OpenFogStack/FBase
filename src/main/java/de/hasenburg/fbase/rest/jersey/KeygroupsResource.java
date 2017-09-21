@@ -5,6 +5,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import control.FBase;
+import de.hasenburg.fbase.model.CryptoWrapper;
 import exceptions.FBaseCommunicationException;
 import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
@@ -23,7 +25,9 @@ import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
 import model.config.TriggerNodeConfig;
+import model.data.ClientID;
 import model.data.KeygroupID;
+import model.data.NodeID;
 import model.messages.Message;
 
 /**
@@ -42,6 +46,8 @@ import model.messages.Message;
  * * Deleting a {@link ClientConfig} <br>
  * * Deleting a {@link NodeConfig} <br>
  * 
+ * The client methods return code 200, if the naming service approved the configuration, even
+ * though the node might fail storing it.
  * 
  * TODO C Methods should only be possible to use for clients that are a part of keygroup
  * (besides LIST and GET)
@@ -61,7 +67,7 @@ public class KeygroupsResource {
 	@Path("{app}/{tenant}/{group}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getKeygroupConfig(@PathParam("app") String app,
-	@PathParam("tenant") String tenant, @PathParam("group") String group) {
+			@PathParam("tenant") String tenant, @PathParam("group") String group) {
 
 		KeygroupConfig config = null;
 		try {
@@ -110,14 +116,167 @@ public class KeygroupsResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createKeygroupConfig(String json) {
 
+		// parse config
 		KeygroupConfig keygroupConfig = JSONable.fromJSON(json, KeygroupConfig.class);
 		if (keygroupConfig == null) {
 			return Response.status(400, "Body is not a keygroup config").build();
 		}
 
+		// ask naming service and begin storage
 		try {
 			KeygroupConfig approvedConfig =
 					fBase.namingServiceSender.sendKeygroupConfigCreate(keygroupConfig);
+			fBase.taskmanager.runUpdateKeygroupConfigTask(approvedConfig, true);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	@PUT
+	@Path("{app}/{tenant}/{group}/addClient")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response addClient(@PathParam("app") String app, @PathParam("tenant") String tenant,
+			@PathParam("group") String group, String json) {
+
+		ClientID clientID = JSONable.fromJSON(json, ClientID.class);
+		if (clientID == null) {
+			return Response.status(400, "Body is not a client id").build();
+		}
+
+		try {
+			KeygroupID keygroupID = new KeygroupID(app, tenant, group);
+			KeygroupConfig approvedConfig =
+					fBase.namingServiceSender.sendKeygroupConfigAddClient(clientID, keygroupID);
+			fBase.taskmanager.runUpdateKeygroupConfigTask(approvedConfig, true);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	@PUT
+	@Path("{app}/{tenant}/{group}/addReplicaNode")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response addReplicaNode(@PathParam("app") String app, @PathParam("tenant") String tenant,
+			@PathParam("group") String group, String json) {
+
+		ReplicaNodeConfig rNConfig = JSONable.fromJSON(json, ReplicaNodeConfig.class);
+		if (rNConfig == null) {
+			return Response.status(400, "Body is not a replica node config").build();
+		}
+
+		try {
+			KeygroupID keygroupID = new KeygroupID(app, tenant, group);
+			KeygroupConfig approvedConfig = fBase.namingServiceSender
+					.sendKeygroupConfigAddReplicaNode(rNConfig, keygroupID);
+			fBase.taskmanager.runUpdateKeygroupConfigTask(approvedConfig, true);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	@PUT
+	@Path("{app}/{tenant}/{group}/addTriggerNode")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response addTriggerNode(@PathParam("app") String app, @PathParam("tenant") String tenant,
+			@PathParam("group") String group, String json) {
+
+		TriggerNodeConfig tNConfig = JSONable.fromJSON(json, TriggerNodeConfig.class);
+		if (tNConfig == null) {
+			return Response.status(400, "Body is not a trigger node config").build();
+		}
+
+		try {
+			KeygroupID keygroupID = new KeygroupID(app, tenant, group);
+			KeygroupConfig approvedConfig = fBase.namingServiceSender
+					.sendKeygroupConfigAddTriggerNode(tNConfig, keygroupID);
+			fBase.taskmanager.runUpdateKeygroupConfigTask(approvedConfig, true);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	@PUT
+	@Path("{app}/{tenant}/{group}/updateCrypto")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response updateCrypto(@PathParam("app") String app, @PathParam("tenant") String tenant,
+			@PathParam("group") String group, String json) {
+
+		CryptoWrapper wrapper = JSONable.fromJSON(json, CryptoWrapper.class);
+		if (wrapper == null) {
+			return Response.status(400, "Body is not a crypto wrapper").build();
+		}
+
+		try {
+			KeygroupID keygroupID = new KeygroupID(app, tenant, group);
+			KeygroupConfig approvedConfig = fBase.namingServiceSender
+					.sendKeygroupConfigUpdateCrypto(wrapper.getEncryptionSecret(),
+							wrapper.getEncryptionAlgorithm(), keygroupID);
+			fBase.taskmanager.runUpdateKeygroupConfigTask(approvedConfig, true);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	@PUT
+	@Path("{app}/{tenant}/{group}/deleteClient")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response deleteClient(@PathParam("app") String app, @PathParam("tenant") String tenant,
+			@PathParam("group") String group, String json) {
+
+		ClientID clientID = JSONable.fromJSON(json, ClientID.class);
+		if (clientID == null) {
+			return Response.status(400, "Body is not a client id").build();
+		}
+
+		try {
+			KeygroupID keygroupID = new KeygroupID(app, tenant, group);
+			KeygroupConfig approvedConfig =
+					fBase.namingServiceSender.sendKeygroupConfigDeleteClient(clientID, keygroupID);
+			fBase.taskmanager.runUpdateKeygroupConfigTask(approvedConfig, true);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	@PUT
+	@Path("{app}/{tenant}/{group}/deleteNode")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response deleteNode(@PathParam("app") String app, @PathParam("tenant") String tenant,
+			@PathParam("group") String group, String json) {
+
+		NodeID nodeID = JSONable.fromJSON(json, NodeID.class);
+		if (nodeID == null) {
+			return Response.status(400, "Body is not a node id").build();
+		}
+
+		try {
+			KeygroupID keygroupID = new KeygroupID(app, tenant, group);
+			KeygroupConfig approvedConfig =
+					fBase.namingServiceSender.sendKeygroupConfigDeleteNode(keygroupID, nodeID);
 			fBase.taskmanager.runUpdateKeygroupConfigTask(approvedConfig, true);
 		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
 			logger.warn(e);

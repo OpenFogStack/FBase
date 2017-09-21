@@ -50,7 +50,10 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	/** stores keygroup subscriber info */
 	private final Map<KeygroupID, Pair<String, Integer>> keygroupSubscribers = new HashMap<>();
 
-	/** stores liveness info per machine */
+	/**
+	 * stores liveness info per machine <br>
+	 * (machine name -> (machine address, last heartbeat in milliseconds))
+	 */
 	private final Map<String, Pair<String, Long>> heartbeats = new HashMap<>();
 
 	/** stores data records */
@@ -320,7 +323,8 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#heartbeats_getAll()
 	 */
 	@Override
-	public Map<String, Pair<String, Long>> heartbeats_listAll() throws FBaseStorageConnectorException {
+	public Map<String, Pair<String, Long>> heartbeats_listAll()
+			throws FBaseStorageConnectorException {
 		return new HashMap<>(heartbeats);
 	}
 

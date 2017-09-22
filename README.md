@@ -17,9 +17,10 @@ For some of the tests, a running naming service is required. The naming service 
 
 ## One to One Communication
 - [ ] Add one to one communication for datarecords
+- [ ] Add one to one communication for machine addition announcement
 
 ### Handling Missed Messages
-- [ ] Add message history size to machine config (node specific), cleanup config files
+- [x] Add message history size to machine config (node specific), cleanup config files
 - [ ] (Add message history cleanup functionality (on receiver and sender side)), thesis states not implemented
 
 ## Controlling FBase with Clients

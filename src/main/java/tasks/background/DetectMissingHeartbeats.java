@@ -16,7 +16,8 @@ import tasks.TaskManager.TaskName;
 
 /**
  * 
- * This background task stores heartbeats inside the node database for this machine.
+ * This background task detects missing heartbeats of other machines and removes them from the
+ * node if detected.
  * 
  * @author jonathanhasenburg
  *
@@ -30,11 +31,11 @@ public class DetectMissingHeartbeats extends Task<Boolean> {
 	}
 
 	/**
-	 * Creates a new {@link DetectMissingHeartbeats}. If pulse <= 0, the default is used (10
+	 * Creates a new {@link DetectMissingHeartbeats}. If checkInterval <= 0, the default is used (10
 	 * sec). If toleratedMissingHeartbeat <= 0, the default is used (100 sec).
 	 * 
 	 * @param fBase
-	 * @param pulse - the interval to put heartbeats in milliseconds
+	 * @param checkInterval - the interval to put heartbeats in milliseconds
 	 * @param toleratedMissingHeartbeat - the maximum number of milliseconds tolerated for a
 	 *            heartbeat to not have been updated
 	 */

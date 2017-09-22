@@ -49,5 +49,10 @@ public class SubscriptionUpdateProcessScenario {
 	public void testMissingHeartbeatDetected() {
 		fail("Not yet implemented");
 	}
+	
+	@Test
+	public void testNoResponsibilityDetected() {
+		fail("Not yet implemented");
+	}
 
 }

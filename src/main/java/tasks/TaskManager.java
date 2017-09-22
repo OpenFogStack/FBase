@@ -17,6 +17,7 @@ import model.data.DataRecord;
 import model.messages.Envelope;
 import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
 import tasks.background.DetectMissingHeartbeats;
+import tasks.background.DetectMissingResponsibility;
 import tasks.background.PollLatestConfigurationDataForResponsibleKeygroupsTask;
 import tasks.background.PutHeartbeatTask;
 
@@ -40,7 +41,7 @@ public class TaskManager {
 		PROCESS_MESSAGE_WITH_UNKNOWN_ENCRYPTION, CHECK_NAMING_SERVICE_CONFIGURATION_DATA,
 		B_POLL_LATEST_CONFIGURATION_DATA_FOR_RESPONSIBLE_KEYGROUPS, B_PUT_HEARTBEAT,
 		B_DETECT_MISSING_HEARTBEATS, REMOVE_MACHINE_FROM_NODE,
-		ANNOUNCE_UPDATE_OF_OWN_NODE_CONFIGURATION
+		ANNOUNCE_UPDATE_OF_OWN_NODE_CONFIGURATION, B_DETECT_MISSING_RESPONSIBILITY
 	}
 
 	public void storeHistory() {
@@ -141,7 +142,7 @@ public class TaskManager {
 		Future<Boolean> future = pool.submit(new RemoveMachineFromNodeTask(machineName, fBase));
 		return future;
 	}
-	
+
 	public Future<Boolean> runAnnounceUpdateOfOwnNodeConfigurationTask() {
 		Future<Boolean> future = pool.submit(new AnnounceUpdateOfOwnNodeConfigurationTask(fBase));
 		return future;
@@ -173,6 +174,11 @@ public class TaskManager {
 			int toleratedMissingHeartbeat) {
 		Future<Boolean> future = pool.submit(
 				new DetectMissingHeartbeats(fBase, checkInterval, toleratedMissingHeartbeat));
+		return future;
+	}
+
+	public Future<Boolean> startBackgroundDetectMissingResponsibility(int interval) {
+		Future<Boolean> future = pool.submit(new DetectMissingResponsibility(fBase, interval));
 		return future;
 	}
 

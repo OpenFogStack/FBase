@@ -14,13 +14,13 @@
 
 ### [3] Lost responsibility detected
 
-- [ ] Background task to detect lost responsibilities for each keygroup for which subscriptions exist
-- [ ] Detected: run UpdateKeygroupSubscriptionsTask
+- [x] Background task to detect lost responsibilities for each keygroup for which subscriptions exist
+- [x] Detected: run UpdateKeygroupSubscriptionsTask
 
 ### [4] Client updates/deletes keygroup via node
 
-- [ ] Add client keygroup update/delete functionality incl. naming service validation
-- [ ] Naming service approves: run UpdateKeygroupConfigTask
+- [x] Add client keygroup update/delete functionality incl. naming service validation
+- [x] Naming service approves: run UpdateKeygroupConfigTask
 
 ### [5] Not interpretable message
 

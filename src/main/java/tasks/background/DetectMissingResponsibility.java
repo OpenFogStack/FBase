@@ -68,7 +68,7 @@ public class DetectMissingResponsibility extends Task<Boolean> {
 				}
 
 			} catch (FBaseStorageConnectorException e1) {
-				logger.error("Could not read heartbeats, going back to sleep", e1);
+				logger.error("Could not read responsibilities, going back to sleep", e1);
 			}
 
 			try {

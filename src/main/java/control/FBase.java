@@ -96,6 +96,7 @@ public class FBase {
 		taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(0);
 		taskmanager.startDetectMissingHeartbeatsTask(0, 0);
 		taskmanager.startBackgroundDetectMissingResponsibility(0);
+		taskmanager.startBackgroundDetectLostResponsibility(0);
 
 		Thread.sleep(50);
 		logger.info("FBase started, all background tasks up and running.");

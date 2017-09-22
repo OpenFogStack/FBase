@@ -9,8 +9,8 @@
 - [x] Detected: run RemoveMachineFromNodeTask
 
 ### [2] No responsibility detected
-- [ ] Background task to detect missing responsibilities
-- [ ] Detected: run UpdateKeygroupSubscriptionsTask
+- [x] Background task to detect missing responsibilities
+- [x] Detected: run UpdateKeygroupSubscriptionsTask
 
 ### [3] Lost responsibility detected
 

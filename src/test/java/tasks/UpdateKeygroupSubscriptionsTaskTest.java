@@ -62,7 +62,7 @@ public class UpdateKeygroupSubscriptionsTaskTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fBase = FBaseFactory.basic(1);
+		fBase = FBaseFactory.basic(1, false, false);
 		keygroupID1 = new KeygroupID("smartlight", "h1", "brightness");
 		keygroupID2 = new KeygroupID("smartlight", "h1", "lightning");
 		keygroupID3 = new KeygroupID("smartlight", "h1", "sound");

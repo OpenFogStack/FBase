@@ -39,6 +39,7 @@ import model.data.NodeID;
 import model.messages.Envelope;
 import model.messages.Message;
 import model.messages.ResponseCode;
+import tasks.FBaseFactory;
 
 public class NamingServiceSenderTest {
 
@@ -46,7 +47,6 @@ public class NamingServiceSenderTest {
 
 	private static ExecutorService executor;
 	private static FBase fbase;
-	private static final String configName = "NamingServiceSenderTest_Config.properties";
 	private static final String ownNodeConfigJSONPath =
 			"src/test/resources/NamingServiceSenderTest_NodeConfig.json";
 
@@ -61,8 +61,7 @@ public class NamingServiceSenderTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		executor = Executors.newCachedThreadPool();
-		fbase = new FBase(configName);
-		fbase.startup(false);
+		fbase = FBaseFactory.namingService(1, false, false);
 		localSender = new NamingServiceSender(localAddress, localPort, null);
 		nsSender = new NamingServiceSender(fbase.configuration.getNamingServiceAddress(),
 				fbase.configuration.getNamingServicePort(), fbase);

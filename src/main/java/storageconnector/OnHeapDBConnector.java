@@ -70,20 +70,21 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	private NodeID nodeID = null;
 	private String machineName = null;
 
-	public OnHeapDBConnector(NodeID nodeID, String machineName) {
+	public OnHeapDBConnector(NodeID nodeID) {
 		this.nodeID = nodeID;
-		this.machineName = machineName;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see storageconnector.AbstractDBConnector#initiateDatabaseConnection()
+	 * Always returns the same name, because always only one machine exists for an on_heap node
 	 */
 	@Override
-	public void dbConnection_initiate() throws FBaseStorageConnectorException {
+	public String dbConnection_initiate() throws FBaseStorageConnectorException {
 		log.info("Connector initialized.");
-
+		this.machineName = "M1";
+		return this.machineName;
 	}
 
 	/*

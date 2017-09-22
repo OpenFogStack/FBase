@@ -55,17 +55,16 @@ public class FBase {
 		publisher = new Publisher("tcp://0.0.0.0", configuration.getPublisherPort());
 	}
 
-	public void startup(boolean announce) throws InterruptedException, ExecutionException,
-			TimeoutException, FBaseStorageConnectorException, FBaseCommunicationException,
-			FBaseNamingServiceException {
+	public void startup(boolean announce, boolean backgroundTasks) throws InterruptedException,
+			ExecutionException, TimeoutException, FBaseStorageConnectorException,
+			FBaseCommunicationException, FBaseNamingServiceException {
 		if (Connector.S3.equals(configuration.getDatabaseConnector())) {
 			connector =
-					new S3DBConnector(configuration.getNodeID(), configuration.getMachineName());
+					new S3DBConnector(configuration.getNodeID());
 		} else {
-			connector = new OnHeapDBConnector(configuration.getNodeID(),
-					configuration.getMachineName());
+			connector = new OnHeapDBConnector(configuration.getNodeID());
 		}
-		connector.dbConnection_initiate();
+		configuration.setMachineName(connector.dbConnection_initiate());
 		configAccessHelper = new ConfigAccessHelper(this);
 		taskmanager = new TaskManager(this);
 		if (configuration.getRestPort() > 0) {
@@ -82,36 +81,41 @@ public class FBase {
 		subscriptionRegistry = new SubscriptionRegistry(this);
 		messageIdEvaluator = new MessageIdEvaluator(this);
 		messageIdEvaluator.startup();
-		
+
 		// start putting heartbeats (pulse 0 = default)
 		taskmanager.startBackgroundPutHeartbeatTask(0);
-		
+
 		// add machine to node
 		if (announce) {
 			announceMachineAdditionToNode();
 		}
-		
+
 		// start other background tasks (interval 0 = default)
-		taskmanager.startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(0);
-		taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(0);
-		taskmanager.startDetectMissingHeartbeatsTask(0, 0);
-		taskmanager.startBackgroundDetectMissingResponsibility(0);
-		taskmanager.startBackgroundDetectLostResponsibility(0);
+		if (backgroundTasks) {
+			taskmanager.startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(0);
+			taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(0);
+			taskmanager.startDetectMissingHeartbeatsTask(0, 0);
+			taskmanager.startBackgroundDetectMissingResponsibility(0);
+			taskmanager.startBackgroundDetectLostResponsibility(0);
+		}
 
 		Thread.sleep(50);
 		logger.info("FBase started, all background tasks up and running.");
 	}
 
-	private void announceMachineAdditionToNode()
-			throws FBaseStorageConnectorException, FBaseCommunicationException,
-			FBaseNamingServiceException {
-		
-		// TODO 1: Tell a node that is already registered about addition (we need a one-to-one here)
+	private void announceMachineAdditionToNode() throws FBaseStorageConnectorException,
+			FBaseCommunicationException, FBaseNamingServiceException {
+
+		// TODO 1: Tell a node that is already registered about addition (we need a one-to-one
+		// here)
 
 	}
 
 	public void tearDown() {
+		// TODO 1: stop all background tasks
+		subscriptionRegistry.deleteAllData();
 		publisher.shutdown();
+		namingServiceSender.shutdown();
 		messageIdEvaluator.tearDown();
 		directMessageReceiver.stopReception();
 		if (server != null) {

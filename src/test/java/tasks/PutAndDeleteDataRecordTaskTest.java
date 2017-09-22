@@ -48,8 +48,7 @@ public class PutAndDeleteDataRecordTaskTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fBase = new FBase("PutAndDeleteDataRecordTask_Config.properties");
-		fBase.startup(false);
+		fBase = FBaseFactory.basic(1, false, false);
 		KeygroupConfig keygroupConfig =
 				new KeygroupConfig(keygroupID, "testscret", EncryptionAlgorithm.AES);
 		fBase.taskmanager.runUpdateKeygroupConfigTask(keygroupConfig, false).get(2,

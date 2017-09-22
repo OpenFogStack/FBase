@@ -39,7 +39,7 @@ public class MessageIdEvaluator {
 	private static Logger logger = Logger.getLogger(MessageIdEvaluator.class.getName());
 	
 	static {
-		logger.setLevel(Level.INFO);
+		logger.setLevel(Level.DEBUG);
 	}
 
 	private FBase fBase;

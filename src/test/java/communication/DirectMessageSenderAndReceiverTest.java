@@ -22,6 +22,7 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.data.MessageID;
+import tasks.FBaseFactory;
 
 /**
  * Test for {@link DirectMessageSender} and {@link DirectMessageReceiver}.
@@ -31,7 +32,8 @@ import model.data.MessageID;
  */
 public class DirectMessageSenderAndReceiverTest {
 
-	private static Logger logger = Logger.getLogger(DirectMessageSenderAndReceiverTest.class.getName());
+	private static Logger logger =
+			Logger.getLogger(DirectMessageSenderAndReceiverTest.class.getName());
 
 	FBase fBase = null;
 	DirectMessageSender directMessageSender = null;
@@ -48,12 +50,11 @@ public class DirectMessageSenderAndReceiverTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fBase = new FBase("MessageSenderAndReceiverTest_Config.properties");
-		fBase.startup(false);
+		fBase = FBaseFactory.basic(1, false, false);
 		myNode = fBase.configuration.buildNodeConfigBasedOnData();
 		// put my own configuration in database
 		fBase.connector.nodeConfig_put(myNode.getNodeID(), myNode);
-		
+
 		directMessageSender = new DirectMessageSender(myNode, fBase);
 		KeygroupConfig keygroupConfig =
 				new KeygroupConfig(keygroupID, "testscret", EncryptionAlgorithm.AES);

@@ -50,7 +50,7 @@ public class UpdateKeygroupConfigTaskTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fBase = FBaseFactory.basic(1);
+		fBase = FBaseFactory.basic(1, false, false);
 		keygroupID = new KeygroupID("smartlight", "h1", "brightness");
 
 		kConfigV1 = new KeygroupConfig(keygroupID, "secret", EncryptionAlgorithm.AES);

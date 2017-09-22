@@ -49,9 +49,7 @@ public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 			throws FBaseStorageConnectorException, InterruptedException, ExecutionException,
 			TimeoutException, FBaseCommunicationException, FBaseNamingServiceException {
 		logger.debug("-------Starting test-------");
-		FBase fbase = new FBase(null);
-		fbase.startup(false);
-		fbase.taskmanager.storeHistory();
+		FBase fbase = FBaseFactory.basic(1, false, false);
 		KeygroupID id = new KeygroupID("app", "tenant", "group");
 		KeygroupConfig config = new KeygroupConfig(id, null, null);
 		config.setVersion(1);
@@ -62,7 +60,8 @@ public class B_CheckKeygroupConfigurationsOnUpdatesTaskTest {
 						+ " should not have been executed so often, ",
 				new Integer(1), fbase.taskmanager.getHistoricTaskNumbers()
 						.get(TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS));
-		Future<Boolean> task = fbase.taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(1000);
+		Future<Boolean> task =
+				fbase.taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(1000);
 		config.setVersion(2);
 		fbase.connector.keygroupConfig_put(id, config);
 		Thread.sleep(2000);

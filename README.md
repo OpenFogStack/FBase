@@ -9,7 +9,7 @@ For some of the tests, a running naming service is required. The naming service 
 # Current ToDos / Missing Functionality
 
 ## Startup
-- [ ] A machineName should be dynamically created on Startup (clean up configs)
+- [x] A machineName should be dynamically created on Startup (clean up configs)
 - [x] Run AddMachineToNodeTask (ended up not being a task)
 
 ## Subscription Management incl. Heartbeats

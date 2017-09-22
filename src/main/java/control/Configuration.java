@@ -61,7 +61,6 @@ public class Configuration {
 			
 			properties.load(is);
 			// General
-			machineName = properties.getProperty("machineName");
 			nodeID = new NodeID(properties.getProperty("nodeID"));
 			location = properties.getProperty("location", "Unknown");
 			description = properties.getProperty("description", "Unknown");
@@ -101,7 +100,7 @@ public class Configuration {
 		for (int i = 0; i < methods.length; i++) {
 			Method m = methods[i];
 			if (m.getName().startsWith("get")) {
-				if (!m.getName().equals("getAlgorithm")) {
+				if (!m.getName().equals("getAlgorithm") && !m.getName().equals("getMachineName")) {
 					try {
 						Object obj = m.invoke(this);
 						if (obj == null) {
@@ -134,6 +133,10 @@ public class Configuration {
 		config.setMachines(machines);
 
 		return config;
+	}
+	
+	public void setMachineName(String machineName) {
+		this.machineName = machineName;
 	}
 
 	public String getMachineName() {

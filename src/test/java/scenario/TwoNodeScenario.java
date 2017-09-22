@@ -33,6 +33,7 @@ import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
 import model.data.MessageID;
+import tasks.FBaseFactory;
 import tasks.TaskManager.TaskName;
 
 public class TwoNodeScenario {
@@ -59,12 +60,8 @@ public class TwoNodeScenario {
 
 	@Before
 	public void setUp() throws Exception {
-		fbase1 = new FBase("TwoNodeScenario_1.properties");
-		fbase1.startup(false);
-		fbase1.taskmanager.storeHistory();
-		fbase2 = new FBase("TwoNodeScenario_2.properties");
-		fbase2.startup(false);
-		fbase2.taskmanager.storeHistory();
+		fbase1 = FBaseFactory.namingService(1, false, false);
+		fbase2 = FBaseFactory.namingService(2, false, false);
 
 		nConfig1 = fbase1.configuration.buildNodeConfigBasedOnData();
 		nConfig2 = fbase2.configuration.buildNodeConfigBasedOnData();

@@ -57,9 +57,8 @@ public class S3DBConnector extends AbstractDBConnector {
 	private NodeID nodeID = null;
 	private String machineName = null;
 
-	public S3DBConnector(NodeID nodeID, String machineName) {
+	public S3DBConnector(NodeID nodeID) {
 		this.nodeID = nodeID;
-		this.machineName = machineName;
 		suffixMap = new HashMap<>();
 		suffixMap.put(Suffix.DATA_RECORD, ".data-records");
 		suffixMap.put(Suffix.KEYGROUP, ".keygroup-configs");
@@ -70,8 +69,8 @@ public class S3DBConnector extends AbstractDBConnector {
 		suffixMap.put(Suffix.MESSAGE_HISTORY, ".message-history");
 	}
 
-	public S3DBConnector(NodeID nodeID, String machineName, String bucketName) {
-		this(nodeID, machineName);
+	public S3DBConnector(NodeID nodeID, String bucketName) {
+		this(nodeID);
 		this.bucketPrefix = bucketName;
 	}
 	
@@ -106,6 +105,9 @@ public class S3DBConnector extends AbstractDBConnector {
 				}
 			}
 		}
+		// TODO S3: set this.machinename to generated name
+		
+		return this.machineName;
 	}
 
 	public void deleteBuckets() throws FBaseStorageConnectorException {

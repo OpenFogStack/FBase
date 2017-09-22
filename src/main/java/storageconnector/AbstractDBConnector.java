@@ -47,8 +47,9 @@ public abstract class AbstractDBConnector {
 	 * called when initializing the connection
 	 * 
 	 * @throws FBaseStorageConnectorException when something goes wrong
+	 * @return the random name for the initialized machine that did not exist yet
 	 */
-	public abstract void dbConnection_initiate() throws FBaseStorageConnectorException;
+	public abstract String dbConnection_initiate() throws FBaseStorageConnectorException;
 
 	/**
 	 * CONNECTION ADMINISTRATION<br<br>

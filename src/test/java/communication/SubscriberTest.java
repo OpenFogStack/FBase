@@ -23,6 +23,7 @@ import model.JSONable;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.messages.Message;
+import tasks.FBaseFactory;
 
 public class SubscriberTest {
 
@@ -47,8 +48,7 @@ public class SubscriberTest {
 		contextPub = ZMQ.context(1);
 		publisher = contextPub.socket(ZMQ.PUB);
 		publisher.bind(address + ":" + port);
-		fBase = new FBase("SubscriberTest.properties");
-		fBase.startup(false);
+		fBase = FBaseFactory.basic(1, false, false);
 	}
 
 	@Before

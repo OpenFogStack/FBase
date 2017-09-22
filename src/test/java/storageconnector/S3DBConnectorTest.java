@@ -50,7 +50,7 @@ public class S3DBConnectorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		connector = new S3DBConnector(new NodeID("N1"), "M1",
+		connector = new S3DBConnector(new NodeID("N1"),
 				"de.hasenburg.fbase.s3dbconnector-testbucket");
 		connector.dbConnection_initiate();
 		keygroupID1 = new KeygroupID("smartlight", "h1", "lightning");

@@ -277,20 +277,35 @@ public abstract class AbstractDBConnector {
 	 * <br>
 	 * sets the "I'm alive" timestamp for the specified machine to the current time
 	 * 
-	 * @param machine a machine ID
+	 * @param machine - the machine's name
+	 * @param address - the machine's address
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract void heartbeats_update(String machine) throws FBaseStorageConnectorException;
+	public abstract void heartbeats_update(String machine, String address)
+			throws FBaseStorageConnectorException;
 
 	/**
 	 * HEARTBEATS<br>
 	 * <br>
 	 * 
-	 * @return a mapping of all machine IDs within this node and the last time they each
-	 *         reported to be alive.
+	 * @return a mapping of all machine names and their addresses within this node and the last
+	 *         time they each reported to be alive.
 	 * @throws FBaseStorageConnectorException when the operation fails
 	 */
-	public abstract Map<String, Long> heartbeats_listAll() throws FBaseStorageConnectorException;
+	public abstract Map<String, Pair<String, Long>> heartbeats_listAll()
+			throws FBaseStorageConnectorException;
+	
+	/**
+	 * HEARTBEATS<br>
+	 * <br>
+	 * removes a machine from the heartbeats table.
+	 * 
+	 * @param machine - the machine's name
+	 * @return true if the item no longer exists after the method call, false otherwise
+	 * @throws FBaseStorageConnectorException when the operation fails
+	 */
+	public abstract boolean heartbeats_remove(String machine)
+			throws FBaseStorageConnectorException;
 
 	/**
 	 * MESSAGEHISTORY<br>

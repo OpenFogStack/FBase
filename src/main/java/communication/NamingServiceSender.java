@@ -28,6 +28,9 @@ import model.messages.ResponseCode;
 /**
  * Sends requests to designated receivers.
  * 
+ * TODO 2: Don't catch encryption exception?
+ * TODO 2: Remove booleans as return value, because no exception equals success
+ * 
  * @author jonathanhasenburg
  *
  */
@@ -303,7 +306,7 @@ public class NamingServiceSender extends AbstractSender {
 	 * @param config - the {@link KeygroupConfig}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
 	 * @throws FBaseCommunicationException
-	 * @throws FBaseNamingServiceException 
+	 * @throws FBaseNamingServiceException
 	 */
 	public KeygroupConfig sendKeygroupConfigCreate(KeygroupConfig config)
 			throws FBaseCommunicationException, FBaseNamingServiceException {

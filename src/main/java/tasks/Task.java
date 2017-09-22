@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
 
 import control.FBase;
+import exceptions.FBaseException;
 import tasks.TaskManager.TaskName;
 
 public abstract class Task<V> implements Callable<V> {
@@ -26,7 +27,7 @@ public abstract class Task<V> implements Callable<V> {
 	}
 
 	@Override
-	public V call() {
+	public V call() throws FBaseException {
 		logger.debug("Executing task " + name);
 		fBase.taskmanager.registerTask(name);
 		V answer = executeFunctionality();
@@ -35,6 +36,6 @@ public abstract class Task<V> implements Callable<V> {
 		return answer;
 	}
 
-	public abstract V executeFunctionality();
+	public abstract V executeFunctionality() throws FBaseException;
 
 }

@@ -15,18 +15,22 @@ import model.config.NodeConfig;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.messages.Envelope;
-import tasks.UpdateNodeConfigTask.Flag;
 import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
+import tasks.background.DetectLostResponsibility;
+import tasks.background.DetectMissingHeartbeats;
+import tasks.background.DetectMissingResponsibility;
+import tasks.background.PollLatestConfigurationDataForResponsibleKeygroupsTask;
+import tasks.background.PutHeartbeatTask;
 
 public class TaskManager {
 
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(TaskManager.class.getName());
 	private ExecutorService pool = null;
 	private final AtomicInteger[] runningTasks = new AtomicInteger[TaskName.values().length];
 
 	// if set to true by enable storingHistory, the taskmanager will store how often it run
-	// each
-	// task
+	// each task
 	private boolean storingHistory = false;
 	private final AtomicInteger[] taskHistory = new AtomicInteger[TaskName.values().length];
 
@@ -34,8 +38,12 @@ public class TaskManager {
 
 	public enum TaskName {
 		LOG, SLEEP, UPDATE_KEYGROUP_CONFIG, UPDATE_KEYGROUP_SUBSCRIPTIONS, PUT_DATA_RECORD,
-		DELETE_DATA_RECORD, UPDATE_NODE_CONFIG, CHECK_KEYGROUP_SUBSCRIPTIONS,
-		PROCESS_MESSAGE_WITH_UNKNOWN_ENCRYPTION, CHECK_NAMING_SERVICE_CONFIGURATION_DATA
+		DELETE_DATA_RECORD, UPDATE_FOREIGN_NODE_CONFIG, B_CHECK_KEYGROUP_CONFIGURATIONS_ON_UPDATES,
+		PROCESS_MESSAGE_WITH_UNKNOWN_ENCRYPTION, CHECK_NAMING_SERVICE_CONFIGURATION_DATA,
+		B_POLL_LATEST_CONFIGURATION_DATA_FOR_RESPONSIBLE_KEYGROUPS, B_PUT_HEARTBEAT,
+		B_DETECT_MISSING_HEARTBEATS, REMOVE_MACHINE_FROM_NODE,
+		ANNOUNCE_UPDATE_OF_OWN_NODE_CONFIGURATION, B_DETECT_MISSING_RESPONSIBILITY,
+		B_DETECT_LOST_RESPONSIBILITY
 	}
 
 	public void storeHistory() {
@@ -59,7 +67,6 @@ public class TaskManager {
 	}
 
 	public void deregisterTask(TaskName name) {
-		logger.debug("Deregistering task " + name);
 		runningTasks[name.ordinal()].decrementAndGet();
 	}
 
@@ -112,21 +119,8 @@ public class TaskManager {
 		return future;
 	}
 
-	public Future<Boolean> runCheckKeygroupConfigurationsOnUpdatesTask(int interval) {
-		Future<Boolean> future =
-				pool.submit(new CheckKeygroupConfigurationsOnUpdatesTask(fBase, interval));
-		return future;
-	}
-
-	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config, Flag flag) {
-		Future<Boolean> future = pool.submit(new UpdateNodeConfigTask(config, fBase, flag));
-		return future;
-	}
-
-	public Future<Boolean> runUpdateNodeConfigTask(NodeConfig config, Flag flag,
-			boolean notifyNamingService) {
-		Future<Boolean> future =
-				pool.submit(new UpdateNodeConfigTask(config, fBase, flag, notifyNamingService));
+	public Future<Boolean> runUpdateForeignNodeConfigTask(NodeConfig config) {
+		Future<Boolean> future = pool.submit(new UpdateForeignNodeConfigTask(config, fBase));
 		return future;
 	}
 
@@ -143,6 +137,55 @@ public class TaskManager {
 	public Future<Boolean> runProcessMessageWithUnknownEncryptionTask(Envelope envelope) {
 		Future<Boolean> future =
 				pool.submit(new ProcessMessageWithUnknownEncryptionTask(fBase, envelope));
+		return future;
+	}
+
+	public Future<Boolean> runRemoveMachineFromNodeTask(String machineName) {
+		Future<Boolean> future = pool.submit(new RemoveMachineFromNodeTask(machineName, fBase));
+		return future;
+	}
+
+	public Future<Boolean> runAnnounceUpdateOfOwnNodeConfigurationTask() {
+		Future<Boolean> future = pool.submit(new AnnounceUpdateOfOwnNodeConfigurationTask(fBase));
+		return future;
+	}
+
+	/*
+	 * ------ Background Initiators ------
+	 */
+
+	public Future<Boolean> startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(int interval) {
+		Future<Boolean> future =
+				pool.submit(new CheckKeygroupConfigurationsOnUpdatesTask(fBase, interval));
+		return future;
+	}
+
+	public Future<Boolean> startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(
+			int checkInterval) {
+		Future<Boolean> future = pool.submit(
+				new PollLatestConfigurationDataForResponsibleKeygroupsTask(fBase, checkInterval));
+		return future;
+	}
+
+	public Future<Boolean> startBackgroundPutHeartbeatTask(int pulse) {
+		Future<Boolean> future = pool.submit(new PutHeartbeatTask(fBase, pulse));
+		return future;
+	}
+
+	public Future<Boolean> startDetectMissingHeartbeatsTask(int checkInterval,
+			int toleratedMissingHeartbeat) {
+		Future<Boolean> future = pool.submit(
+				new DetectMissingHeartbeats(fBase, checkInterval, toleratedMissingHeartbeat));
+		return future;
+	}
+
+	public Future<Boolean> startBackgroundDetectMissingResponsibility(int interval) {
+		Future<Boolean> future = pool.submit(new DetectMissingResponsibility(fBase, interval));
+		return future;
+	}
+
+	public Future<Boolean> startBackgroundDetectLostResponsibility(int interval) {
+		Future<Boolean> future = pool.submit(new DetectLostResponsibility(fBase, interval));
 		return future;
 	}
 

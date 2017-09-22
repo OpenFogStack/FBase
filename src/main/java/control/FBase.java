@@ -4,13 +4,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import communication.MessageIdEvaluator;
+import org.apache.log4j.Logger;
+
 import communication.DirectMessageReceiver;
+import communication.MessageIdEvaluator;
 import communication.NamingServiceSender;
 import communication.Publisher;
 import communication.SubscriptionRegistry;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import de.hasenburg.fbase.rest.WebServer;
+import exceptions.FBaseCommunicationException;
+import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
@@ -24,7 +28,6 @@ import storageconnector.ConfigAccessHelper;
 import storageconnector.OnHeapDBConnector;
 import storageconnector.S3DBConnector;
 import tasks.TaskManager;
-import tasks.UpdateNodeConfigTask.Flag;
 
 /**
  * Main control class of a FBase machine.
@@ -33,6 +36,8 @@ import tasks.UpdateNodeConfigTask.Flag;
  *
  */
 public class FBase {
+
+	private static Logger logger = Logger.getLogger(FBase.class.getName());
 
 	public Configuration configuration = null;
 	public AbstractDBConnector connector = null;
@@ -50,8 +55,9 @@ public class FBase {
 		publisher = new Publisher("tcp://0.0.0.0", configuration.getPublisherPort());
 	}
 
-	public void startup(boolean registerAtNamingService) throws InterruptedException,
-			ExecutionException, TimeoutException, FBaseStorageConnectorException {
+	public void startup(boolean announce) throws InterruptedException, ExecutionException,
+			TimeoutException, FBaseStorageConnectorException, FBaseCommunicationException,
+			FBaseNamingServiceException {
 		if (Connector.S3.equals(configuration.getDatabaseConnector())) {
 			connector =
 					new S3DBConnector(configuration.getNodeID(), configuration.getMachineName());
@@ -76,13 +82,32 @@ public class FBase {
 		subscriptionRegistry = new SubscriptionRegistry(this);
 		messageIdEvaluator = new MessageIdEvaluator(this);
 		messageIdEvaluator.startup();
+		
+		// start putting heartbeats (pulse 0 = default)
+		taskmanager.startBackgroundPutHeartbeatTask(0);
+		
+		// add machine to node
+		if (announce) {
+			announceMachineAdditionToNode();
+		}
+		
+		// start other background tasks (interval 0 = default)
+		taskmanager.startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(0);
+		taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(0);
+		taskmanager.startDetectMissingHeartbeatsTask(0, 0);
+		taskmanager.startBackgroundDetectMissingResponsibility(0);
+		taskmanager.startBackgroundDetectLostResponsibility(0);
 
-		taskmanager.runUpdateNodeConfigTask(null, Flag.INITIAL, registerAtNamingService).get(20,
-				TimeUnit.SECONDS);
+		Thread.sleep(50);
+		logger.info("FBase started, all background tasks up and running.");
+	}
 
-		// TODO 2: Start Background Tasks,
+	private void announceMachineAdditionToNode()
+			throws FBaseStorageConnectorException, FBaseCommunicationException,
+			FBaseNamingServiceException {
+		
+		// TODO 1: Tell a node that is already registered about addition (we need a one-to-one here)
 
-		// TODO 2: should check own node configuration regulary to figure if removed
 	}
 
 	public void tearDown() {
@@ -99,16 +124,20 @@ public class FBase {
 		}
 	}
 
-	public void fillWithData() throws FBaseStorageConnectorException {
+	public void fillWithData() throws FBaseStorageConnectorException, InterruptedException,
+			ExecutionException, TimeoutException {
 		ClientConfig clientConfig = new ClientConfig();
 		clientConfig.setClientID(new ClientID("C-1"));
+		clientConfig.setEncryptionAlgorithm(EncryptionAlgorithm.RSA);
+		clientConfig.setPublicKey(
+				"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnvVCGNNQMcI9FCio5Hhu0JNW3kXTYj+XqmuFolQyNj+kbEZgZ718i2ujRoz5PSKU8oWSwiDKDxHmhnEAwvwX2w4E/p74SSWuv18FLcobBVad4QUbJFLCp1+JmPLJuBN/Vjvke3RYUgZcZifaH8OQDaAnJsWrNlGHRjafXwFxiwHD6KA6J8mW7y+xtcS3WDsstAwVrxZMkENnkEg3syCOKPsaUuUQgo/yE2GCaJd41v8rGee+V7ThDcVqyAJpWi/tDGclEJvH2HrPsxzUnY0cl10OAkzzZiF7lWIr/cGWpRvlzygeHqT538mLckImFRwxF4EVU/N5AoDDPhWdhNCy4QIDAQAB");
 		connector.clientConfig_put(clientConfig.getClientID(), clientConfig);
 
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
 		KeygroupConfig config = new KeygroupConfig(new KeygroupID("smartlight", "h1", "brightness"),
 				"secret", EncryptionAlgorithm.AES);
 		config.addClient(clientConfig.getClientID());
-		taskmanager.runUpdateKeygroupConfigTask(config, false);
+		taskmanager.runUpdateKeygroupConfigTask(config, false).get(1, TimeUnit.SECONDS);
 
 		DataRecord record = new DataRecord();
 		record.setDataIdentifier(new DataIdentifier(keygroupID, "M-1"));

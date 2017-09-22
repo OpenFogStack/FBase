@@ -5,10 +5,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
-import org.javatuples.Pair;
 
 import control.FBase;
-import exceptions.FBaseEncryptionException;
+import exceptions.FBaseException;
 import exceptions.FBaseStorageConnectorException;
 import model.JSONable;
 import model.config.KeygroupConfig;
@@ -16,23 +15,16 @@ import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
 import tasks.TaskManager.TaskName;
-import tasks.background.CheckKeygroupConfigurationsOnUpdatesTask;
 
 /**
- * This task stores a keygroup config in the database. Furthermore, it instructs the publisher
- * to publish the given data record if a specific flag has been set.
+ * This task stores a keygroup config in the database. It will only store the configuration
+ * and continue with the rest of this task, if the version differ. Furthermore, it instructs
+ * the publisher to publish the given data record if a specific flag has been set.
  * 
- * Before returning, the {@link UpdateKeygroupSubscriptionsTask} is started if one of the
- * following to conditions is met:
+ * This task also starts the {@link UpdateKeygroupSubscriptionsTask} for the updated keygroup.
  * 
- * 1. the machine is the responsible machine for the keygroups
- * 
- * 2. no machine is responsible for the keygroup yet
- * 
- * Otherwise, the subscriptions will not be updated. However, the machine responsible for the
- * subscriptions will identify the updated due to the
- * {@link CheckKeygroupConfigurationsOnUpdatesTask}. which runs as a background process on
- * each machine.
+ * @return true, if task executed
+ * @return false, if version did not differ
  * 
  * @author jonathanhasenburg
  *
@@ -51,9 +43,15 @@ public class UpdateKeygroupConfigTask extends Task<Boolean> {
 	}
 
 	@Override
-	public Boolean executeFunctionality() {
-		
-		// TODO 1: Handle tombstoned
+	public Boolean executeFunctionality() throws FBaseException {
+
+		// check version change
+		KeygroupConfig oldConfig = fBase.connector.keygroupConfig_get(config.getKeygroupID());
+
+		if (oldConfig != null && oldConfig.getVersion() >= config.getVersion()) {
+			logger.warn("Version of to be put config not greater than stored config");
+			return false;
+		}
 
 		// store config in database
 		try {
@@ -61,39 +59,18 @@ public class UpdateKeygroupConfigTask extends Task<Boolean> {
 		} catch (FBaseStorageConnectorException e) {
 			// no problem, it just already existed
 		}
-		try {
-			fBase.connector.keygroupConfig_put(config.getKeygroupID(), config);
-		} catch (FBaseStorageConnectorException e) {
-			logger.fatal("Could not store keygroup configuration in node DB, nothing changed");
-			return false;
-		}
+		
+		fBase.connector.keygroupConfig_put(config.getKeygroupID(), config);
+		logger.debug("Stored configuration in database");
 
-		// check whether subscriptions need to be updated
 		try {
-			Pair<String, Integer> responsibleMachine = fBase.connector
-					.keyGroupSubscriberMachines_listAll().get(config.getKeygroupID());
-			boolean updateNeeded = false;
-			if (responsibleMachine == null) {
-				logger.debug("No responsible machine set yet, initiliazing "
-						+ TaskManager.TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS + " task");
-				updateNeeded = true;
-			} else if (fBase.configuration.getMachineName()
-					.equals(responsibleMachine.getValue0())) {
-				logger.debug("We are the responsible machine, initiliazing "
-						+ TaskManager.TaskName.UPDATE_KEYGROUP_SUBSCRIPTIONS + " task");
-				updateNeeded = true;
-			}
-
-			if (updateNeeded) {
-				fBase.taskmanager.runUpdateKeygroupSubscriptionsTask(config).get(1,
-						TimeUnit.SECONDS);
-			}
-		} catch (FBaseStorageConnectorException | InterruptedException | ExecutionException
-				| TimeoutException e) {
-			e.printStackTrace();
-			logger.fatal("Could not check whether any subscriptions need to be updated. "
-					+ "However, the configuration was stored in the database.");
+			fBase.taskmanager.runUpdateKeygroupSubscriptionsTask(config).get(1, TimeUnit.SECONDS);
+		} catch (ExecutionException e2) {
+			throw new FBaseException(e2.getCause());
+		} catch (TimeoutException | InterruptedException e2) {
+			e2.printStackTrace();
 		}
+		logger.debug("Updated keygroup subscriptions");
 
 		if (publish) {
 			// create envelope
@@ -103,14 +80,8 @@ public class UpdateKeygroupConfigTask extends Task<Boolean> {
 			Envelope e = new Envelope(config.getKeygroupID(), m);
 
 			// publish data
-			try {
-				fBase.publisher.send(e, config.getEncryptionSecret(),
-						config.getEncryptionAlgorithm());
-			} catch (FBaseEncryptionException e1) {
-				logger.warn("Could not publish envelope to other nodes because encyption failed, "
-						+ e1.getMessage());
-				e1.printStackTrace();
-			}
+			fBase.publisher.send(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+			logger.debug("Published updated configuration to subscribers");
 		}
 
 		return true;

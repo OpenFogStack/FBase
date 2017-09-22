@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import control.FBase;
@@ -36,6 +37,10 @@ import model.data.NodeID;
 public class MessageIdEvaluator {
 
 	private static Logger logger = Logger.getLogger(MessageIdEvaluator.class.getName());
+	
+	static {
+		logger.setLevel(Level.INFO);
+	}
 
 	private FBase fBase;
 	private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
@@ -112,7 +117,7 @@ public class MessageIdEvaluator {
 							directMessageSender.shutdown();
 						}
 						nodeID = mID.getNodeID();
-						logger.debug("Retrieving messages from node " + nodeID);
+						logger.info("Retrieving missed messages from node " + nodeID);
 						directMessageSender = new DirectMessageSender(
 								fBase.configAccessHelper.nodeConfig_get(nodeID), fBase);
 					}

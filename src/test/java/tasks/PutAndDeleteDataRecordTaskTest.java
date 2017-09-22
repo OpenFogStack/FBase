@@ -33,7 +33,7 @@ import scenario.TwoNodeScenario;
  * @author jonathanhasenburg
  *
  */
-public class PutAndDeleteDataRecordTask {
+public class PutAndDeleteDataRecordTaskTest {
 
 	FBase fBase = null;
 	private static KeygroupID keygroupID = new KeygroupID("app", "tenant", "group");

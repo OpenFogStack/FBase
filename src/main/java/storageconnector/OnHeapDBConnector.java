@@ -5,6 +5,7 @@ package storageconnector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 
 import exceptions.FBaseStorageConnectorException;
+import model.JSONable;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
@@ -28,8 +30,6 @@ import model.data.NodeID;
  * This class stores all data on heap in a number of maps; it should only be used for testing
  * purposes.
  * 
- * WARNING: the operations do not create copies, instead they return and set references SO USE
- * WITH CAUTION
  * 
  * @author Dave
  * @author jonathanhasenburg
@@ -50,8 +50,11 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	/** stores keygroup subscriber info */
 	private final Map<KeygroupID, Pair<String, Integer>> keygroupSubscribers = new HashMap<>();
 
-	/** stores liveness info per machine */
-	private final Map<String, Long> heartbeats = new HashMap<>();
+	/**
+	 * stores liveness info per machine <br>
+	 * (machine name -> (machine address, last heartbeat in milliseconds))
+	 */
+	private final Map<String, Pair<String, Long>> heartbeats = new HashMap<>();
 
 	/** stores data records */
 	private final Map<KeygroupID, Map<DataIdentifier, DataRecord>> records = new HashMap<>();
@@ -100,6 +103,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 */
 	@Override
 	public void dataRecords_put(DataRecord record) throws FBaseStorageConnectorException {
+		record = JSONable.clone(record);
 		Map<DataIdentifier, DataRecord> keygroupMap =
 				records.get(record.getDataIdentifier().getKeygroupID());
 		if (keygroupMap == null)
@@ -117,7 +121,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 		Map<DataIdentifier, DataRecord> keygroupMap = records.get(key.getKeygroupID());
 		if (keygroupMap == null)
 			throw new FBaseStorageConnectorException("Keygroup does not exist.");
-		return keygroupMap.get(key);
+		return JSONable.clone(keygroupMap.get(key));
 	}
 
 	/*
@@ -145,7 +149,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 		Map<DataIdentifier, DataRecord> keygroupMap = records.get(keygroup);
 		if (keygroupMap == null)
 			throw new FBaseStorageConnectorException("Keygroup does not exist.");
-		return keygroupMap.keySet();
+		return new HashSet<DataIdentifier>(keygroupMap.keySet());
 	}
 
 	/*
@@ -182,6 +186,8 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public void keygroupConfig_put(KeygroupID id, KeygroupConfig config)
 			throws FBaseStorageConnectorException {
+		id = JSONable.clone(id);
+		config = JSONable.clone(config);
 		keygroupConfigs.put(id, config);
 	}
 
@@ -193,7 +199,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public KeygroupConfig keygroupConfig_get(KeygroupID keygroupID)
 			throws FBaseStorageConnectorException {
-		return keygroupConfigs.get(keygroupID);
+		return JSONable.clone(keygroupConfigs.get(keygroupID));
 	}
 
 	@Override
@@ -209,8 +215,9 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public void nodeConfig_put(NodeID nodeID, NodeConfig config)
 			throws FBaseStorageConnectorException {
+		nodeID = JSONable.clone(nodeID);
+		config = JSONable.clone(config);
 		nodeConfigs.put(nodeID, config);
-
 	}
 
 	/*
@@ -220,7 +227,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 */
 	@Override
 	public NodeConfig nodeConfig_get(NodeID nodeID) throws FBaseStorageConnectorException {
-		return nodeConfigs.get(nodeID);
+		return JSONable.clone(nodeConfigs.get(nodeID));
 	}
 
 	@Override
@@ -237,6 +244,8 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	@Override
 	public void clientConfig_put(ClientID clientID, ClientConfig config)
 			throws FBaseStorageConnectorException {
+		clientID = JSONable.clone(clientID);
+		config = JSONable.clone(config);
 		clientConfigs.put(clientID, config);
 	}
 
@@ -247,7 +256,7 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 */
 	@Override
 	public ClientConfig clientConfig_get(ClientID clientID) throws FBaseStorageConnectorException {
-		return clientConfigs.get(clientID);
+		return JSONable.clone(clientConfigs.get(clientID));
 	}
 
 	@Override
@@ -303,8 +312,9 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#heartbeats_update(java.lang.String)
 	 */
 	@Override
-	public void heartbeats_update(String machine) throws FBaseStorageConnectorException {
-		heartbeats.put(machine, System.currentTimeMillis());
+	public void heartbeats_update(String machine, String address)
+			throws FBaseStorageConnectorException {
+		heartbeats.put(machine, new Pair<String, Long>(address, System.currentTimeMillis()));
 	}
 
 	/*
@@ -313,20 +323,25 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 	 * @see storageconnector.AbstractDBConnector#heartbeats_getAll()
 	 */
 	@Override
-	public Map<String, Long> heartbeats_listAll() throws FBaseStorageConnectorException {
+	public Map<String, Pair<String, Long>> heartbeats_listAll()
+			throws FBaseStorageConnectorException {
 		return new HashMap<>(heartbeats);
+	}
+	
+	@Override
+	public boolean heartbeats_remove(String machine) throws FBaseStorageConnectorException {
+		heartbeats.remove(machine);
+		return true;
 	}
 
 	@Override
 	public MessageID messageHistory_getNextMessageID() throws FBaseStorageConnectorException {
 		if (messageHistory.isEmpty()) {
-			return new MessageID(nodeID,
-					machineName, 1);
+			return new MessageID(nodeID, machineName, 1);
 		}
 
 		int nextVersion = messageHistory.lastKey() + 1;
-		return new MessageID(nodeID, machineName,
-				nextVersion);
+		return new MessageID(nodeID, machineName, nextVersion);
 	}
 
 	@Override

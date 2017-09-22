@@ -1,18 +1,16 @@
 package tasks;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.apache.log4j.Logger;
 
-import communication.SubscriptionRegistry;
 import control.FBase;
-import exceptions.FBaseEncryptionException;
-import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseCommunicationException;
-import model.JSONable;
+import exceptions.FBaseNamingServiceException;
 import model.config.KeygroupConfig;
-import model.data.DataIdentifier;
-import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.messages.Command;
 import model.messages.Envelope;
 import tasks.TaskManager.TaskName;
 
@@ -20,11 +18,7 @@ import tasks.TaskManager.TaskName;
  * This task tries to process a message which could not be interpreted with the encryption
  * data available locally. This is usually the case, if the secret of a configuration was
  * updated. Thus, the task polls the most recent configuration of the keygroup from the naming
- * service.
- * 
- * If the node was removed from the keygroup, this task will detect it, remove the config data
- * stored in the node database and call
- * {@link SubscriptionRegistry#unsubscribeFromKeygroup(model.data.KeygroupID)}
+ * service and initializes the subscription update process
  * 
  * @author jonathanhasenburg
  *
@@ -43,11 +37,12 @@ class ProcessMessageWithUnknownEncryptionTask extends Task<Boolean> {
 
 	@Override
 	public Boolean executeFunctionality() {
-		logger.debug("Trying to process envelope with id " + envelope.getKeygroupID());
+		logger.debug("Trying to process envelope with keygroup id " + envelope.getKeygroupID());
 
 		KeygroupID keygroupID = envelope.getKeygroupID();
 		if (keygroupID == null) {
 			// Message is not parseable
+			logger.warn("The received message does not have a valid keygroup id " + keygroupID);
 			return false;
 		}
 
@@ -60,37 +55,14 @@ class ProcessMessageWithUnknownEncryptionTask extends Task<Boolean> {
 			return false;
 		}
 
-		if (config == null) {
-			// config was deleted
-			logger.debug("The configuration was deleted");
-			fBase.subscriptionRegistry.unsubscribeFromKeygroup(envelope.getKeygroupID());
-			return true;
-		}
-
-		// I am removed from config
-		if (config.getEncryptionSecret() == null) {
-			logger.debug("I was removed from the configuration");
-			fBase.subscriptionRegistry.unsubscribeFromKeygroup(envelope.getKeygroupID());
-			return true;
-		}
-
-		fBase.taskmanager.runUpdateKeygroupConfigTask(config, false);
 		try {
-			envelope.getMessage().decryptFields(config.getEncryptionSecret(),
-					config.getEncryptionAlgorithm());
-			if (Command.PUT_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-				DataRecord update =
-						JSONable.fromJSON(envelope.getMessage().getContent(), DataRecord.class);
-				fBase.taskmanager.runPutDataRecordTask(update, false);
-			} else if (Command.DELETE_DATA_RECORD.equals(envelope.getMessage().getCommand())) {
-				DataIdentifier identifier =
-						JSONable.fromJSON(envelope.getMessage().getContent(), DataIdentifier.class);
-				fBase.taskmanager.runDeleteDataRecordTask(identifier, false);
-			}
-		} catch (FBaseEncryptionException e) {
-			logger.error(
-					"Could not decrypt fields with new naming service data, " + e.getMessage());
+			fBase.taskmanager.runUpdateKeygroupConfigTask(config, false).get(3, TimeUnit.SECONDS);
+		} catch (ExecutionException e) {
+			logger.error("Could not update keygroup config" + e.getMessage());
+		} catch (TimeoutException | InterruptedException e) {
+			logger.error(e);
 		}
+		logger.debug("Updated subscriptions with new config");
 
 		return true;
 	}

@@ -1,20 +1,13 @@
 package client;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import model.JSONable;
+import exceptions.FBaseEncryptionException;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
 import model.data.KeygroupID;
-import model.messages.Message;
 
 /**
  * A client implemantation which allows the usage of the FBase rest interface
@@ -25,111 +18,59 @@ import model.messages.Message;
 public class Client {
 
 	private static Logger logger = Logger.getLogger(Client.class.getName());
-
-	public static void main(String[] args) throws UnirestException {
+	
+	public void getScenario(String address, int port) throws UnirestException {
+		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
+		DataIdentifier dataID = new DataIdentifier(keygroupID, "M-1");
+		
+		DataRecord newRecord = new DataRecord(new DataIdentifier(keygroupID, "M-2"), null);
+		newRecord.setValueWithoutKey("Example value");
+		
+		RecordRequest records = new RecordRequest(address, port);
+		
+		logger.info("Got M-1: " + records.getDataRecord(dataID));
+		logger.info("Put M-2: " + records.putDataRecord(newRecord));
+		logger.info("Got M-2: " + records.getDataRecord(newRecord.getDataIdentifier()));
+		logger.info("List: " + records.listDataRecords(keygroupID));
+		logger.info("Deleted M-2: " + records.deleteDataRecord(newRecord.getDataIdentifier()));
+		logger.info("Got M-2: " + records.getDataRecord(newRecord.getDataIdentifier()));
+		logger.info("List: " + records.listDataRecords(keygroupID));
+	}
+	
+	public static void main(String[] args) throws UnirestException, FBaseEncryptionException {
+		String address = "localhost";
+		int port = 8081;
+		
 		Client c = new Client();
-		DataRecord record = new DataRecord();
-		DataIdentifier dataIdentifier = new DataIdentifier("smartlight", "h1", "brightness", "M-1");
-		record.setDataIdentifier(new DataIdentifier(dataIdentifier.getKeygroupID(), "M-4"));
-		Message m = c.runPutRecordRequest("http://localhost", 8080, record);
-		logger.info(JSONable.toJSON(m));
-
-		DataRecord record2 = c.runGetRecordRequest("http://localhost", 8080, dataIdentifier);
-		logger.info(JSONable.toJSON(record2));
-
-		List<String> list = c.runGetListRecordRequest("http://localhost", 8080,
-				dataIdentifier.getKeygroupID());
-		list.stream().forEach(i -> logger.info(i));
+		c.getScenario(address, port);
 	}
 
-	public Client() {
-	}
 
-	public DataRecord runGetRecordRequest(String address, int port, DataIdentifier dataIdentifier)
-			throws UnirestException {
-		DataRecord record = null;
-		try {
-			String target = address + ":" + port + "/record";
-			logger.info("Running get request targeting " + target);
-			HttpResponse<String> response = Unirest.get(target)
-					.queryString("dataIdentifier", dataIdentifier).asString();
-			if (response.getStatus() == 200) {
-				logger.info("Status = 200");
-				Message m = JSONable.fromJSON(response.getBody(), Message.class);
-				// Insert decryption here if needed
-				record = JSONable.fromJSON(m.getContent(), DataRecord.class);
-			} else {
-				logger.info("Status = " + response.getStatus());
-			}
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
 
-		return record;
-	}
+//	public boolean keygroupConfig_create(String address, int port, KeygroupConfig keygroupConfig)
+//			throws UnirestException, FBaseEncryptionException {
+//		
+//		// prepare
+//		String target = address + ":" + port + "/keygroupConfig";
+//		logger.info("Running post request targeting " + target);
+//		
+//		// create and sign request message
+//		Message requestM = new Message();
+//		requestM.setContent(JSONable.toJSON(keygroupConfig));
+//		requestM.signMessage(privateKey, algorithm);
+//
+//		// send message
+//		HttpResponse<String> response = Unirest.post(target).header("accept", "application/json")
+//				.queryString("clientID", clientID.getID()).body(JSONable.toJSON(requestM))
+//				.asString();
+//
+//		// process response
+//		if (response.getStatus() == 200) {
+//			return true;
+//		} else {
+//			logger.error("Status = " + response.getStatus());
+//			return false;
+//		}
+//	}
 
-	@SuppressWarnings("unchecked")
-	public List<String> runGetListRecordRequest(String address, int port, KeygroupID keygroupID) {
-		List<String> list = null;
-		try {
-			String target = address + ":" + port + "/record/list";
-			logger.info("Running get request targeting " + target);
-			HttpResponse<String> response = Unirest.get(target)
-					.queryString("keygroupID", keygroupID).asString();
-			if (response.getStatus() == 200) {
-				logger.info("Status = 200");
-				Message m = JSONable.fromJSON(response.getBody(), Message.class);
-				// Insert decryption here if needed
-				ObjectMapper mapper = new ObjectMapper();
-				list = mapper.readValue(m.getContent(), List.class);
-			} else {
-				logger.info("Status = " + response.getStatus());
-			}
-		} catch (UnirestException | IOException e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
-
-	public Message runPutRecordRequest(String address, int port, DataRecord record) {
-		Message m = null;
-		try {
-			String target = address + ":" + port + "/record";
-			logger.info("Running put request targeting " + target);
-			HttpResponse<String> response = Unirest.put(target).header("accept", "application/json")
-					// insert decryption here if needed
-					.queryString("keygroupID", record.getKeygroupID().getID()).body(JSONable.toJSON(record))
-					.asString();
-			if (response.getStatus() == 200) {
-				m = JSONable.fromJSON(response.getBody(), Message.class);
-			} else {
-				logger.info("Status = " + response.getStatus());
-			}
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
-		return m;
-	}
-	
-	public Message runDeleteRecordRequest(String address, int port, DataIdentifier identifier) {
-		Message m = null;
-		try {
-			String target = address + ":" + port + "/record";
-			logger.info("Running delete request targeting " + target);
-			HttpResponse<String> response = Unirest.delete(target)
-					  .header("accept", "application/json")
-					  .queryString("keygroupID", identifier.getKeygroupID().getID())
-					  .body(JSONable.toJSON(identifier)) // insert encryption here if needed
-					  .asString();
-			if (response.getStatus() == 200) {
-				m = JSONable.fromJSON(response.getBody(), Message.class);
-			} else {
-				logger.info("Status = " + response.getStatus());
-			}
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
-		return m;
-	}
-	
 }

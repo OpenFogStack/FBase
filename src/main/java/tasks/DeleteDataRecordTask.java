@@ -3,10 +3,7 @@ package tasks;
 import org.apache.log4j.Logger;
 
 import control.FBase;
-import exceptions.FBaseEncryptionException;
-import exceptions.FBaseNamingServiceException;
-import exceptions.FBaseCommunicationException;
-import exceptions.FBaseStorageConnectorException;
+import exceptions.FBaseException;
 import model.JSONable;
 import model.config.KeygroupConfig;
 import model.data.DataIdentifier;
@@ -39,45 +36,36 @@ class DeleteDataRecordTask extends Task<Boolean> {
 
 	/**
 	 * Delete a {@link DataRecord} from the node database and instructs the publisher to
-	 * publish a delete request if {@link #publish} is true. Fails, if no keygroup exists for
-	 * the given record, or no related keygroup config is found.
+	 * publish a delete request if {@link #publish} is true.
 	 * 
-	 * @return true, if everything works, otherwise false
+	 * @return true, if everything works
+	 * @throws FBaseException if no keygroup (config) for that data record exists or the
+	 *             publish fails
 	 */
 	@Override
-	public Boolean executeFunctionality() {
+	public Boolean executeFunctionality() throws FBaseException {
 		// get keygroup config and delete from node database
 		KeygroupConfig config = null;
-		try {
-			config = fBase.configAccessHelper.keygroupConfig_get(identifier.getKeygroupID());
-			fBase.connector.dataRecords_delete(identifier);
-		} catch (FBaseStorageConnectorException | FBaseCommunicationException
-				| FBaseNamingServiceException e) {
-			logger.error(e.getMessage());
-			return false;
-		}
 
-		try {
-			if (publish) {
-				// get next messageID
-				MessageID messageID = fBase.connector.messageHistory_getNextMessageID();
+		config = fBase.configAccessHelper.keygroupConfig_get(identifier.getKeygroupID());
+		fBase.connector.dataRecords_delete(identifier);
+		logger.debug("Deleted data record " + identifier.getDataID() + " from database");
 
-				// create envelope
-				Message m = new Message();
-				m.setMessageID(messageID);
-				m.setCommand(Command.DELETE_DATA_RECORD);
-				m.setContent(JSONable.toJSON(identifier));
-				Envelope e = new Envelope(identifier.getKeygroupID(), m);
+		if (publish) {
+			// get next messageID
+			MessageID messageID = fBase.connector.messageHistory_getNextMessageID();
 
-				fBase.publisher.send(e, config.getEncryptionSecret(),
-						config.getEncryptionAlgorithm());
+			// create envelope
+			Message m = new Message();
+			m.setMessageID(messageID);
+			m.setCommand(Command.DELETE_DATA_RECORD);
+			m.setContent(JSONable.toJSON(identifier));
+			Envelope e = new Envelope(identifier.getKeygroupID(), m);
 
-				// store in messageHistory
-				fBase.connector.messageHistory_put(messageID, identifier);
-			}
-		} catch (FBaseStorageConnectorException | FBaseEncryptionException e) {
-			logger.error("Unable to publish message", e);
-			return false;
+			fBase.publisher.send(e, config.getEncryptionSecret(), config.getEncryptionAlgorithm());
+
+			// store in messageHistory
+			fBase.connector.messageHistory_put(messageID, identifier);
 		}
 
 		return true;

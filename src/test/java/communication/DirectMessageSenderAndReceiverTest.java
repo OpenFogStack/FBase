@@ -51,6 +51,9 @@ public class DirectMessageSenderAndReceiverTest {
 		fBase = new FBase("MessageSenderAndReceiverTest_Config.properties");
 		fBase.startup(false);
 		myNode = fBase.configuration.buildNodeConfigBasedOnData();
+		// put my own configuration in database
+		fBase.connector.nodeConfig_put(myNode.getNodeID(), myNode);
+		
 		directMessageSender = new DirectMessageSender(myNode, fBase);
 		KeygroupConfig keygroupConfig =
 				new KeygroupConfig(keygroupID, "testscret", EncryptionAlgorithm.AES);

@@ -1,12 +1,10 @@
 package control;
 
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
-import org.javatuples.Pair;
 
 import communication.DirectMessageReceiver;
 import communication.MessageIdEvaluator;
@@ -20,7 +18,6 @@ import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
 import model.config.KeygroupConfig;
-import model.config.NodeConfig;
 import model.data.ClientID;
 import model.data.DataIdentifier;
 import model.data.DataRecord;
@@ -58,7 +55,7 @@ public class FBase {
 		publisher = new Publisher("tcp://0.0.0.0", configuration.getPublisherPort());
 	}
 
-	public void startup(boolean tellEveryone) throws InterruptedException, ExecutionException,
+	public void startup(boolean announce) throws InterruptedException, ExecutionException,
 			TimeoutException, FBaseStorageConnectorException, FBaseCommunicationException,
 			FBaseNamingServiceException {
 		if (Connector.S3.equals(configuration.getDatabaseConnector())) {
@@ -85,39 +82,28 @@ public class FBase {
 		subscriptionRegistry = new SubscriptionRegistry(this);
 		messageIdEvaluator = new MessageIdEvaluator(this);
 		messageIdEvaluator.startup();
-
+		
+		// start putting heartbeats (pulse 0 = default)
+		taskmanager.startBackgroundPutHeartbeatTask(0);
+		
 		// add machine to node
-		addMachineToNodeConfiguration(tellEveryone);
-
-		// start background tasks (interval 0 = default)
+		if (announce) {
+			announceMachineAdditionToNode();
+		}
+		
+		// start other background tasks (interval 0 = default)
 		taskmanager.startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(0);
 		taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(0);
+		taskmanager.startDetectMissingHeartbeatsTask(0, 0);
 
+		logger.info("FBase started, all background tasks up and running.");
 	}
 
-	private void addMachineToNodeConfiguration(boolean tellEveryone)
+	private void announceMachineAdditionToNode()
 			throws FBaseStorageConnectorException, FBaseCommunicationException,
 			FBaseNamingServiceException {
-		NodeConfig nodeConfig = configuration.buildNodeConfigBasedOnData();
-		// add other machines based on heartbeats (I am not included here, because I did not
-		// report a heartbeat yet)
-		Map<String, Pair<String, Long>> heartbeats = connector.heartbeats_listAll();
-		for (Pair<String, Long> address : heartbeats.values()) {
-			nodeConfig.addMachine(address.getValue0());
-		}
-
-		if (tellEveryone) {
-			// only updates are possible, because a node cannot create itself, only other
-			// nodes can
-			try {
-				namingServiceSender.sendNodeConfigUpdate(nodeConfig);
-				logger.info("Updated node configuration at the namingservice");
-			} catch (FBaseCommunicationException e) {
-				logger.info("Could not update node configuration at the naming service: "
-						+ e.getMessage());
-			}
-			// TODO 1: Needs to be published to other nodes, but how?
-		}
+		
+		// TODO 1: Tell a node that is already registered about addition (we need a one-to-one here)
 
 	}
 

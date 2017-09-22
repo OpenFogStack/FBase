@@ -26,17 +26,18 @@ public class Publisher extends AbstractSender {
 	}
 
 	/**
-	 * Publishes a new envelope to all subscribers and encrypts the message with the given secret and
-	 * algorithm
+	 * Publishes a new envelope to all subscribers and encrypts the message with the given
+	 * secret and algorithm
 	 * 
 	 * @param envelope - the published envelope
 	 * @param secret - the secret used for encryption
 	 * @param algorithm - the algorithm used for encryption
 	 * @return null
-	 * @throws FBaseEncryptionException 
+	 * @throws FBaseEncryptionException
 	 */
 	@Override
-	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm) throws FBaseEncryptionException {
+	public String send(Envelope envelope, String secret, EncryptionAlgorithm algorithm)
+			throws FBaseEncryptionException {
 		logger.debug("Publishing envelope with namespace " + envelope.getConfigID().getID());
 		envelope.getMessage().encryptFields(secret, algorithm);
 		sender.sendMore(envelope.getConfigID().getID());

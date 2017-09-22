@@ -4,9 +4,9 @@
 
 ### [1] Missing heartbeats detected
 
-- [ ] Background task that stores own heartbeats in the node database
-- [ ] Background task to detect missing heartbeats
-- [ ] Detected: run RemoveMachineFromNodeTask
+- [x] Background task that stores own heartbeats in the node database
+- [x] Background task to detect missing heartbeats
+- [x] Detected: run RemoveMachineFromNodeTask
 
 ### [2] No responsibility detected
 - [ ] Background task to detect missing responsibilities

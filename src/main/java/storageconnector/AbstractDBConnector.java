@@ -294,6 +294,18 @@ public abstract class AbstractDBConnector {
 	 */
 	public abstract Map<String, Pair<String, Long>> heartbeats_listAll()
 			throws FBaseStorageConnectorException;
+	
+	/**
+	 * HEARTBEATS<br>
+	 * <br>
+	 * removes a machine from the heartbeats table.
+	 * 
+	 * @param machine - the machine's name
+	 * @return true if the item no longer exists after the method call, false otherwise
+	 * @throws FBaseStorageConnectorException when the operation fails
+	 */
+	public abstract boolean heartbeats_remove(String machine)
+			throws FBaseStorageConnectorException;
 
 	/**
 	 * MESSAGEHISTORY<br>

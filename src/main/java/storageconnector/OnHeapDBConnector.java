@@ -327,6 +327,12 @@ public class OnHeapDBConnector extends AbstractDBConnector {
 			throws FBaseStorageConnectorException {
 		return new HashMap<>(heartbeats);
 	}
+	
+	@Override
+	public boolean heartbeats_remove(String machine) throws FBaseStorageConnectorException {
+		heartbeats.remove(machine);
+		return true;
+	}
 
 	@Override
 	public MessageID messageHistory_getNextMessageID() throws FBaseStorageConnectorException {

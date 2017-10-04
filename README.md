@@ -19,6 +19,9 @@ For some of the tests, a running naming service is required. The naming service 
 - [ ] Add one to one communication for datarecords
 - [ ] Add one to one communication for machine addition announcement
 
+## Storage
+- [ ] Remove data that is expired
+
 ### Handling Missed Messages
 - [x] Add message history size to machine config (node specific), cleanup config files
 - [ ] (Add message history cleanup functionality (on receiver and sender side), not implemented in thesis)

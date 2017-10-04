@@ -50,9 +50,9 @@ public class S3DBConnectorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		connector = new S3DBConnector(new NodeID("N1"),
-				"de.hasenburg.fbase.s3dbconnector-testbucket");
-		connector.dbConnection_initiate();
+		connector =
+				new S3DBConnector(new NodeID("N1"), "de.hasenburg.fbase.s3dbconnector-testbucket");
+		logger.debug("Machine name: " + connector.dbConnection_initiate());
 		keygroupID1 = new KeygroupID("smartlight", "h1", "lightning");
 		keygroupID2 = new KeygroupID("smartlight", "h1", "brightness");
 	}
@@ -235,26 +235,36 @@ public class S3DBConnectorTest {
 
 		// store data
 		Long time = System.currentTimeMillis();
-		connector.heartbeats_update("M1");
-		connector.heartbeats_update("M2");
+		connector.heartbeats_update("M1", "addressM1");
+		connector.heartbeats_update("M2", "addressM2");
 
 		// check map
-		Map<String, Long> heartbeats = connector.heartbeats_listAll();
+		Map<String, Pair<String, Long>> heartbeats = connector.heartbeats_listAll();
 		assertEquals(2, heartbeats.keySet().size());
-		assertTrue(heartbeats.get("M1") >= time && heartbeats.get("M1") < (time + 1000));
-		assertTrue(heartbeats.get("M2") >= time && heartbeats.get("M2") < (time + 1000));
+		assertTrue(heartbeats.get("M1").getValue1() >= time
+				&& heartbeats.get("M1").getValue1() < (time + 1000));
+		assertTrue(heartbeats.get("M2").getValue1() >= time
+				&& heartbeats.get("M2").getValue1() < (time + 1000));
+		
+		assertEquals("addressM1", heartbeats.get("M1").getValue0());
+		assertEquals("addressM2", heartbeats.get("M2").getValue0());
 
 		Thread.sleep(1000);
-		connector.heartbeats_update("M1");
+		connector.heartbeats_update("M1", "addressMX");
 		heartbeats = connector.heartbeats_listAll();
-		assertTrue(heartbeats.get("M1") >= time + 1000 && heartbeats.get("M1") < (time + 2000));
+		assertTrue(heartbeats.get("M1").getValue1() >= time + 1000
+				&& heartbeats.get("M1").getValue1() < (time + 2000));
+		
+		assertEquals("addressMX", heartbeats.get("M1").getValue0());
 
 		logger.debug("Finished testHeartbeats.");
 	}
 
 	@Test
 	public void testMessageHistory() throws InterruptedException, FBaseException {
-		logger.debug("-------Starting testMessageHistory-------");
+		logger.debug("-------Starting testMessageHistory-------");		
+		connector.setNodeIDAndMachineName(new NodeID("N1"), "M1");
+
 		MessageID mID1 = new MessageID();
 		mID1.setMessageIDString("N1/M1/1");
 		MessageID mID2 = new MessageID();

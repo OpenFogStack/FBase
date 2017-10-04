@@ -1,5 +1,7 @@
 # Implementation Subscription Management
 
+Numbers are not as written in thesis
+
 ## Events
 
 ### [1] Missing heartbeats detected

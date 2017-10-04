@@ -52,7 +52,6 @@ public class FBase {
 
 	public FBase(String configName) {
 		configuration = new Configuration(configName);
-		publisher = new Publisher("tcp://0.0.0.0", configuration.getPublisherPort());
 	}
 
 	public void startup(boolean announce, boolean backgroundTasks) throws InterruptedException,
@@ -71,6 +70,8 @@ public class FBase {
 			server = new WebServer(this);
 			server.startServer();
 		}
+		publisher = new Publisher("tcp://0.0.0.0", configuration.getPublisherPort());
+
 		namingServiceSender = new NamingServiceSender(configuration.getNamingServiceAddress(),
 				configuration.getNamingServicePort(), this);
 

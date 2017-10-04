@@ -73,7 +73,7 @@ public class S3DBConnector extends AbstractDBConnector {
 		this(nodeID);
 		this.bucketPrefix = bucketName;
 	}
-	
+
 	/**
 	 * Mainly used for tests.
 	 * 
@@ -86,7 +86,7 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	@Override
-	public void dbConnection_initiate() throws FBaseStorageConnectorException {
+	public String dbConnection_initiate() throws FBaseStorageConnectorException {
 		try {
 			s3 = AmazonS3ClientBuilder.defaultClient();
 		} catch (SdkClientException e) {
@@ -105,9 +105,19 @@ public class S3DBConnector extends AbstractDBConnector {
 				}
 			}
 		}
-		// TODO S3: set this.machinename to generated name
+
+		// read all machine names
+		Map<String, Pair<String, Long>> heartbeats_listAll = heartbeats_listAll();
+
+		// generate names until we found one that is not used, yet.
+		while (true) {
+			String name = generateNameString(5);
+			if (!heartbeats_listAll.containsKey(name)) {
+				this.machineName = name;
+				return this.machineName;
+			}
+		}
 		
-		return this.machineName;
 	}
 
 	public void deleteBuckets() throws FBaseStorageConnectorException {
@@ -544,19 +554,20 @@ public class S3DBConnector extends AbstractDBConnector {
 	}
 
 	@Override
-	public void heartbeats_update(String machine) throws FBaseStorageConnectorException {
+	public void heartbeats_update(String machine, String address)
+			throws FBaseStorageConnectorException {
 		try {
 			s3.putObject(getHeartbeatBucketName(), getHeartbeatsPath(machine),
-					Long.toString(System.currentTimeMillis()));
+					Long.toString(System.currentTimeMillis()) + "\n" + address);
 		} catch (AmazonServiceException e) {
 			throw new FBaseStorageConnectorException(e);
 		}
 	}
 
 	@Override
-	public Map<String, Long> heartbeats_listAll() throws FBaseStorageConnectorException {
+	public Map<String, Pair<String, Long>> heartbeats_listAll() throws FBaseStorageConnectorException {
 		try {
-			Map<String, Long> heartbeats = new HashMap<>();
+			Map<String, Pair<String, Long>> heartbeats = new HashMap<>();
 			ObjectListing ol = s3.listObjects(getHeartbeatBucketName());
 			while (true) {
 				List<S3ObjectSummary> objects = ol.getObjectSummaries();
@@ -565,7 +576,8 @@ public class S3DBConnector extends AbstractDBConnector {
 							.getObject(getHeartbeatBucketName(), os.getKey()).getObjectContent()));
 					try {
 						Long time = Long.parseLong(reader.readLine());
-						heartbeats.put(os.getKey(), time);
+						String address = reader.readLine();
+						heartbeats.put(os.getKey(), new Pair<String, Long>(address, time));
 					} catch (NumberFormatException | IOException e) {
 						logger.error("Cannot parse time from " + os.getKey(), e);
 					}
@@ -578,6 +590,16 @@ public class S3DBConnector extends AbstractDBConnector {
 				}
 			}
 			return heartbeats;
+		} catch (AmazonServiceException e) {
+			throw new FBaseStorageConnectorException(e);
+		}
+	}
+	
+	@Override
+	public boolean heartbeats_remove(String machine) throws FBaseStorageConnectorException {
+		try {
+			s3.deleteObject(getHeartbeatBucketName(), getHeartbeatsPath(machine));
+			return true;
 		} catch (AmazonServiceException e) {
 			throw new FBaseStorageConnectorException(e);
 		}

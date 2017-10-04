@@ -21,7 +21,7 @@ For some of the tests, a running naming service is required. The naming service 
 
 ### Handling Missed Messages
 - [x] Add message history size to machine config (node specific), cleanup config files
-- [ ] (Add message history cleanup functionality (on receiver and sender side)), thesis states not implemented
+- [ ] (Add message history cleanup functionality (on receiver and sender side), not implemented in thesis)
 
 ## Controlling FBase with Clients
  - [ ] Enable encryption and authentication

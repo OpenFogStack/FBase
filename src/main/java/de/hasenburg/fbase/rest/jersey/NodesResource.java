@@ -22,9 +22,6 @@ import model.messages.Message;
  * operations.
  * 
  * 
- * TODO C <br>
- * Do not return the whole config (e.g. keys)
- * 
  * @author jonathanhasenburg
  *
  */

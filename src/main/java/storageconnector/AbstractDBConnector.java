@@ -5,6 +5,7 @@ package storageconnector;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.javatuples.Pair;
@@ -415,6 +416,19 @@ public abstract class AbstractDBConnector {
 	public boolean keygroup_delete(String app, String tenant, String group)
 			throws FBaseStorageConnectorException {
 		return keygroup_delete(new KeygroupID(app, tenant, group));
+	}
+	
+	protected String generateNameString(int size) {
+		String possibleCharacterString = "abcdefghijklmnopqrstuvwxyz";
+		char[] chars = possibleCharacterString.toCharArray();
+		StringBuilder builder = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < size; i++) {
+			char c = chars[random.nextInt(chars.length)];
+			builder.append(c);
+		}
+		String output = builder.toString();
+		return output;
 	}
 
 }

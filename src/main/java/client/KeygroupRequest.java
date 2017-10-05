@@ -22,6 +22,16 @@ public class KeygroupRequest extends RessourceRequest {
 		super(address, port, PATH);
 	}
 
+	public KeygroupConfig updateLocalKeygroupConfig(KeygroupID keygroupID) throws UnirestException {
+		String target = target(keygroupID.getApp(), keygroupID.getTenant(), keygroupID.getGroup(), "update");
+		logger.info("Running get request targeting " + target);
+
+		HttpResponse<String> response =
+				Unirest.get(target).asString();
+
+		return handleObjectResponse(response, KeygroupConfig.class, logger);
+	}
+	
 	public boolean createKeygroup(KeygroupConfig keygroupConfig) throws UnirestException {
 		String target = target();
 		logger.info("Running post request targeting " + target);

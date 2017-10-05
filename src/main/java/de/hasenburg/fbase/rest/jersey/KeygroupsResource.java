@@ -1,5 +1,9 @@
 package de.hasenburg.fbase.rest.jersey;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -62,6 +66,33 @@ public class KeygroupsResource {
 
 	@Inject
 	FBase fBase;
+
+	@GET
+	@Path("{app}/{tenant}/{group}/update")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updateLocal(@PathParam("app") String app, @PathParam("tenant") String tenant,
+			@PathParam("group") String group) {
+
+		KeygroupConfig config = null;
+		try {
+			config = fBase.namingServiceSender
+					.sendKeygroupConfigRead(new KeygroupID(app, tenant, group));
+
+			if (config == null) {
+				return Response.status(404, "Keygroup does not exist").build();
+			}
+
+			fBase.taskmanager.runUpdateKeygroupConfigTask(config, false).get(3, TimeUnit.SECONDS);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException | InterruptedException
+				| ExecutionException | TimeoutException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		Message m = new Message();
+		m.setContent(JSONable.toJSON(config));
+		return Response.ok(JSONable.toJSON(m)).build();
+	}
 
 	@GET
 	@Path("{app}/{tenant}/{group}")

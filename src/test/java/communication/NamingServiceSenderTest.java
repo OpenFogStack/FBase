@@ -393,6 +393,8 @@ public class NamingServiceSenderTest {
 	private void readKeygroupConfig(KeygroupID keygroupID, KeygroupConfig expectedConfig)
 			throws FBaseCommunicationException, FBaseNamingServiceException {
 		KeygroupConfig actualConfig = nsSender.sendKeygroupConfigRead(keygroupID);
+		actualConfig.setEncryptionSecret(expectedConfig.getEncryptionSecret());
+		actualConfig.setEncryptionAlgorithm(expectedConfig.getEncryptionAlgorithm());
 		logger.debug("Expected: " + JSONable.toJSON(expectedConfig));
 		logger.debug("Actual: " + JSONable.toJSON(actualConfig));
 		assertEquals("The naming service returned a wrong config", expectedConfig, actualConfig);
@@ -540,8 +542,8 @@ public class NamingServiceSenderTest {
 		kConfig.addReplicaNode(rnConfig);
 
 		// delete myself
-		assertEquals(kConfig, nsSender.sendKeygroupConfigDeleteNode(kConfig.getKeygroupID(),
-				fbase.configuration.getNodeID()));
+		assertEquals(kConfig.getReplicaNodes().size(), nsSender.sendKeygroupConfigDeleteNode(kConfig.getKeygroupID(),
+				fbase.configuration.getNodeID()).getReplicaNodes().size());
 
 		// check data
 		readKeygroupConfig(kConfig.getKeygroupID(), kConfig);

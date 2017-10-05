@@ -1,7 +1,9 @@
 package de.hasenburg.fbase.rest.jersey;
 
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -18,9 +20,8 @@ import model.config.NodeConfig;
 import model.messages.Message;
 
 /**
- * The only supported node method is get. The client should not be able to run any other
- * operations.
  * 
+ * TODO C: add update and delete
  * 
  * @author jonathanhasenburg
  *
@@ -53,6 +54,28 @@ public class NodesResource {
 		Message m = new Message();
 		m.setContent(JSONable.toJSON(config));
 		return Response.ok(JSONable.toJSON(m)).build();
+	}
+	
+	@POST
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response createNodeConfig(String json) {
+
+		NodeConfig nodeConfig = JSONable.fromJSON(json, NodeConfig.class);
+		if (nodeConfig == null) {
+			return Response.status(400, "Body is not a node config").build();
+		}
+
+		try {
+			fBase.namingServiceSender.sendNodeConfigCreate(nodeConfig);
+			fBase.connector.nodeConfig_put(nodeConfig.getNodeID(), nodeConfig);
+		} catch (FBaseCommunicationException | FBaseNamingServiceException
+				| FBaseStorageConnectorException e) {
+			logger.warn(e);
+			return Response.status(500, e.getMessage()).build();
+		}
+
+		return Response.ok().build();
 	}
 
 }

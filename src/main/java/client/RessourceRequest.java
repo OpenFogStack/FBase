@@ -40,6 +40,10 @@ public abstract class RessourceRequest {
 	protected String target(String a, String b, String c) {
 		return target(a, b) + "/" + c;
 	}
+	
+	protected String target(String a, String b, String c, String d) {
+		return target(a, b, c) + "/" + d;
+	}
 
 	protected <T> T handleObjectResponse(HttpResponse<String> response, Class<T> targetClass,
 			Logger logger) {

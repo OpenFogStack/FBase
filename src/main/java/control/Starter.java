@@ -19,7 +19,7 @@ public class Starter {
 			fbase = new FBase("local.properties");
 		}
 		fbase.startup(true, true); // TODO 2: parse from args
-		fbase.fillWithData();
+		//fbase.fillWithData();
 	}
 
 }

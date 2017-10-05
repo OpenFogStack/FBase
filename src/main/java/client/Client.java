@@ -45,8 +45,6 @@ public class Client {
 		c.getScenario(address, port);
 	}
 
-
-
 //	public boolean keygroupConfig_create(String address, int port, KeygroupConfig keygroupConfig)
 //			throws UnirestException, FBaseEncryptionException {
 //		

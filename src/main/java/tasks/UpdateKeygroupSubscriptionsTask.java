@@ -13,6 +13,7 @@ import exceptions.FBaseException;
 import model.config.KeygroupConfig;
 import model.config.NodeConfig;
 import model.config.ReplicaNodeConfig;
+import model.config.TriggerNodeConfig;
 import model.data.KeygroupID;
 import storageconnector.AbstractDBConnector;
 import tasks.TaskManager.TaskName;
@@ -63,6 +64,13 @@ public class UpdateKeygroupSubscriptionsTask extends Task<Boolean> {
 		for (ReplicaNodeConfig rn : config.getReplicaNodes()) {
 			if (fBase.configuration.getNodeID().equals(rn.getNodeID())) {
 				partOfKeygroup = true;
+			}
+		}
+		if (!partOfKeygroup) {
+			for (TriggerNodeConfig tn : config.getTriggerNodes()) {
+				if (fBase.configuration.getNodeID().equals(tn.getNodeID())) {
+					partOfKeygroup = true;
+				}
 			}
 		}
 

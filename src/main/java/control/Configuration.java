@@ -6,7 +6,11 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
@@ -58,7 +62,7 @@ public class Configuration {
 			if (is == null) {
 				is = new FileInputStream(configName);
 			}
-			
+
 			properties.load(is);
 			// General
 			nodeID = new NodeID(properties.getProperty("nodeID"));
@@ -84,7 +88,7 @@ public class Configuration {
 			namingServicePublicKey = properties.getProperty("namingServicePublicKey", "Unknown");
 
 			// Set IP Address of Machine
-			machineIPAddress = InetAddress.getLocalHost().getHostAddress();
+			machineIPAddress = getBestIPAddress();
 			logger.info("The ip address is " + machineIPAddress);
 
 			checkConsistency();
@@ -93,6 +97,34 @@ public class Configuration {
 			e.printStackTrace();
 			System.exit(1);
 		}
+	}
+
+	/**
+	 * Gets the ip address that seems to be best.
+	 * @throws SocketException
+	 */
+	private static String getBestIPAddress() throws SocketException {		
+		Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+		for (NetworkInterface netint : Collections.list(nets)) {
+			// get en or eth adapters
+			if (netint.getName().startsWith("e")) {
+				logger.debug("Found network adapter: " + netint.getName());
+				Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+				for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+					// only ipv4
+					String ipString = inetAddress.getHostAddress();
+					if (ipString.split("\\.").length == 4) {
+						logger.debug("Evaluating address " + ipString);
+						// make sure not a private address
+						if (!ipString.split("\\.")[0].equals("10")) {
+							logger.debug("Picking address " + ipString);
+							return ipString;
+						}
+					}
+				}
+			}
+		}
+		throw new RuntimeException("Cannot determine node ip address");
 	}
 
 	private void checkConsistency() throws IOException {
@@ -134,7 +166,7 @@ public class Configuration {
 
 		return config;
 	}
-	
+
 	public void setMachineName(String machineName) {
 		this.machineName = machineName;
 	}
@@ -162,7 +194,7 @@ public class Configuration {
 	public Connector getDatabaseConnector() {
 		return databaseConnector;
 	}
-	
+
 	public Integer getMessageHistorySize() {
 		return messageHistorySize;
 	}

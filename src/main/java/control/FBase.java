@@ -106,8 +106,13 @@ public class FBase {
 
 	private void announceMachineAdditionToNode() throws FBaseStorageConnectorException,
 			FBaseCommunicationException, FBaseNamingServiceException {
-
-		// TODO 1: Tell a node that is already registered about addition (we need a one-to-one
+		if (connector.heartbeats_listAll().size() <= 1) {
+			// update myself (must exist before, created by another node)
+			taskmanager.runAnnounceUpdateOfOwnNodeConfigurationTask();
+		}
+		
+		
+		// TODO 1: Tell a machine that is already registered about addition (we need a one-to-one
 		// here)
 
 	}

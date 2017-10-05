@@ -55,7 +55,7 @@ public class NodesResource {
 		m.setContent(JSONable.toJSON(config));
 		return Response.ok(JSONable.toJSON(m)).build();
 	}
-	
+
 	@POST
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -68,9 +68,7 @@ public class NodesResource {
 
 		try {
 			fBase.namingServiceSender.sendNodeConfigCreate(nodeConfig);
-			fBase.connector.nodeConfig_put(nodeConfig.getNodeID(), nodeConfig);
-		} catch (FBaseCommunicationException | FBaseNamingServiceException
-				| FBaseStorageConnectorException e) {
+		} catch (FBaseCommunicationException | FBaseNamingServiceException e) {
 			logger.warn(e);
 			return Response.status(500, e.getMessage()).build();
 		}

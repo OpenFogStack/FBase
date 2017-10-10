@@ -12,5 +12,5 @@
     "messagePort": 6001,
     "restPort": 8081,
     "location": "Everywhere",
-    "description": "Machine specified in JUnit tests"
+    "description": "Machine specified in JUnit tests (Node 1)"
 }

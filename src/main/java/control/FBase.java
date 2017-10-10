@@ -1,12 +1,16 @@
 package control;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
+import org.javatuples.Pair;
 
 import communication.DirectMessageReceiver;
+import communication.DirectMessageSender;
 import communication.MessageIdEvaluator;
 import communication.NamingServiceSender;
 import communication.Publisher;
@@ -14,6 +18,7 @@ import communication.SubscriptionRegistry;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import de.hasenburg.fbase.rest.WebServer;
 import exceptions.FBaseCommunicationException;
+import exceptions.FBaseException;
 import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
@@ -88,6 +93,7 @@ public class FBase {
 
 		// add machine to node
 		if (announce) {
+			Thread.sleep(400); // make sure own heartbeat is in database
 			announceMachineAdditionToNode();
 		}
 
@@ -106,15 +112,35 @@ public class FBase {
 
 	private void announceMachineAdditionToNode() throws FBaseStorageConnectorException,
 			FBaseCommunicationException, FBaseNamingServiceException {
-		if (connector.heartbeats_listAll().size() <= 1) {
+		Map<String, Pair<String, Long>> heartbeats = connector.heartbeats_listAll();
+		if (heartbeats.size() <= 1) {
+			logger.debug("We are the first machine of the node");
 			// update myself (must exist before, created by another node)
-			taskmanager.runAnnounceUpdateOfOwnNodeConfigurationTask();
+			taskmanager.runAnnounceUpdateOfOwnNodeConfigurationTask();	
+			// TODO 2: get all keygroups in which node is either replica/trigger node (important for restart)
+			return;
 		}
 		
-		
-		// TODO 1: Tell a machine that is already registered about addition (we need a one-to-one
-		// here)
-
+		logger.debug("In total, the node has " + heartbeats.size() + " including myself.");
+		Iterator<String> iterator = heartbeats.keySet().iterator();
+		while (iterator.hasNext()) {
+			String next = iterator.next();
+			if (!configuration.getMachineName().equals(next)) {
+				DirectMessageSender sender = new DirectMessageSender("tcp://" + heartbeats.get(next).getValue0(), configuration.getMessagePort(), this);
+				try {
+					sender.sendAnnounceMeRequest();
+					sender.shutdown();
+					break;
+				} catch (FBaseException e) {
+					logger.debug("Machine " + next + " could not announce me, trying with another one");
+				}
+				sender.shutdown();
+			}
+			// no machine left for announcing
+			if (iterator.hasNext()) {
+				logger.fatal("No machine could announce me, shutting down");
+			}
+		}
 	}
 
 	public void tearDown() {

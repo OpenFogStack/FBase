@@ -48,7 +48,7 @@ public class NamingServiceSenderTest {
 	private static ExecutorService executor;
 	private static FBase fbase;
 	private static final String ownNodeConfigJSONPath =
-			"src/test/resources/NamingServiceSenderTest_NodeConfig.json";
+			"src/test/resources/NamingServiceSenderTest_NodeConfig1.json";
 
 	private static NamingServiceSender localSender = null;
 	private static NamingServiceSender nsSender = null;

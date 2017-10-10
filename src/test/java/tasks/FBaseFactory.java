@@ -13,7 +13,6 @@ public class FBaseFactory {
 	private static final String BASIC_PROPERTIES_FILE = "FBaseFactory_Basic";
 	private static final String NAMING_SERVICE_PROPERTIES_FILE = "FBaseFactory_NamingService";
 
-
 	public static FBase basic(int instanceNumber, boolean announce, boolean backgroundTasks)
 			throws FBaseStorageConnectorException, InterruptedException, ExecutionException,
 			TimeoutException, FBaseCommunicationException, FBaseNamingServiceException {

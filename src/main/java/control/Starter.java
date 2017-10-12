@@ -1,5 +1,6 @@
 package control;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -11,7 +12,7 @@ public class Starter {
 
 	public static void main(String[] args)
 			throws FBaseStorageConnectorException, InterruptedException, ExecutionException,
-			TimeoutException, FBaseCommunicationException, FBaseNamingServiceException {
+			TimeoutException, FBaseCommunicationException, FBaseNamingServiceException, IOException {
 		FBase fbase;
 		if (args.length == 1) {
 			fbase = new FBase(args[0]);
@@ -20,6 +21,10 @@ public class Starter {
 		}
 		fbase.startup(true, true); // TODO 2: parse from args
 		//fbase.fillWithData();
+		
+		System.out.println("FBase started, press any key to stop.");
+		System.in.read();
+		fbase.tearDown();
 	}
 
 }

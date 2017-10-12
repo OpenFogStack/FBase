@@ -1,12 +1,19 @@
 package control;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
+import org.javatuples.Pair;
 
 import communication.DirectMessageReceiver;
+import communication.DirectMessageSender;
 import communication.MessageIdEvaluator;
 import communication.NamingServiceSender;
 import communication.Publisher;
@@ -14,6 +21,7 @@ import communication.SubscriptionRegistry;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import de.hasenburg.fbase.rest.WebServer;
 import exceptions.FBaseCommunicationException;
+import exceptions.FBaseException;
 import exceptions.FBaseNamingServiceException;
 import exceptions.FBaseStorageConnectorException;
 import model.config.ClientConfig;
@@ -31,6 +39,10 @@ import tasks.TaskManager;
 
 /**
  * Main control class of a FBase machine.
+ * 
+ * TODO 2: Missing functionality: <br>
+ * * clean up of data records that are stored longer than needed<br>
+ * * clean up of message history of outgoing messages
  * 
  * @author jonathanhasenburg
  *
@@ -50,6 +62,8 @@ public class FBase {
 	public MessageIdEvaluator messageIdEvaluator = null;
 	private WebServer server = null;
 
+	private List<Future<Boolean>> backgroundTaskList = new ArrayList<>();
+
 	public FBase(String configName) {
 		configuration = new Configuration(configName);
 	}
@@ -58,8 +72,7 @@ public class FBase {
 			ExecutionException, TimeoutException, FBaseStorageConnectorException,
 			FBaseCommunicationException, FBaseNamingServiceException {
 		if (Connector.S3.equals(configuration.getDatabaseConnector())) {
-			connector =
-					new S3DBConnector(configuration.getNodeID());
+			connector = new S3DBConnector(configuration.getNodeID());
 		} else {
 			connector = new OnHeapDBConnector(configuration.getNodeID());
 		}
@@ -84,20 +97,23 @@ public class FBase {
 		messageIdEvaluator.startup();
 
 		// start putting heartbeats (pulse 0 = default)
-		taskmanager.startBackgroundPutHeartbeatTask(0);
+		backgroundTaskList.add(taskmanager.startBackgroundPutHeartbeatTask(0));
 
 		// add machine to node
 		if (announce) {
+			Thread.sleep(400); // make sure own heartbeat is in database
 			announceMachineAdditionToNode();
 		}
 
 		// start other background tasks (interval 0 = default)
 		if (backgroundTasks) {
-			taskmanager.startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(0);
-			taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(0);
-			taskmanager.startDetectMissingHeartbeatsTask(0, 0);
-			taskmanager.startBackgroundDetectMissingResponsibility(0);
-			taskmanager.startBackgroundDetectLostResponsibility(0);
+			backgroundTaskList.add(taskmanager
+					.startBackgroundPollLatesConfigurationDataForResponsibleKeygroupsTask(0));
+			backgroundTaskList
+					.add(taskmanager.startBackgroundCheckKeygroupConfigurationsOnUpdatesTask(0));
+			backgroundTaskList.add(taskmanager.startDetectMissingHeartbeatsTask(0, 0));
+			backgroundTaskList.add(taskmanager.startBackgroundDetectMissingResponsibility(0));
+			backgroundTaskList.add(taskmanager.startBackgroundDetectLostResponsibility(0));
 		}
 
 		Thread.sleep(50);
@@ -106,32 +122,61 @@ public class FBase {
 
 	private void announceMachineAdditionToNode() throws FBaseStorageConnectorException,
 			FBaseCommunicationException, FBaseNamingServiceException {
-		if (connector.heartbeats_listAll().size() <= 1) {
+		Map<String, Pair<String, Long>> heartbeats = connector.heartbeats_listAll();
+		if (heartbeats.size() <= 1) {
+			logger.debug("We are the first machine of the node");
 			// update myself (must exist before, created by another node)
 			taskmanager.runAnnounceUpdateOfOwnNodeConfigurationTask();
+			// TODO 2: get all keygroups in which node is either replica/trigger node from
+			// naming service (important for restart)
+			return;
 		}
-		
-		
-		// TODO 1: Tell a machine that is already registered about addition (we need a one-to-one
-		// here)
 
+		logger.debug("In total, the node has " + heartbeats.size() + " including myself.");
+		Iterator<String> iterator = heartbeats.keySet().iterator();
+		while (iterator.hasNext()) {
+			String next = iterator.next();
+			if (!configuration.getMachineName().equals(next)) {
+				DirectMessageSender sender =
+						new DirectMessageSender("tcp://" + heartbeats.get(next).getValue0(),
+								configuration.getMessagePort(), this);
+				try {
+					sender.sendAnnounceMeRequest();
+					sender.shutdown();
+					break;
+				} catch (FBaseException e) {
+					logger.debug(
+							"Machine " + next + " could not announce me, trying with another one");
+				}
+				sender.shutdown();
+			}
+			// no machine left for announcing
+			if (iterator.hasNext()) {
+				logger.fatal("No machine could announce me, shutting down");
+			}
+		}
 	}
 
 	public void tearDown() {
-		// TODO 1: stop all background tasks
-		subscriptionRegistry.deleteAllData();
-		publisher.shutdown();
-		namingServiceSender.shutdown();
-		messageIdEvaluator.tearDown();
-		directMessageReceiver.stopReception();
+		logger.info("Stopping background tasks");
+		for (Future<Boolean> backgroundTask : backgroundTaskList) {
+			backgroundTask.cancel(true);
+		}
 		if (server != null) {
 			server.stopServer();
 		}
+		subscriptionRegistry.deleteAllData();
+		messageIdEvaluator.tearDown();
+		publisher.shutdown();
+		namingServiceSender.shutdown();
+		directMessageReceiver.stopReception();
+		taskmanager.tearDown();
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		System.exit(0);
 	}
 
 	public void fillWithData() throws FBaseStorageConnectorException, InterruptedException,

@@ -46,6 +46,10 @@ public class TaskManager {
 		B_DETECT_LOST_RESPONSIBILITY
 	}
 
+	public void tearDown() {
+		pool.shutdownNow();
+	}
+	
 	public void storeHistory() {
 		storingHistory = true;
 	}

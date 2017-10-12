@@ -1,5 +1,9 @@
 package communication;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.apache.log4j.Logger;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Socket;
@@ -7,6 +11,7 @@ import org.zeromq.ZMQ.Socket;
 import control.FBase;
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import de.hasenburg.fbase.model.GetMissedMessageResponse;
+import exceptions.FBaseEncryptionException;
 import exceptions.FBaseException;
 import model.JSONable;
 import model.config.NodeConfig;
@@ -53,8 +58,10 @@ public class DirectMessageReceiver extends AbstractReceiver {
 
 			envelope.getMessage().decryptFields(fBase.configuration.getPrivateKey(),
 					EncryptionAlgorithm.RSA);
-			envelope.getMessage().verifyMessage(requestingNode.getPublicKey(),
-					EncryptionAlgorithm.RSA);
+			if (!envelope.getMessage().verifyMessage(requestingNode.getPublicKey(),
+					EncryptionAlgorithm.RSA)) {
+				throw new FBaseEncryptionException("The message was not signed correctly");
+			}
 
 			// INTERPRET MESSAGE
 			// if slow, it might be wise to create another task which executes the processing
@@ -74,6 +81,17 @@ public class DirectMessageReceiver extends AbstractReceiver {
 				} catch (FBaseException e) {
 					responseMessage.setTextualInfo("Required messageID not parseable");
 				}
+			} else if (Command.ANNOUNCE_OWN_NODE_CONFIGURATION_CHANGE.equals(envelope.getMessage().getCommand())) { 
+				responseMessage.setContent("true");
+				try {
+					boolean status = fBase.taskmanager.runAnnounceUpdateOfOwnNodeConfigurationTask().get(5, TimeUnit.SECONDS);
+					if (status == false) {
+						responseMessage.setContent("Announcing failed, check log of target machine");
+					}
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					responseMessage.setContent(e.getMessage());
+				}
+				
 			} else {
 				responseMessage.setTextualInfo(
 						"Unknown command " + envelope.getMessage().getCommand().toString());

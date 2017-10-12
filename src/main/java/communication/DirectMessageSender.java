@@ -19,6 +19,7 @@ import model.data.MessageID;
 import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
+import tasks.AnnounceUpdateOfOwnNodeConfigurationTaskTest;
 
 /**
  * Sends requests to designated receivers.
@@ -35,6 +36,7 @@ public class DirectMessageSender extends AbstractSender {
 
 	/**
 	 * Initializes the Message, it then can be used without further modifications.
+	 * Messages are send to a random machine of the given node configuration.
 	 */
 	public DirectMessageSender(NodeConfig targetNode, FBase fBase) {
 		super(getRandomAddress(targetNode.getMachines()), targetNode.getMessagePort(), ZMQ.REQ);
@@ -42,6 +44,14 @@ public class DirectMessageSender extends AbstractSender {
 		this.targetNode = targetNode;
 	}
 
+	/**
+	 * Initializes the Message, it then can be used without further modifications.
+	 */
+	public DirectMessageSender(String targetAddress, int targetPort, FBase fBase) {
+		super(targetAddress, targetPort, ZMQ.REQ);
+		this.fBase = fBase;
+	}
+	
 	private static String getRandomAddress(List<String> machines) {
 		int randomNum = ThreadLocalRandom.current().nextInt(0, machines.size());
 		return "tcp://" + machines.get(randomNum);
@@ -122,6 +132,35 @@ public class DirectMessageSender extends AbstractSender {
 		} catch (FBaseEncryptionException e1) {
 			logger.error(e1.getMessage(), e1);
 			return null;
+		}
+	}
+
+	/**
+	 * Ask the target machine to run {@link AnnounceUpdateOfOwnNodeConfigurationTaskTest}.
+	 * This is necessary if a new machine was added to a node, because node configuration
+	 * updates are distributed via the publisher to other nodes (and other nodes have not
+	 * subscribed to the new machine yet).
+	 * 
+	 * @throws FBaseCommunicationException - if other node declines/cannot be reached
+	 */
+	public void sendAnnounceMeRequest() throws FBaseCommunicationException {
+		Message m = new Message();
+		m.setContent(Command.ANNOUNCE_OWN_NODE_CONFIGURATION_CHANGE.toString());
+		m.setCommand(Command.ANNOUNCE_OWN_NODE_CONFIGURATION_CHANGE);
+		try {
+			String answer = send(createEncryptedEnvelope(m, fBase.configuration.getPublicKey()), null, null);
+			Message response = createDecryptedMessage(answer, fBase.configuration.getPublicKey());
+
+			if (response.getContent().equals("true")) {
+				logger.debug("The other machine announced me");
+				return;
+			} else {
+				logger.debug("The other machine could not announce me");
+				throw new FBaseCommunicationException("The other machine could not announce me " + response.getContent());
+			}
+		} catch (FBaseEncryptionException e1) {
+			logger.error(e1.getMessage(), e1);
+			throw new FBaseCommunicationException("Announce Request failed " + e1.getMessage());
 		}
 	}
 

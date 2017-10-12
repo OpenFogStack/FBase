@@ -140,6 +140,7 @@ public class S3DBConnector extends AbstractDBConnector {
 						break;
 					}
 				}
+				logger.debug("Deleting bucket " + bucketName);
 				s3.deleteBucket(bucketName);
 			} catch (AmazonServiceException e) {
 				throw new FBaseStorageConnectorException(e);

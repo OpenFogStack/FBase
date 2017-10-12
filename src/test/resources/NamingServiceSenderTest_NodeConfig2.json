@@ -1,0 +1,16 @@
+{
+    "version": 1,
+    "nodeID": {
+        "nodeID": "N2"
+    },
+    "publicKey": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqMCldz9e44B0I6V916WUX5tHlw0S4M+zUniAxeRq3rHFOtlKA+ARI8MW85sDz8MAMT51HxhcXOc09L76s0Nh2eWYdvFkaTH66BH2/d6QBIjmPOj8ZWM3t+U6CzqhN9wXqNKLj19Aop+cy4KqhfstiQpAb33803Wto/Zm+Gt3XQEpH/IRs5fgrnp73I4LDenosz5t/Xjo3DMG1+w9fx9ccB+BUikgFPHVDM5bHVT3KZG/9F3Qh4sYNXKWgNuLGpn2v6dVEAFZO/QM4UzJES7O0vHt9Dis4XQloCXqQaZ3FpCd8fQV7xnNO33gdyIJZyjEv8O5ucSuVbddsr+63cQ76QIDAQAB",
+    "encryptionAlgorithm": "RSA",
+    "machines": [
+        "m1"
+    ],
+    "publisherPort": 7002,
+    "messagePort": 6002,
+    "restPort": 8082,
+    "location": "Everywhere",
+    "description": "Configuration fitting for Node 2"
+}

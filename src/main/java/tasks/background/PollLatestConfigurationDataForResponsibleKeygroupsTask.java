@@ -35,6 +35,9 @@ import tasks.UpdateKeygroupConfigTask;
  * 
  * TODO T: Write test for this task
  * 
+ * TODO 2: It might make sense to ask the naming service about all keygroups this node is responsbile for,
+ * instead of relying on the data from the responsibility table
+ * 
  * @author jonathanhasenburg
  *
  */

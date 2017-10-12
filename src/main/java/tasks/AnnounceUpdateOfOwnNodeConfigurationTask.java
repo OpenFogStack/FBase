@@ -54,7 +54,7 @@ class AnnounceUpdateOfOwnNodeConfigurationTask extends Task<Boolean> {
 						+ e.getMessage());
 			}
 
-			// publish to all keygroups the machine is responsible for
+			// publish to all keygroups the node is responsible for
 			Set<KeygroupID> responsibilities =
 					fBase.connector.keyGroupSubscriberMachines_listAll().keySet();
 			for (KeygroupID keygroupID : responsibilities) {

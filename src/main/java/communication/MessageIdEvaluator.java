@@ -31,8 +31,6 @@ import model.data.NodeID;
  * he finds a gap, he will create a directMessageSender and ask the related node about the send
  * data.
  * 
- * TODO 2: clean ID storage from time to time
- * 
  * @author jonathanhasenburg
  *
  */

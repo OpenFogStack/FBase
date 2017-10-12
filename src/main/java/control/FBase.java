@@ -40,11 +40,6 @@ import tasks.TaskManager;
 /**
  * Main control class of a FBase machine.
  * 
- * TODO 2: Missing functionality: <br>
- * * clean up of data records that are stored longer than needed<br>
- * * clean up of message history of outgoing messages
- * * enable encryption for client communication
- * 
  * @author jonathanhasenburg
  *
  */

@@ -49,7 +49,7 @@ public class DetectMissingResponsibility extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 
 		while (!Thread.currentThread().isInterrupted()) {
-			logger.info("Looking for missing responsibilities");
+			logger.debug("Looking for missing responsibilities");
 
 			try {
 				Map<KeygroupID, Pair<String, Integer>> responsibilities =

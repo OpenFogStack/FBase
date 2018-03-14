@@ -17,7 +17,7 @@ public class Starter {
 		if (args.length == 1) {
 			fbase = new FBase(args[0]);
 		} else {
-			fbase = new FBase("local.properties");
+			fbase = new FBase("quickstart_local.properties");
 		}
 		fbase.startup(true, true); // TODO 2: parse from args
 		//fbase.fillWithData();

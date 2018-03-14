@@ -104,9 +104,10 @@ public class MessageIdEvaluator {
 	}
 
 	private Runnable evaluateIDs = () -> {
-		logger.debug("Running through all messageIDs");
 		List<MessageID> missingIDs = getMissingMessageIDs();
-		logger.debug("Found " + missingIDs.size() + " missing IDs");
+		if (!missingIDs.isEmpty()) {
+			logger.debug("Found " + missingIDs.size() + " missing IDs");
+		}
 		if (fBase != null) {
 			NodeID nodeID = null;
 			DirectMessageSender directMessageSender = null;

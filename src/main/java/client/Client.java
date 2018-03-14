@@ -1,5 +1,7 @@
 package client;
 
+import crypto.CryptoProvider;
+import model.config.KeygroupConfig;
 import org.apache.log4j.Logger;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -19,8 +21,13 @@ public class Client {
 
 	private static Logger logger = Logger.getLogger(Client.class.getName());
 	
-	public void getScenario(String address, int port) throws UnirestException {
+	public void quickstart_clientAction(String address, int port) throws UnirestException {
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
+
+		KeygroupConfig config = new KeygroupConfig(keygroupID, "a secret password", CryptoProvider.EncryptionAlgorithm.AES);
+		KeygroupRequest keygroups = new KeygroupRequest(address, port);
+		logger.info("Created keygroup: " + keygroups.createKeygroup(config));
+
 		DataIdentifier dataID = new DataIdentifier(keygroupID, "M-1");
 		
 		DataRecord newRecord = new DataRecord(new DataIdentifier(keygroupID, "M-2"), null);
@@ -42,7 +49,7 @@ public class Client {
 		int port = 8081;
 		
 		Client c = new Client();
-		c.getScenario(address, port);
+		c.quickstart_clientAction(address, port);
 	}
 
 //	public boolean keygroupConfig_create(String address, int port, KeygroupConfig keygroupConfig)

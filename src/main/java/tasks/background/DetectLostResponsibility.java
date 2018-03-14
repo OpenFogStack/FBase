@@ -52,7 +52,7 @@ public class DetectLostResponsibility extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 
 		while (!Thread.currentThread().isInterrupted()) {
-			logger.info("Looking for lost responsibilities");
+			logger.debug("Looking for lost responsibilities");
 
 			try {
 				Set<KeygroupID> subscribedKeygroups =

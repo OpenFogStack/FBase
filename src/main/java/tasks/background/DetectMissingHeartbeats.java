@@ -56,7 +56,7 @@ public class DetectMissingHeartbeats extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 
 		while (!Thread.currentThread().isInterrupted()) {
-			logger.info("Looking for missing heartbeats");
+			logger.debug("Looking for missing heartbeats");
 
 			try {
 				Map<String, Pair<String, Long>> heartbeats = fBase.connector.heartbeats_listAll();

@@ -47,7 +47,7 @@ public class PollLatestConfigurationDataForResponsibleKeygroupsTask extends Task
 			Logger.getLogger(PollLatestConfigurationDataForResponsibleKeygroupsTask.class.getName());
 
 	static {
-		logger.setLevel(Level.INFO);
+		logger.setLevel(Level.WARN);
 	}
 	
 	/**
@@ -71,7 +71,7 @@ public class PollLatestConfigurationDataForResponsibleKeygroupsTask extends Task
 
 		while (!Thread.currentThread().isInterrupted()) {
 
-			logger.info("Polling latest configuration data");
+			logger.debug("Polling latest configuration data");
 			
 			try {
 				// get responsible keygroupIDs

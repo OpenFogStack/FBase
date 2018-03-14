@@ -16,14 +16,11 @@ For some of the tests, a running naming service is required. The naming service 
 
 ## Current ToDos not listed in code
 
-### One to One Communication
-- [ ] Add one to one communication for datarecords
-
 ### Storage
-- [ ] Remove data that is expired
+- [ ] Remove data that is expired.
 
 ### Handling Missed Messages
-- [ ] Add message history cleanup functionality (on receiver and sender side)
+- [ ] Add message history cleanup functionality (on receiver and sender side). Currently, the message history is never cleaned.
 
 ### Controlling FBase with Clients
- - [ ] Enable encryption and authentication
+ - [ ] Enable encryption and authentication (Currently, everyone can use the rest API of a node and do everything. However, the node has to check whether the requesting client is already registered with the naming service.)

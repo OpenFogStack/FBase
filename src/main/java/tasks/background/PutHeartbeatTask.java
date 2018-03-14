@@ -42,7 +42,7 @@ public class PutHeartbeatTask extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 
 		while (!Thread.currentThread().isInterrupted()) {
-			logger.info("Putting heartbeat");
+			logger.debug("Putting heartbeat");
 
 			try {
 				fBase.connector.heartbeats_update(fBase.configuration.getMachineName(),

@@ -72,7 +72,7 @@ public class CheckKeygroupConfigurationsOnUpdatesTask extends Task<Boolean> {
 	public Boolean executeFunctionality() {
 
 		while (!Thread.currentThread().isInterrupted()) {
-			logger.info("Checking keygroup configurations on updates");
+			logger.debug("Checking keygroup configurations on updates");
 			
 			currentResponsibleKeygroups.clear();
 			currentKeygroupConfigurations.clear();

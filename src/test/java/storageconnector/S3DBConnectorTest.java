@@ -12,11 +12,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import crypto.CryptoProvider.EncryptionAlgorithm;
 import exceptions.FBaseException;
@@ -31,6 +27,7 @@ import model.data.KeygroupID;
 import model.data.MessageID;
 import model.data.NodeID;
 
+@Ignore // remove when credentials are set
 public class S3DBConnectorTest {
 
 	private static final Logger logger = Logger.getLogger(S3DBConnectorTest.class);

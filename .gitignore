@@ -1,8 +1,20 @@
-.DS_Store
-.vagrant/
+# APP
 target/
+*.log
+local.properties
+
+# MAC
+.DS_Store
+
+# ECLIPSE
 .classpath
 .project
 .settings
-*.log
-local.properties
+
+# JETBRAINS
+.idea/*
+!.idea/dictionaries/
+*.iml
+
+# Others
+.vagrant/

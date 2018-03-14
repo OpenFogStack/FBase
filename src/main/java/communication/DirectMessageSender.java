@@ -19,7 +19,6 @@ import model.data.MessageID;
 import model.messages.Command;
 import model.messages.Envelope;
 import model.messages.Message;
-import tasks.AnnounceUpdateOfOwnNodeConfigurationTaskTest;
 
 /**
  * Sends requests to designated receivers.
@@ -136,7 +135,7 @@ public class DirectMessageSender extends AbstractSender {
 	}
 
 	/**
-	 * Ask the target machine to run {@link AnnounceUpdateOfOwnNodeConfigurationTaskTest}.
+	 * Ask the target machine to run the test of {@link tasks.AnnounceUpdateOfOwnNodeConfigurationTask}.
 	 * This is necessary if a new machine was added to a node, because node configuration
 	 * updates are distributed via the publisher to other nodes (and other nodes have not
 	 * subscribed to the new machine yet).

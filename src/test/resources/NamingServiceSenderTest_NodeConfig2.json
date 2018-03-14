@@ -12,5 +12,5 @@
     "messagePort": 6002,
     "restPort": 8082,
     "location": "Everywhere",
-    "description": "Configuration fitting for Node 2"
+    "description": "Machine specified in JUnit tests (Node 2) of the FBase project"
 }

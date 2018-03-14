@@ -172,7 +172,7 @@ public class FBase {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.exit(0);
+		// System.exit(0);
 	}
 
 	public void fillWithData() throws FBaseStorageConnectorException, InterruptedException,

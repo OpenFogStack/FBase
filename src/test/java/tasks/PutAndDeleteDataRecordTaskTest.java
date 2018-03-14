@@ -83,7 +83,6 @@ public class PutAndDeleteDataRecordTaskTest {
 		assertEquals(record.getDataIdentifier(), fBase.connector.messageHistory_get(mID));
 		assertEquals(null,
 				fBase.connector.dataRecords_get(fBase.connector.messageHistory_get(mID)));
-
 	}
 
 }

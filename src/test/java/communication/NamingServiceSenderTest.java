@@ -264,11 +264,12 @@ public class NamingServiceSenderTest {
 	@Test
 	public void testSendNodeConfigRead() throws FBaseCommunicationException, FBaseNamingServiceException {
 		logger.debug("-------Starting testSendNodeConfigRead-------");
+
 		readNodeConfig(fbase.configuration.getNodeID(), makeNodeConfig(ownNodeConfigJSONPath));
 		// not existent config
 		try {
 			nsSender.sendNodeConfigRead(new NodeID("asdlkfj"));
-			fail("Should have thrwon an exception");
+			fail("Should have thrown an exception");
 		} catch (Exception e) {
 			assertEquals(ResponseCode.ERROR_DOESNT_EXIST.toString(), e.getMessage());
 

@@ -23,8 +23,8 @@ public class Starter {
 		//fbase.fillWithData();
 		
 		System.out.println("FBase started, press any key to stop.");
-		System.in.read();
-		fbase.tearDown();
+		// System.in.read(); does not work when started as deamon
+		// fbase.tearDown();
 	}
 
 }

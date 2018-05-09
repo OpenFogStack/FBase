@@ -416,7 +416,7 @@ public class NamingServiceSender extends AbstractSender {
 	 * Asks the naming service to add a {@link TriggerNodeConfig} to the
 	 * {@link KeygroupConfig} with the given id
 	 * 
-	 * @param rNConfig - the {@link ReplicaNodeConfig} to be added
+	 * @param tNConfig - the {@link TriggerNodeConfig} to be added
 	 * @param keygroupID - the {@link KeygroupID}
 	 * @return the {@link KeygroupConfig} version approved by the naming service
 	 * @throws FBaseCommunicationException

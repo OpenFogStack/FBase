@@ -1,6 +1,6 @@
 # FBase
 
-FBase can be build by running `mvn clean package`. Do not forget to run `mvn clean install` in the local FBaseCommons repository as it is one of the dependencies. In addition, the Naming Service should be up and running (with the quickstart configuration).
+FBase can be build by running `mvn clean package`. Do not forget to run `mvn clean install` in the local FBaseCommons [repository](https://github.com/OpenFogStack/FBaseCommons) as it is one of the dependencies. In addition, the [Naming Service](https://github.com/OpenFogStack/FBaseNamingService) should be up and running (with the quickstart configuration).
 
 The easiest way to startup FBase is by just using the jar file (with dependencies) produced by maven. If no argument is provided, a quickstart configuration is used. Otherwise, the only argument that can be provided is the path to a config file (that is then used instead of the quickstart config). For an example config file check out `src/main/resources/sample_config.properties.`, make sure that the initialNodeConfig of the naming service is compatible to the configuration of the first FBase node started (nodeID and encryption information), because otherwise it cannot communicate with the Naming Service. The quickstart configurations are compatible.
 

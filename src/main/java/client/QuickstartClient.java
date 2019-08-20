@@ -12,14 +12,14 @@ import model.data.DataRecord;
 import model.data.KeygroupID;
 
 /**
- * A client implemantation which allows the usage of the FBase rest interface
+ * A client implementation which allows the usage of the FBase rest interface
  * 
  * @author jonathanhasenburg
  *
  */
-public class Client {
+public class QuickstartClient {
 
-	private static Logger logger = Logger.getLogger(Client.class.getName());
+	private static Logger logger = Logger.getLogger(QuickstartClient.class.getName());
 	
 	public void quickstart_clientAction(String address, int port) throws UnirestException {
 		KeygroupID keygroupID = new KeygroupID("smartlight", "h1", "brightness");
@@ -48,7 +48,7 @@ public class Client {
 		String address = "localhost";
 		int port = 8081;
 		
-		Client c = new Client();
+		QuickstartClient c = new QuickstartClient();
 		c.quickstart_clientAction(address, port);
 	}
 

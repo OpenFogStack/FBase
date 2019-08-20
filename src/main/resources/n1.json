@@ -1,0 +1,16 @@
+{
+	"version": 0,
+	"nodeID": {
+		"nodeID": "N1"
+	},
+	"publicKey": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlVb/JwQO0ynWtTzGxgUL2Ia1zVnTNMGHZXYMTEFNfJkqd2tgKizuyHhL1PulAWFbhmMH+sRfZgbX1wW3Pk3GxyyhFo7asnWAuizLkEZW4mkRA2t2u7f2TGksmAP3rlALl6PCtKC020Owi9p9mqcAQq50/y+dITuhhUXUvRpQgRqYl8N5cFuLs/Mzx6pg+0prkq/K2tqGkWDMnB3UvdhlP3MoJjLgxyQah66uDYrkcgSVNFToGZdSLikM6gyuOvlcB3sz6VtSor4pnC3WGhwV7geIyaO/Du01L7UATY6vcrgi2AVWkzqzwYsJu0D1KPvpmTaIO/a5mvYrYSxxE5eyaQIDAQAB",
+	"encryptionAlgorithm": "RSA",
+	"machines": [
+		"m1"
+	],
+	"publisherPort": 7001,
+	"messagePort": 6001,
+	"restPort": 8081,
+	"location": "Everywhere",
+	"description": "Machine specified in JUnit tests (Node 1) of the FBase project"
+}

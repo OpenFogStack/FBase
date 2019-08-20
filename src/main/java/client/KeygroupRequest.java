@@ -53,6 +53,17 @@ public class KeygroupRequest extends RessourceRequest {
 
 		return handleBoolResponse(response, logger);
 	}
+
+	public boolean deleteClient(KeygroupID keygroupID, ClientID clientID) throws UnirestException {
+		String target = target(keygroupID.getApp(), keygroupID.getTenant(), keygroupID.getGroup(), "deleteClient");
+		logger.info("Running delete request targeting " + target);
+
+		HttpResponse<String> response =
+				Unirest.put(target).header("Content-Type", "application/json")
+					   .body(JSONable.toJSON(clientID)).asString();
+
+		return handleBoolResponse(response, logger);
+	}
 	
 	public boolean addReplicaNode(KeygroupID keygroupID, ReplicaNodeConfig repNC) throws UnirestException {
 		String target = target(keygroupID.getApp(), keygroupID.getTenant(), keygroupID.getGroup(), "addReplicaNode");

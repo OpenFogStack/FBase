@@ -6,9 +6,7 @@ import model.config.KeygroupConfig
 import model.config.NodeConfig
 import model.config.ReplicaNodeConfig
 import model.config.TriggerNodeConfig
-import model.data.ClientID
-import model.data.KeygroupID
-import model.data.NodeID
+import model.data.*
 import org.apache.log4j.Logger
 import java.io.File
 
@@ -23,8 +21,8 @@ private val logger = Logger.getLogger(Client::class.java.name)
 class Client(val address: String, val port: Int) {
 
     /**
-     * Adds the given information to the Keygroup with [keygroupId]; creates the keygroup if it did not exist yet.
-     * If information is already present in the keygroup, this piece of information is ignored.
+     * Adds the given information to the specified keygroup; creates the keygroup if it did not exist yet.
+     * If a piece of information is already present in the keygroup, this specific piece of information is ignored.
      *
      * Note, that all clients and nodes have to be registered at the naming service before they can be added.
      *
@@ -39,7 +37,7 @@ class Client(val address: String, val port: Int) {
                       triggerNodeIds: List<String> = emptyList()) {
 
         // check whether valid keygroupID
-        val keygroupID = KeygroupID.createFromString(keygroupId)?: run {
+        val keygroupID = KeygroupID.createFromString(keygroupId) ?: run {
             logger.warn("Cannot update keygroup with the id $keygroupId as the id is not valid")
             return
         }
@@ -92,11 +90,19 @@ class Client(val address: String, val port: Int) {
         }
     }
 
+    /**
+     * Removes the given information from the specified keygroup, if it exists.
+     *
+     * @param keygroupId - the id of the keygroup
+     * @param clientIds - list of to be removed client ids
+     * @param replicaNodeIds - list of to be removed replica node ids
+     * @param triggerNodeIds - list of to be removed trigger node ids
+     */
     fun removeFromKeygroup(keygroupId: String, clientIds: List<String> = emptyList(),
                            replicaNodeIds: List<String> = emptyList(), triggerNodeIds: List<String> = emptyList()) {
 
         // check whether valid keygroupID
-        val keygroupID = KeygroupID.createFromString(keygroupId)?: run {
+        val keygroupID = KeygroupID.createFromString(keygroupId) ?: run {
             logger.warn("Cannot remove items from keygroup with the id $keygroupId as the id is not valid")
             return
         }
@@ -104,7 +110,7 @@ class Client(val address: String, val port: Int) {
         val request = KeygroupRequest(address, port)
 
         // get current config first, return if not null
-        val keygroupConfig = request.updateLocalKeygroupConfig(keygroupID)?: run {
+        val keygroupConfig = request.updateLocalKeygroupConfig(keygroupID) ?: run {
             logger.warn("Keygroup $keygroupId does not exist")
             return
         }
@@ -143,6 +149,38 @@ class Client(val address: String, val port: Int) {
         }
     }
 
+    /**
+     * Stores a data record of the keygroup with the given [keygroupId]. If a data record with the same [dataId] already
+     * exists in the keygroup, it is overwritten.
+     */
+    fun putData(keygroupId: String, dataId: String, key: String = "", value: String) {
+        // check whether valid keygroupID
+        val keygroupID = KeygroupID.createFromString(keygroupId) ?: run {
+            logger.warn("Cannot remove items from keygroup with the id $keygroupId as the id is not valid")
+            return
+        }
+
+        val request = RecordRequest(address, port)
+        logger.debug("Added data to keygroup $keygroupID$:" + request.putDataRecord(DataRecord(DataIdentifier(keygroupID,
+                dataId), mapOf(key to value))))
+    }
+
+    /**
+     * Stores a data record of the keygroup with the given [keygroupId]. If a data record with the same [dataId] already
+     * exists in the keygroup, it is overwritten.
+     */
+    fun putData(keygroupId: String, dataId: String, valueMap: Map<String, String>) {
+        // check whether valid keygroupID
+        val keygroupID = KeygroupID.createFromString(keygroupId) ?: run {
+            logger.warn("Cannot remove items from keygroup with the id $keygroupId as the id is not valid")
+            return
+        }
+
+        val request = RecordRequest(address, port)
+        logger.debug("Added data to keygroup $keygroupID: " + request.putDataRecord(DataRecord(DataIdentifier(keygroupID,
+                dataId), valueMap)))
+    }
+
 }
 
 fun main(args: Array<String>) {
@@ -159,6 +197,7 @@ fun main(args: Array<String>) {
     nr.createNodeConfig(nodeConfig)
 
     c.addToKeygroup(keygroupId, replicaNodeIds = listOf("N2"), ttl = 120)
+    c.putData(keygroupId, "D1", value = "Testvalue")
 
     // remove N3 (must fail)
     c.removeFromKeygroup(keygroupId, replicaNodeIds = listOf("N3"))

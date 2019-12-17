@@ -11,7 +11,7 @@ If you need to generate a private/public RSA key, use the `RSAHelper` class' mai
 
 Jonathan Hasenburg, Martin Grambow, David Bermbach. ***Towards A Replication Service for Data-Intensive Fog Applications.*** In: Proceedings of the 35th ACM Symposium on Applied Computing, Posters Track (SAC 2020). ACM 2020.
 
-Jonathan Hasenburg, David Bermbach. ***Towards Geo-Context Aware IoT Data Distribution.*** In: Proceedings of the 4th Workshop on IoT Systems Provisioning and Management for Context-Aware Smart Cities (ISYCC 2019). Springer 2019.
+Jonathan Hasenburg, Martin Grambow, David Bermbach. ***FBase: A Replication Service for Data-Intensive Fog Applications.*** In: Technical Report MCC.2019.1. TU Berlin & ECDF, Mobile Cloud Computing Research Group. 2018.
 
 ## S3 Connector
 

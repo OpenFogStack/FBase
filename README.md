@@ -14,7 +14,7 @@ If you use this software in a publication, please cite it as:
 ### Text
 Jonathan Hasenburg, Martin Grambow, David Bermbach. **Towards A Replication Service for Data-Intensive Fog Applications**. In: Proceedings of the 35th ACM Symposium on Applied Computing, Posters Track (SAC 2020). ACM 2020.
 
-Jonathan Hasenburg, Martin Grambow, David Bermbach. **FBase: A Replication Service for Data-Intensive Fog Applications**. In: Technical Report MCC.2019.1. TU Berlin & ECDF, Mobile Cloud Computing Research Group. 2018.
+Jonathan Hasenburg, Martin Grambow, David Bermbach. **FBase: A Replication Service for Data-Intensive Fog Applications**. In: Technical Report MCC.2019.1. TU Berlin & ECDF, Mobile Cloud Computing Research Group. 2019.
 
 ### BibTeX
 ```
@@ -26,12 +26,12 @@ Jonathan Hasenburg, Martin Grambow, David Bermbach. **FBase: A Replication Servi
 	year = {2020}
 }
 
-@inproceedings{paper_hasenburg_towards_fbase,
-	title = {{Towards A Replication Service for Data-Intensive Fog Applications}},
-	booktitle = {Proceedings of the 35th ACM Symposium on Applied Computing, Posters Track (SAC 2020)},
-	publisher = {ACM},
+@inproceedings{techreport_hasenburg_2019,
+	title = {{FBase: A Replication Service for Data-Intensive Fog Applications}},
+	booktitle = {Technical Report MCC.2019.1},
+	publisher = {{TU Berlin \& ECDF, Mobile Cloud Computing Research Group}},
 	author = {Jonathan Hasenburg and Martin Grambow and David Bermbach},
-	year = {2020}
+	year = {2019}
 }
 ```
 

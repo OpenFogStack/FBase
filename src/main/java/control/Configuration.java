@@ -106,8 +106,8 @@ public class Configuration {
 	private static String getBestIPAddress() throws SocketException {		
 		Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
 		for (NetworkInterface netint : Collections.list(nets)) {
-			// get en or eth adapters
-			if (netint.getName().startsWith("e")) {
+			// get wl, en or eth adapters
+			if (netint.getName().startsWith("w") || netint.getName().startsWith("e")) {
 				logger.debug("Found network adapter: " + netint.getName());
 				Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
 				for (InetAddress inetAddress : Collections.list(inetAddresses)) {
